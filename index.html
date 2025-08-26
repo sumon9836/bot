@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Bot Management Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <i class="fab fa-whatsapp header-icon"></i>
+                    <h1>Bot Management Dashboard</h1>
+                </div>
+                <div class="header-right">
+                    <button id="refreshBtn" class="btn btn-secondary" title="Refresh Sessions">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Action Cards -->
+            <section class="action-section">
+                <div class="action-cards">
+                    <!-- Pair New Number Card -->
+                    <div class="card action-card">
+                        <div class="card-header">
+                            <i class="fas fa-plus-circle card-icon"></i>
+                            <h2>Pair New Number</h2>
+                        </div>
+                        <div class="card-content">
+                            <form id="pairForm" class="action-form">
+                                <div class="form-group">
+                                    <label for="pairNumber">Phone Number</label>
+                                    <div class="input-wrapper">
+                                        <i class="fas fa-phone input-icon"></i>
+                                        <input 
+                                            type="tel" 
+                                            id="pairNumber" 
+                                            placeholder="e.g., 1234567890"
+                                            required
+                                            pattern="[0-9]{10,15}"
+                                            title="Enter 10-15 digits without spaces or special characters"
+                                        >
+                                    </div>
+                                    <small class="form-help">Enter number without country code prefix</small>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <span class="btn-text">Pair Number</span>
+                                    <div class="btn-loader" style="display: none;">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Delete Number Card -->
+                    <div class="card action-card">
+                        <div class="card-header">
+                            <i class="fas fa-trash-alt card-icon"></i>
+                            <h2>Remove Number</h2>
+                        </div>
+                        <div class="card-content">
+                            <form id="deleteForm" class="action-form">
+                                <div class="form-group">
+                                    <label for="deleteNumber">Phone Number</label>
+                                    <div class="input-wrapper">
+                                        <i class="fas fa-phone input-icon"></i>
+                                        <input 
+                                            type="tel" 
+                                            id="deleteNumber" 
+                                            placeholder="e.g., 1234567890"
+                                            required
+                                            pattern="[0-9]{10,15}"
+                                            title="Enter 10-15 digits without spaces or special characters"
+                                        >
+                                    </div>
+                                    <small class="form-help">Enter number to remove from bot</small>
+                                </div>
+                                <button type="submit" class="btn btn-danger">
+                                    <span class="btn-text">Remove Number</span>
+                                    <div class="btn-loader" style="display: none;">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sessions Section -->
+            <section class="sessions-section">
+                <div class="section-header">
+                    <h2>Active Sessions</h2>
+                    <div class="session-count">
+                        <span id="sessionCount">0</span> sessions
+                    </div>
+                </div>
+                
+                <!-- Loading State -->
+                <div id="sessionsLoader" class="loader-container">
+                    <div class="loader">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading sessions...</p>
+                    </div>
+                </div>
+
+                <!-- Error State -->
+                <div id="sessionsError" class="error-container" style="display: none;">
+                    <div class="error-content">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Failed to Load Sessions</h3>
+                        <p id="sessionsErrorMessage">Unable to fetch active sessions. Please try again.</p>
+                        <button id="retrySessionsBtn" class="btn btn-primary">
+                            <i class="fas fa-redo"></i>
+                            Retry
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div id="sessionsEmpty" class="empty-container" style="display: none;">
+                    <div class="empty-content">
+                        <i class="fas fa-users"></i>
+                        <h3>No Active Sessions</h3>
+                        <p>No paired numbers found. Add a new number to get started.</p>
+                    </div>
+                </div>
+
+                <!-- Sessions Grid -->
+                <div id="sessionsGrid" class="sessions-grid" style="display: none;">
+                    <!-- Sessions will be populated here -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Notification Toast -->
+        <div id="toast" class="toast">
+            <div class="toast-content">
+                <div class="toast-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="toast-message">
+                    <div class="toast-title">Success</div>
+                    <div class="toast-text">Operation completed successfully</div>
+                </div>
+            </div>
+            <div class="toast-progress"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
