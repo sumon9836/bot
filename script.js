@@ -286,13 +286,7 @@ function createSessionCard(session, index) {
                     <span>Device: ${deviceInfo}</span>
                 </div>
             ` : ''}
-        </div>
-        <div class="session-actions">
-            <button class="btn btn-danger btn-small session-delete-btn" onclick="deleteSessionNumber('${number}')" title="Remove this session">
-                <i class="fas fa-trash-alt"></i>
-                Remove Session
-            </button>
-        </div>
+        
     `;
     
     return card;
