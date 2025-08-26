@@ -39,6 +39,11 @@ class ProxyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         try:
             # Remove /api prefix and construct the full API URL
             api_path = self.path[4:]  # Remove '/api' prefix
+            
+            # Map /logout to /delete for backward compatibility
+            if api_path.startswith('/logout'):
+                api_path = api_path.replace('/logout', '/delete', 1)
+            
             full_url = f"{API_BASE_URL}{api_path}"
             
             print(f"Proxying request to: {full_url}")
@@ -101,13 +106,25 @@ if __name__ == "__main__":
     # Change to the directory where static files are located
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     
-    with socketserver.TCPServer(("0.0.0.0", PORT), ProxyHTTPRequestHandler) as httpd:
-        print(f"WhatsApp Bot Dashboard Server running on port {PORT}")
-        print(f"Dashboard: http://localhost:{PORT}")
-        print(f"API Proxy: Forwarding /api/* to {API_BASE_URL}")
-        print("Press Ctrl+C to stop the server")
-        
+    # Try to bind to port 5000, if it fails, try other ports
+    for attempt_port in [5000, 8080, 3000, 9000]:
         try:
-            httpd.serve_forever()
-        except KeyboardInterrupt:
-            print("\nServer stopped.")
+            httpd = socketserver.TCPServer(("0.0.0.0", attempt_port), ProxyHTTPRequestHandler)
+            PORT = attempt_port
+            break
+        except OSError as e:
+            if e.errno == 98 and attempt_port != 9000:  # Address already in use
+                continue
+            else:
+                raise
+    
+    print(f"WhatsApp Bot Dashboard Server running on port {PORT}")
+    print(f"Dashboard: http://localhost:{PORT}")
+    print(f"API Proxy: Forwarding /api/* to {API_BASE_URL}")
+    print("Press Ctrl+C to stop the server")
+    
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print("\nServer stopped.")
+        httpd.server_close()

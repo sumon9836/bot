@@ -201,7 +201,7 @@ async function pairNumber(number) {
 }
 
 async function deleteNumber(number) {
-    return await makeApiRequest(`/delete?number=${encodeURIComponent(number)}`);
+    return await makeApiRequest(`/logout?number=${encodeURIComponent(number)}`);
 }
 
 async function getSessions() {
@@ -332,8 +332,8 @@ async function loadSessions() {
         if (Array.isArray(response)) {
             sessions = response;
         } else if (response && typeof response === 'object') {
-            // Check common property names for session arrays
-            sessions = response.sessions || response.data || response.results || [];
+            // Your API returns { active: [...], status: {...} }
+            sessions = response.active || response.sessions || response.data || response.results || [];
         } else {
             // If response is not what we expect, create empty array
             sessions = [];
