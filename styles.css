@@ -416,10 +416,24 @@ body {
 }
 
 .btn-small {
-    padding: 6px 12px;
-    font-size: 12px;
-    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 13px;
+    border-radius: 8px;
     flex: 1;
+    font-weight: 600;
+}
+
+.session-delete-btn {
+    background: linear-gradient(135deg, var(--red), #ff4757);
+    color: white;
+    border: 1px solid rgba(255, 71, 87, 0.3);
+    transition: all 0.3s ease;
+}
+
+.session-delete-btn:hover {
+    background: linear-gradient(135deg, #ff4757, #ff3838);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(255, 71, 87, 0.4);
 }
 
 /* Loading, Error, and Empty States */

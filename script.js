@@ -288,9 +288,9 @@ function createSessionCard(session, index) {
             ` : ''}
         </div>
         <div class="session-actions">
-            <button class="btn btn-danger btn-small" onclick="deleteSessionNumber('${number}')">
-                <i class="fas fa-trash"></i>
-                Remove
+            <button class="btn btn-danger btn-small session-delete-btn" onclick="deleteSessionNumber('${number}')" title="Remove this session">
+                <i class="fas fa-trash-alt"></i>
+                Remove Session
             </button>
         </div>
     `;
@@ -352,26 +352,47 @@ async function loadSessions() {
 
 // Global function for session removal (called from session cards)
 window.deleteSessionNumber = async function(number) {
-    const confirmed = confirm(`Are you sure you want to remove +${number}?`);
+    // Clean the number (remove + if present)
+    const cleanNumber = number.toString().replace(/^\+/, '');
+    
+    const confirmed = confirm(`🗑️ Remove Session\n\nAre you sure you want to logout and remove +${cleanNumber} from the bot?\n\nThis action cannot be undone.`);
     if (!confirmed) return;
     
+    // Find and disable the button during deletion
+    const deleteButton = document.querySelector(`button[onclick="deleteSessionNumber('${number}')"]`);
+    if (deleteButton) {
+        deleteButton.disabled = true;
+        deleteButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Removing...';
+    }
+    
     try {
-        await deleteNumber(number);
-        showToast('Success', `Number +${number} has been removed successfully`);
+        await deleteNumber(cleanNumber);
+        showToast('Session Removed', `Number +${cleanNumber} has been logged out successfully`, 'success');
         
         // Remove from local sessions array
         sessions = sessions.filter(session => {
             const sessionNumber = typeof session === 'object' 
                 ? (session.number || session.phone || session.id)
                 : session.toString();
-            return sessionNumber !== number;
+            return sessionNumber.replace(/^\+/, '') !== cleanNumber;
         });
         
         renderSessions();
         
+        // Reload sessions from server to confirm removal
+        setTimeout(() => {
+            loadSessions();
+        }, 1000);
+        
     } catch (error) {
         console.error('Failed to delete session:', error);
-        showToast('Error', `Failed to remove number: ${error.message}`, 'error');
+        showToast('Removal Failed', `Failed to remove number: ${error.message}`, 'error');
+        
+        // Re-enable button on error
+        if (deleteButton) {
+            deleteButton.disabled = false;
+            deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i> Remove Session';
+        }
     }
 };
 
