@@ -1,4 +1,4 @@
-// API Configuration - Using local proxy to avoid CORS issues
+// API Configuration - Using Vercel API routes  
 const API_BASE_URL = '/api';
 
 // DOM Elements
