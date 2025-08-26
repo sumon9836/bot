@@ -60,6 +60,98 @@ function showToast(title, message, type = 'success') {
     }, 4000);
 }
 
+function showPairingCodeModal(number, code) {
+    // Remove any existing modal
+    const existingModal = document.getElementById('pairingModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Create modal HTML
+    const modal = document.createElement('div');
+    modal.id = 'pairingModal';
+    modal.className = 'pairing-modal-overlay';
+    modal.innerHTML = `
+        <div class="pairing-modal">
+            <div class="pairing-modal-header">
+                <h2><i class="fab fa-whatsapp"></i> WhatsApp Pairing Code</h2>
+                <button class="modal-close" onclick="closePairingModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="pairing-modal-content">
+                <div class="pairing-number">
+                    <i class="fas fa-phone"></i>
+                    Number: +${number}
+                </div>
+                <div class="pairing-code-container">
+                    <div class="pairing-code-label">Enter this code in WhatsApp:</div>
+                    <div class="pairing-code" id="pairingCode">${code}</div>
+                    <button class="btn btn-secondary copy-code-btn" onclick="copyPairingCode('${code}')">
+                        <i class="fas fa-copy"></i>
+                        Copy Code
+                    </button>
+                </div>
+                <div class="pairing-instructions">
+                    <h3>How to pair:</h3>
+                    <ol>
+                        <li>Open WhatsApp on your phone</li>
+                        <li>Go to Settings → Linked Devices</li>
+                        <li>Tap "Link a Device"</li>
+                        <li>Tap "Link with phone number instead"</li>
+                        <li>Enter the code above when prompted</li>
+                    </ol>
+                </div>
+            </div>
+            <div class="pairing-modal-footer">
+                <button class="btn btn-primary" onclick="closePairingModal()">
+                    Got it!
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Show modal with animation
+    setTimeout(() => {
+        modal.classList.add('show');
+    }, 10);
+    
+    // Auto refresh sessions after pairing attempt
+    setTimeout(async () => {
+        await loadSessions();
+    }, 5000);
+}
+
+// Global functions for modal
+window.closePairingModal = function() {
+    const modal = document.getElementById('pairingModal');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.remove();
+        }, 300);
+    }
+    // Reload sessions when modal is closed
+    loadSessions();
+};
+
+window.copyPairingCode = function(code) {
+    navigator.clipboard.writeText(code).then(() => {
+        showToast('Copied!', 'Pairing code copied to clipboard', 'success');
+    }).catch(() => {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = code;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showToast('Copied!', 'Pairing code copied to clipboard', 'success');
+    });
+};
+
 function setButtonLoading(button, loading) {
     const btnText = button.querySelector('.btn-text');
     const btnLoader = button.querySelector('.btn-loader');
@@ -299,11 +391,20 @@ pairForm.addEventListener('submit', async (e) => {
     
     try {
         const result = await pairNumber(number);
-        showToast('Success', `Number +${number} has been paired successfully`);
-        pairNumberInput.value = '';
         
-        // Reload sessions to show the new pairing
-        await loadSessions();
+        // Check if we got a pairing code
+        if (result && result.code) {
+            showPairingCodeModal(number, result.code);
+            pairNumberInput.value = '';
+        } else if (result && result.status === 'already paired') {
+            showToast('Already Paired', `Number +${number} is already paired`, 'success');
+            pairNumberInput.value = '';
+            await loadSessions();
+        } else {
+            showToast('Success', `Number +${number} has been processed successfully`);
+            pairNumberInput.value = '';
+            await loadSessions();
+        }
         
     } catch (error) {
         console.error('Failed to pair number:', error);
