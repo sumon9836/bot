@@ -3,7 +3,7 @@ const url = require('url');
 const path = require('path');
 const fs = require('fs');
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 const API_BASE_URL = 'http://mainline.proxy.rlwy.net:35640';
 
 // MIME types for static files
@@ -178,7 +178,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 // Start server
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Kaisen-MD Dashboard Server running on port ${PORT}`);
     console.log(`📱 Dashboard: http://localhost:${PORT}`);
     console.log(`🔗 API Proxy: Forwarding /api/* to ${API_BASE_URL}`);
