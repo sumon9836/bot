@@ -148,9 +148,6 @@ const server = http.createServer(async (req, res) => {
         if (pathname === '/api/pair' && query.number) {
             console.log(`🔗 Pairing request for: ${query.number}`);
             await handleAPIRequest(res, `/pair?number=${encodeURIComponent(query.number)}`);
-        } else if (pathname === '/api/logout' && query.number) {
-            console.log(`🚪 Logout request for: ${query.number}`);
-            await handleAPIRequest(res, `/delete?number=${encodeURIComponent(query.number)}`);
         } else if (pathname === '/api/sessions') {
             console.log('📊 Fetching sessions...');
             await handleAPIRequest(res, '/sessions');

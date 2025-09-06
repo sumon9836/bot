@@ -3,9 +3,7 @@ const API_BASE_URL = '/api';
 
 // DOM Elements
 const pairForm = document.getElementById('pairForm');
-const deleteForm = document.getElementById('deleteForm');
 const pairNumberInput = document.getElementById('pairNumber');
-const deleteNumberInput = document.getElementById('deleteNumber');
 const refreshBtn = document.getElementById('refreshBtn');
 const sessionsGrid = document.getElementById('sessionsGrid');
 const sessionsLoader = document.getElementById('sessionsLoader');
@@ -80,27 +78,81 @@ function showPairingCodeModal(number, code) {
                 </button>
             </div>
             <div class="pairing-modal-content">
-                <div class="pairing-number">
-                    <i class="fas fa-phone"></i>
-                    Number: +${number}
+                <div class="pairing-number-card">
+                    <div class="phone-icon-wrapper">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <div class="number-text">
+                        <span class="label">Phone Number</span>
+                        <span class="number">+${number}</span>
+                    </div>
                 </div>
-                <div class="pairing-code-container">
-                    <div class="pairing-code-label">Enter this code in WhatsApp:</div>
-                    <div class="pairing-code" id="pairingCode">${code}</div>
-                    <button class="btn btn-secondary copy-code-btn" onclick="copyPairingCode('${code}')">
-                        <i class="fas fa-copy"></i>
-                        Copy Code
-                    </button>
+                
+                <div class="pairing-code-section">
+                    <div class="code-header">
+                        <div class="whatsapp-icon">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        <h3>Your Pairing Code</h3>
+                    </div>
+                    
+                    <div class="code-display-card">
+                        <div class="code-wrapper">
+                            <div class="pairing-code-enhanced" id="pairingCode">${code}</div>
+                            <div class="code-animation-bg"></div>
+                        </div>
+                        <button class="copy-btn-enhanced" onclick="copyPairingCodeEnhanced('${code}')">
+                            <span class="copy-icon">
+                                <i class="fas fa-copy"></i>
+                            </span>
+                            <span class="copy-text">Copy Code</span>
+                            <span class="copied-text">Copied!</span>
+                        </button>
+                    </div>
                 </div>
-                <div class="pairing-instructions">
-                    <h3>How to pair:</h3>
-                    <ol>
-                        <li>Open WhatsApp on your phone</li>
-                        <li>Go to Settings → Linked Devices</li>
-                        <li>Tap "Link a Device"</li>
-                        <li>Tap "Link with phone number instead"</li>
-                        <li>Enter the code above when prompted</li>
-                    </ol>
+                
+                <div class="instructions-enhanced">
+                    <div class="instruction-header">
+                        <i class="fas fa-list-ol"></i>
+                        <h3>How to Link Your Device</h3>
+                    </div>
+                    <div class="steps-container">
+                        <div class="step-item">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <i class="fab fa-whatsapp step-icon"></i>
+                                <span>Open WhatsApp on your phone</span>
+                            </div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <i class="fas fa-cog step-icon"></i>
+                                <span>Go to <strong>Settings → Linked Devices</strong></span>
+                            </div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <i class="fas fa-link step-icon"></i>
+                                <span>Tap <strong>"Link a Device"</strong></span>
+                            </div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <i class="fas fa-phone step-icon"></i>
+                                <span>Select <strong>"Link with phone number"</strong></span>
+                            </div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-number">5</div>
+                            <div class="step-content">
+                                <i class="fas fa-keyboard step-icon"></i>
+                                <span>Enter the <strong>pairing code</strong> above</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="pairing-modal-footer">
@@ -137,20 +189,104 @@ window.closePairingModal = function() {
     loadSessions();
 };
 
-window.copyPairingCode = function(code) {
+window.copyPairingCodeEnhanced = function(code) {
+    const copyBtn = document.querySelector('.copy-btn-enhanced');
+    const copyIcon = copyBtn.querySelector('.copy-icon');
+    const copyText = copyBtn.querySelector('.copy-text');
+    const copiedText = copyBtn.querySelector('.copied-text');
+    
+    // Add beautiful copying animation
+    copyBtn.classList.add('copying');
+    copyIcon.style.transform = 'scale(0.7) rotate(360deg)';
+    copyIcon.style.transition = 'all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+    
+    // Add sparkle effect to button
+    const sparkle = document.createElement('div');
+    sparkle.style.cssText = `
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 4px;
+        height: 4px;
+        background: white;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        animation: sparkleEffect 0.6s ease-out;
+        pointer-events: none;
+    `;
+    copyBtn.appendChild(sparkle);
+    
     navigator.clipboard.writeText(code).then(() => {
-        showToast('Copied!', 'Pairing code copied to clipboard', 'success');
+        // Beautiful success animation
+        setTimeout(() => {
+            copyBtn.classList.remove('copying');
+            copyBtn.classList.add('copied');
+            copyIcon.innerHTML = '<i class="fas fa-check"></i>';
+            copyIcon.style.transform = 'scale(1.3) rotate(0deg)';
+            
+            // Add bounce effect to the code
+            const codeElement = document.getElementById('pairingCode');
+            codeElement.classList.add('code-copied');
+            codeElement.style.animation = 'bounceSuccess 0.8s ease-out';
+            
+            // Create floating success particles
+            for (let i = 0; i < 3; i++) {
+                const particle = document.createElement('div');
+                particle.style.cssText = `
+                    position: absolute;
+                    top: ${20 + i * 10}%;
+                    left: ${40 + i * 20}%;
+                    width: 6px;
+                    height: 6px;
+                    background: #FF69B4;
+                    border-radius: 50%;
+                    animation: floatUp 1s ease-out ${i * 0.1}s;
+                    pointer-events: none;
+                `;
+                copyBtn.appendChild(particle);
+                setTimeout(() => particle.remove(), 1000);
+            }
+            
+            // Reset after animation
+            setTimeout(() => {
+                copyBtn.classList.remove('copied');
+                copyIcon.innerHTML = '<i class="fas fa-copy"></i>';
+                copyIcon.style.transform = 'scale(1)';
+                codeElement.classList.remove('code-copied');
+                codeElement.style.animation = '';
+            }, 2500);
+        }, 400);
+        
+        // Remove sparkle
+        setTimeout(() => sparkle.remove(), 600);
     }).catch(() => {
-        // Fallback for older browsers
+        // Fallback with same beautiful animation
         const textArea = document.createElement('textarea');
         textArea.value = code;
         document.body.appendChild(textArea);
         textArea.select();
         document.execCommand('copy');
         document.body.removeChild(textArea);
-        showToast('Copied!', 'Pairing code copied to clipboard', 'success');
+        
+        setTimeout(() => {
+            copyBtn.classList.remove('copying');
+            copyBtn.classList.add('copied');
+            copyIcon.innerHTML = '<i class="fas fa-check"></i>';
+            copyIcon.style.transform = 'scale(1.3)';
+            
+            setTimeout(() => {
+                copyBtn.classList.remove('copied');
+                copyIcon.innerHTML = '<i class="fas fa-copy"></i>';
+                copyIcon.style.transform = 'scale(1)';
+            }, 2500);
+        }, 400);
+        
+        setTimeout(() => sparkle.remove(), 600);
     });
 };
+
+// Keep the old function for compatibility
+window.copyPairingCode = window.copyPairingCodeEnhanced;
 
 function setButtonLoading(button, loading) {
     const btnText = button.querySelector('.btn-text');
@@ -200,9 +336,6 @@ async function pairNumber(number) {
     return await makeApiRequest(`/pair?number=${encodeURIComponent(number)}`);
 }
 
-async function deleteNumber(number) {
-    return await makeApiRequest(`/logout?number=${encodeURIComponent(number)}`);
-}
 
 async function getSessions() {
     return await makeApiRequest('/sessions');
@@ -344,51 +477,6 @@ async function loadSessions() {
     }
 }
 
-// Global function for session removal (called from session cards)
-window.deleteSessionNumber = async function(number) {
-    // Clean the number (remove + if present)
-    const cleanNumber = number.toString().replace(/^\+/, '');
-    
-    const confirmed = confirm(`🗑️ Remove Session\n\nAre you sure you want to logout and remove +${cleanNumber} from the bot?\n\nThis action cannot be undone.`);
-    if (!confirmed) return;
-    
-    // Find and disable the button during deletion
-    const deleteButton = document.querySelector(`button[onclick="deleteSessionNumber('${number}')"]`);
-    if (deleteButton) {
-        deleteButton.disabled = true;
-        deleteButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Removing...';
-    }
-    
-    try {
-        await deleteNumber(cleanNumber);
-        showToast('Session Removed', `Number +${cleanNumber} has been logged out successfully`, 'success');
-        
-        // Remove from local sessions array
-        sessions = sessions.filter(session => {
-            const sessionNumber = typeof session === 'object' 
-                ? (session.number || session.phone || session.id)
-                : session.toString();
-            return sessionNumber.replace(/^\+/, '') !== cleanNumber;
-        });
-        
-        renderSessions();
-        
-        // Reload sessions from server to confirm removal
-        setTimeout(() => {
-            loadSessions();
-        }, 1000);
-        
-    } catch (error) {
-        console.error('Failed to delete session:', error);
-        showToast('Removal Failed', `Failed to remove number: ${error.message}`, 'error');
-        
-        // Re-enable button on error
-        if (deleteButton) {
-            deleteButton.disabled = false;
-            deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i> Remove Session';
-        }
-    }
-};
 
 // Event Handlers
 pairForm.addEventListener('submit', async (e) => {
@@ -416,7 +504,6 @@ pairForm.addEventListener('submit', async (e) => {
             pairNumberInput.value = '';
             await loadSessions();
         } else {
-            showToast('Success', `Number +${number} has been processed successfully`);
             pairNumberInput.value = '';
             await loadSessions();
         }
@@ -429,68 +516,150 @@ pairForm.addEventListener('submit', async (e) => {
     }
 });
 
-deleteForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const number = formatPhoneNumber(deleteNumberInput.value);
-    
-    if (!validatePhoneNumber(number)) {
-        showToast('Invalid Number', 'Please enter a valid phone number (10-15 digits)', 'error');
-        return;
-    }
-    
-    const confirmed = confirm(`Are you sure you want to remove +${number}?`);
-    if (!confirmed) return;
-    
-    const submitBtn = deleteForm.querySelector('.btn');
-    setButtonLoading(submitBtn, true);
-    
-    try {
-        await deleteNumber(number);
-        showToast('Success', `Number +${number} has been removed successfully`);
-        deleteNumberInput.value = '';
-        
-        // Reload sessions to reflect the deletion
-        await loadSessions();
-        
-    } catch (error) {
-        console.error('Failed to delete number:', error);
-        showToast('Deletion Failed', `Failed to remove number: ${error.message}`, 'error');
-    } finally {
-        setButtonLoading(submitBtn, false);
-    }
-});
 
 refreshBtn.addEventListener('click', loadSessions);
 retrySessionsBtn.addEventListener('click', loadSessions);
 
 // Input Formatting
-[pairNumberInput, deleteNumberInput].forEach(input => {
-    input.addEventListener('input', (e) => {
-        // Remove any non-digit characters as user types
-        e.target.value = e.target.value.replace(/\D/g, '');
-    });
-    
-    input.addEventListener('paste', (e) => {
-        // Handle paste events to clean up pasted content
-        setTimeout(() => {
-            e.target.value = e.target.value.replace(/\D/g, '');
-        }, 0);
-    });
+pairNumberInput.addEventListener('input', (e) => {
+    // Remove any non-digit characters as user types
+    e.target.value = e.target.value.replace(/\D/g, '');
 });
+
+pairNumberInput.addEventListener('paste', (e) => {
+    // Handle paste events to clean up pasted content
+    setTimeout(() => {
+        e.target.value = e.target.value.replace(/\D/g, '');
+    }, 0);
+});
+
+// Optimized smooth scroll and entrance animations
+function addEntranceAnimations() {
+    const cards = document.querySelectorAll('.card');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+            if (entry.isIntersecting) {
+                // Use requestAnimationFrame for smoother animations
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0) translateZ(0)';
+                    }, index * 80);
+                });
+                observer.unobserve(entry.target); // Stop observing once animated
+            }
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -30px 0px'
+    });
+
+    cards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px) translateZ(0)';
+        card.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+        card.style.willChange = 'transform, opacity';
+        observer.observe(card);
+    });
+}
+
+// Enhanced toast with better animations
+function showToast(title, message, type = 'success') {
+    const toastIcon = toast.querySelector('.toast-icon');
+    const toastTitle = toast.querySelector('.toast-title');
+    const toastText = toast.querySelector('.toast-text');
+    
+    // Reset classes
+    toastIcon.className = `toast-icon ${type}`;
+    toast.className = `toast ${type}`;
+    
+    // Set content
+    toastTitle.textContent = title;
+    toastText.textContent = message;
+    
+    // Set appropriate icon with animation
+    const icon = toastIcon.querySelector('i');
+    if (type === 'success') {
+        icon.className = 'fas fa-check-circle';
+    } else if (type === 'error') {
+        icon.className = 'fas fa-exclamation-circle';
+    }
+    
+    // Show toast with bounce effect
+    toast.classList.add('show');
+    
+    // Add a subtle shake effect for errors
+    if (type === 'error') {
+        toast.style.animation = 'shake 0.5s ease-in-out';
+        setTimeout(() => {
+            toast.style.animation = '';
+        }, 500);
+    }
+    
+    // Hide after 4 seconds with smooth transition
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 4000);
+}
+
+// Add shake animation for errors
+const shakeKeyframes = `
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+`;
+
+// Inject shake animation
+if (!document.getElementById('shake-animation')) {
+    const style = document.createElement('style');
+    style.id = 'shake-animation';
+    style.textContent = shakeKeyframes;
+    document.head.appendChild(style);
+}
+
+// Smooth scroll to sections
+function smoothScrollTo(elementId) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
+}
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
     console.log('WhatsApp Bot Management Dashboard initialized');
+    
+    // Add entrance animations
+    setTimeout(addEntranceAnimations, 100);
+    
+    // Load sessions
     loadSessions();
+    
+    // Add smooth scrolling to refresh button
+    refreshBtn.addEventListener('click', () => {
+        smoothScrollTo('sessions-section');
+    });
 });
 
-// Auto-refresh sessions every 30 seconds
-setInterval(() => {
-    if (!isLoading) {
-        loadSessions();
-    }
-}, 30000);
+// Optimized auto-refresh with better performance
+let refreshInterval;
+
+function startAutoRefresh() {
+    clearInterval(refreshInterval);
+    refreshInterval = setInterval(() => {
+        if (!isLoading && !document.hidden) {
+            loadSessions();
+        }
+    }, 30000);
+}
+
+// Start auto-refresh
+startAutoRefresh();
 
 // Handle visibility change to refresh when tab becomes active
 document.addEventListener('visibilitychange', () => {

@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="top">
         <!-- Header -->
         <header class="header">
             <div class="header-content">
@@ -20,8 +20,16 @@
                     <i class="fab fa-whatsapp header-icon"></i>
                     <h1>𝐊ąìʂҽղ-𝐌𝐃</h1>
                     <p class="header-subtitle">Advanced Bot Management</p>
+                    <p class="developer-credit">Powered by Sumon Developer</p>
                 </div>
                 <div class="header-right">
+                    <a href="https://chat.whatsapp.com/CQyxExEBMGvEnkA32zqbNY" 
+                       target="_blank" 
+                       class="btn btn-support" 
+                       title="Join Support Group">
+                        <i class="fab fa-whatsapp"></i>
+                        <span class="support-text">Support</span>
+                    </a>
                     <button id="refreshBtn" class="btn btn-secondary" title="Refresh Sessions">
                         <i class="fas fa-sync-alt"></i>
                     </button>
@@ -32,6 +40,7 @@
         <!-- Main Content -->
         <main class="main-content">
             <!-- Action Cards -->
+            <div id="pair-section"></div>
             <section class="action-section">
                 <div class="action-cards">
                     <!-- Pair New Number Card -->
@@ -67,42 +76,11 @@
                         </div>
                     </div>
 
-                    <!-- Delete Number Card -->
-                    <div class="card action-card">
-                        <div class="card-header">
-                            <i class="fas fa-trash-alt card-icon"></i>
-                            <h2>Remove Number</h2>
-                        </div>
-                        <div class="card-content">
-                            <form id="deleteForm" class="action-form">
-                                <div class="form-group">
-                                    <label for="deleteNumber">Phone Number</label>
-                                    <div class="input-wrapper">
-                                        <i class="fas fa-phone input-icon"></i>
-                                        <input 
-                                            type="tel" 
-                                            id="deleteNumber" 
-                                            placeholder="e.g., 1234567890"
-                                            required
-                                            pattern="[0-9]{10,15}"
-                                            title="Enter 10-15 digits without spaces or special characters"
-                                        >
-                                    </div>
-                                    <small class="form-help">Enter number to remove from bot</small>
-                                </div>
-                                <button type="submit" class="btn btn-danger">
-                                    <span class="btn-text">Remove Number</span>
-                                    <div class="btn-loader" style="display: none;">
-                                        <i class="fas fa-spinner fa-spin"></i>
-                                    </div>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
                 </div>
             </section>
 
             <!-- Sessions Section -->
+            <div id="sessions-section"></div>
             <section class="sessions-section">
                 <div class="section-header">
                     <h2>Active Sessions</h2>
