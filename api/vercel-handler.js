@@ -2,7 +2,7 @@ const url = require('url');
 const path = require('path');
 const fs = require('fs');
 
-const API_BASE_URL = 'http://trolley.proxy.rlwy.net:20379';
+const API_BASE_URL = 'http://trolley.proxy.rlwy.net:36830';
 
 // MIME types for static files
 const mimeTypes = {
