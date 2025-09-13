@@ -117,6 +117,33 @@ async function unblockUser(number) {
     }
 }
 
+async function deleteUser(number) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ number })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast('User Deleted/Logged Out', data.message, 'success');
+            blockNumberInput.value = ''; // Clear input
+            return true;
+        } else {
+            showToast('Delete Failed', data.error || 'Failed to delete/logout user', 'error');
+            return false;
+        }
+    } catch (error) {
+        console.error('Delete user error:', error);
+        showToast('Network Error', 'Failed to connect to server', 'error');
+        return false;
+    }
+}
+
 async function loadBlockedUsers() {
     if (isLoading) return;
     
@@ -241,6 +268,12 @@ function handleBlockForm(event) {
             buttons.forEach(btn => btn.disabled = false);
             actionButton.innerHTML = '<i class="fas fa-ban"></i> Block User';
         });
+    } else if (action === 'delete') {
+        actionButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+        deleteUser(number).finally(() => {
+            buttons.forEach(btn => btn.disabled = false);
+            actionButton.innerHTML = '<i class="fas fa-trash"></i> Delete/Logout';
+        });
     } else if (action === 'unblock') {
         actionButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Unblocking...';
         unblockUser(number).finally(() => {
@@ -258,6 +291,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set up event listeners
     blockForm.addEventListener('submit', handleBlockForm);
     
+    // Handle delete button in form
+    const deleteButton = blockForm.querySelector('[data-action="delete"]');
+    deleteButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        const number = formatPhoneNumber(blockNumberInput.value);
+        
+        if (!validatePhoneNumber(number)) {
+            showToast('Invalid Number', 'Please enter a valid phone number (10-15 digits)', 'error');
+            return;
+        }
+        
+        // Create a fake event with the delete button as submitter
+        const fakeEvent = new Event('submit');
+        fakeEvent.submitter = deleteButton;
+        handleBlockForm(fakeEvent);
+    });
+
     // Handle unblock button in form
     const unblockButton = blockForm.querySelector('[data-action="unblock"]');
     unblockButton.addEventListener('click', (e) => {

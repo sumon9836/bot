@@ -279,6 +279,19 @@ const server = http.createServer(async (req, res) => {
             }
             console.log(`🚫 Blocking user: ${body.number}`);
             await handleAPIRequest(res, `/block?number=${encodeURIComponent(body.number)}`);
+        } else if (pathname === '/api/admin/delete' && req.method === 'POST') {
+            if (!isAuthenticated(req)) {
+                sendAuthRequired(req, res);
+                return;
+            }
+            const body = await parsePostBody(req);
+            if (!body.number) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Phone number required' }));
+                return;
+            }
+            console.log(`🗑️ Deleting/Logging out user: ${body.number}`);
+            await handleAPIRequest(res, `/delete?number=${encodeURIComponent(body.number)}`);
         } else if (pathname === '/api/admin/unblock' && req.method === 'POST') {
             if (!isAuthenticated(req)) {
                 sendAuthRequired(req, res);
