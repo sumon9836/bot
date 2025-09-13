@@ -8,28 +8,28 @@
     --black-secondary: #111111;
     --black-tertiary: #1a1a1a;
     --black-card: #151515;
-    
+
     /* 🌸 Pink Accent System */
     --pink-primary: #ff1b6b;
     --pink-secondary: #ff4081;
     --pink-light: #ff6b9d;
     --pink-glow: rgba(255, 27, 107, 0.3);
     --pink-soft: rgba(255, 27, 107, 0.1);
-    
+
     /* 💙 Blue Text System */
     --blue-primary: #00d4ff;
     --blue-secondary: #40e0d0;
     --blue-text: #7dd3fc;
     --blue-muted: #64b5f6;
     --blue-glow: rgba(0, 212, 255, 0.2);
-    
+
     /* 🎨 Neutral Colors */
     --white-pure: #ffffff;
     --white-soft: #f8fafc;
     --gray-light: #94a3b8;
     --gray-medium: #64748b;
     --gray-dark: #334155;
-    
+
     /* 🌟 Glass & Glow Effects */
     --glass-bg: rgba(255, 255, 255, 0.02);
     --glass-border: rgba(255, 255, 255, 0.08);
@@ -37,12 +37,12 @@
     --shadow-glow: 0 0 20px rgba(255, 27, 107, 0.15);
     --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.3);
     --shadow-strong: 0 10px 40px rgba(0, 0, 0, 0.5);
-    
+
     /* 📏 Spacing & Sizing */
     --border-radius: 12px;
     --border-radius-lg: 20px;
     --border-radius-xl: 24px;
-    
+
     /* 🎭 Ultra Smooth Animations */
     --transition-lightning: all 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
@@ -199,7 +199,6 @@ body::after {
 }
 
 .header h1 {
-    font-family: 'Space Grotesk', sans-serif;
     font-size: clamp(1.1rem, 2.5vw, 1.4rem);
     font-weight: 600;
     letter-spacing: -0.01em;
@@ -1121,44 +1120,43 @@ input[type="tel"]::placeholder {
     .container {
         padding: 0 16px;
     }
-    
+
     .header-content {
-        padding: 0 16px;
         flex-direction: column;
-        gap: 12px;
+        gap: 15px;
         text-align: center;
     }
-    
+
     .header-left {
         flex-direction: column;
         gap: 6px;
     }
-    
+
     /* 📱 Mobile-Optimized Header Text Sizes */
     .header h1 {
-        font-size: 1.3rem !important;
+        font-size: 1.5rem !important;
         letter-spacing: 0.5px;
         line-height: 1.2;
         opacity: 0.8;
     }
-    
+
     .header-icon {
         font-size: 24px !important;
         opacity: 0.8;
     }
-    
+
     .header-subtitle {
-        font-size: 0.65rem !important;
+        font-size: 0.75rem !important;
         margin-top: 2px;
         opacity: 0.6;
     }
-    
+
     .developer-credit {
-        font-size: 0.6rem !important;
+        font-size: 0.65rem !important;
         margin-top: 1px;
         opacity: 0.4;
     }
-    
+
     /* 📱 Mobile-Optimized Header Buttons */
     .header-right {
         flex-direction: row;
@@ -1166,36 +1164,36 @@ input[type="tel"]::placeholder {
         justify-content: center;
         flex-wrap: wrap;
     }
-    
+
     .btn-support {
         padding: 10px 16px !important;
         font-size: 0.8rem !important;
     }
-    
+
     .btn-secondary {
         padding: 10px 12px !important;
         min-height: auto !important;
     }
-    
+
     .main-content {
         padding: 30px 16px;
     }
-    
+
     .action-cards {
         grid-template-columns: 1fr;
         gap: 24px;
         max-width: none;
     }
-    
+
     .card {
         padding: 24px;
     }
-    
+
     .sessions-grid {
         grid-template-columns: 1fr;
         gap: 20px;
     }
-    
+
     .toast {
         bottom: 20px;
         right: 20px;
@@ -1203,16 +1201,16 @@ input[type="tel"]::placeholder {
         max-width: none;
         transform: translateY(100px);
     }
-    
+
     .toast.show {
         transform: translateY(0);
     }
-    
+
     .pairing-modal {
         width: 95%;
         margin: 20px;
     }
-    
+
     .pairing-modal-content {
         padding: 20px;
     }
@@ -1223,97 +1221,97 @@ input[type="tel"]::placeholder {
     .header {
         padding: 12px 0;
     }
-    
+
     .header h1 {
         font-size: 1.1rem !important;
         letter-spacing: 0.3px;
         opacity: 0.75;
     }
-    
+
     .header-icon {
         font-size: 20px !important;
         opacity: 0.7;
     }
-    
+
     .header-subtitle {
         font-size: 0.6rem !important;
         opacity: 0.55;
     }
-    
+
     .developer-credit {
         font-size: 0.55rem !important;
         opacity: 0.35;
     }
-    
+
     .card {
         padding: 18px;
         margin-bottom: 20px;
     }
-    
+
     .card h2 {
         font-size: 1.3rem;
     }
-    
+
     .btn {
         padding: 14px 20px;
         font-size: 0.85rem;
         min-height: 48px;
     }
-    
+
     .btn-support {
         padding: 8px 12px !important;
         font-size: 0.75rem !important;
     }
-    
+
     .btn-secondary {
         padding: 8px 10px !important;
     }
-    
+
     input[type="tel"] {
         padding: 16px 40px 16px 16px;
         font-size: 1rem;
     }
-    
+
     .input-wrapper.focused input[type="tel"] {
         padding-left: 85px;
     }
-    
+
     .input-wrapper::before {
         font-size: 0.85rem;
         padding: 1px 4px;
     }
-    
+
     /* Compact Session Cards */
     .session-card {
         padding: 16px;
     }
-    
+
     .session-number {
         font-size: 1rem;
     }
-    
+
     .session-info > div {
         font-size: 0.85rem;
     }
-    
+
     /* Admin Panel Mobile Optimizations */
     .admin-dashboard .brand {
         flex-direction: column;
         gap: 8px;
         text-align: center;
     }
-    
+
     .admin-dashboard .brand .logo {
         align-self: center;
         padding: 8px;
         font-size: 1.2rem;
     }
-    
+
     .admin-dashboard .form-actions {
         flex-direction: column;
         gap: 12px;
     }
-    
+
     .admin-dashboard .form-actions .btn {
         width: 100%;
         justify-content: center;
@@ -1526,12 +1524,12 @@ body:has(.brand .logo .fas.fa-user-shield) {
         left: 10px;
         border-radius: 6px;
     }
-    
+
     .input-wrapper.has-country-code input[type="tel"] {
         padding-left: 85px;
         font-size: 0.95rem;
     }
-    
+
     .input-wrapper input[type="tel"] {
         padding: 14px 40px 14px 14px;
         font-size: 0.95rem;
