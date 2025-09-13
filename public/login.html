@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>𝐊ąìʂҽղ-𝐌𝐃 | Admin Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div style="max-width: 400px; margin: 100px auto; padding: 40px; background: rgba(255,255,255,0.1); border-radius: 20px; backdrop-filter: blur(12px);">
+            <h1 style="text-align: center; color: #fff; margin-bottom: 30px;">🔒 Admin Login</h1>
+            <form id="loginForm" style="display: flex; flex-direction: column; gap: 20px;">
+                <input type="password" id="password" placeholder="Admin Password" required style="padding: 15px; border: none; border-radius: 10px; background: rgba(255,255,255,0.2); color: #fff; font-size: 16px;">
+                <button type="submit" style="padding: 15px; border: none; border-radius: 10px; background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; font-size: 16px; cursor: pointer;">Login</button>
+            </form>
+            <p style="text-align: center; margin-top: 20px;"><a href="/" style="color: #6366f1;">← Back to Dashboard</a></p>
+        </div>
+    </div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            try {
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password }),
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = '/admin.html';
+                } else {
+                    alert('Invalid password');
+                }
+            } catch (error) {
+                alert('Login failed');
+            }
+        });
+    </script>
+</body>
+</html>
