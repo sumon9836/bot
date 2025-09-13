@@ -2,7 +2,7 @@ const url = require('url');
 const path = require('path');
 const fs = require('fs');
 
-const API_BASE_URL = 'http://ballast.proxy.rlwy.net:23161';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://ballast.proxy.rlwy.net:23161';
 
 // MIME types for static files
 const mimeTypes = {
@@ -27,25 +27,41 @@ function getContentType(filePath) {
     return mimeTypes[ext] || 'text/plain';
 }
 
-// Serve static files
+// Serve static files safely
 function serveStaticFile(res, filePath) {
-    const publicPath = path.join(__dirname, '../public', filePath);
+    // Sanitize the file path to prevent directory traversal
+    const requestPath = decodeURIComponent(filePath).replace(/^\/+/, '');
+    const publicDir = path.join(__dirname, '../public');
+    const safePath = path.resolve(publicDir, requestPath);
+    
+    // Ensure the resolved path is within the public directory
+    if (!safePath.startsWith(publicDir)) {
+        res.status(403).send('403 - Forbidden');
+        return;
+    }
     
     try {
-        const content = fs.readFileSync(publicPath);
-        const contentType = getContentType(filePath);
+        const content = fs.readFileSync(safePath);
+        const contentType = getContentType(requestPath);
         res.setHeader('Content-Type', contentType);
         res.status(200).send(content);
     } catch (err) {
         if (err.code === 'ENOENT') {
-            // File not found, serve index.html for client-side routing
-            try {
-                const indexPath = path.join(__dirname, '../public/index.html');
-                const content = fs.readFileSync(indexPath);
-                res.setHeader('Content-Type', 'text/html');
-                res.status(200).send(content);
-            } catch (indexErr) {
+            // For HTML routes, serve index.html for client-side routing
+            // For asset requests, return 404
+            const ext = path.extname(requestPath).toLowerCase();
+            if (ext && (ext === '.css' || ext === '.js' || ext === '.png' || ext === '.jpg' || ext === '.gif' || ext === '.svg' || ext === '.ico')) {
                 res.status(404).send('404 - File not found');
+            } else {
+                // Serve index.html for HTML routes
+                try {
+                    const indexPath = path.join(publicDir, 'index.html');
+                    const content = fs.readFileSync(indexPath);
+                    res.setHeader('Content-Type', 'text/html');
+                    res.status(200).send(content);
+                } catch (indexErr) {
+                    res.status(404).send('404 - File not found');
+                }
             }
         } else {
             res.status(500).send('500 - Server error');

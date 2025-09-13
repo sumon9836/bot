@@ -31,16 +31,12 @@ args = "node api/index.js"
 waitForPort = 5000
 
 [[ports]]
-localPort = 3000
-externalPort = 3000
-
-[[ports]]
 localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 8080
-externalPort = 8080
+localPort = 35379
+externalPort = 3000
 
 [deployment]
 run = ["node", "api/index.js"]

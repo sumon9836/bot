@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 
 const PORT = process.env.PORT || 5000;
-const API_BASE_URL = 'http://ballast.proxy.rlwy.net:23161';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://ballast.proxy.rlwy.net:23161';
 
 // MIME types for static files
 const mimeTypes = {
@@ -29,30 +29,48 @@ function getContentType(filePath) {
     return mimeTypes[ext] || 'text/plain';
 }
 
-// Serve static files
+// Serve static files safely
 function serveStaticFile(res, filePath) {
-    const publicPath = path.join(__dirname, '../public', filePath);
+    // Sanitize the file path to prevent directory traversal
+    const requestPath = decodeURIComponent(filePath).replace(/^\/+/, '');
+    const publicDir = path.join(__dirname, '../public');
+    const safePath = path.resolve(publicDir, requestPath);
     
-    fs.readFile(publicPath, (err, content) => {
+    // Ensure the resolved path is within the public directory
+    if (!safePath.startsWith(publicDir)) {
+        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        res.end('403 - Forbidden');
+        return;
+    }
+    
+    fs.readFile(safePath, (err, content) => {
         if (err) {
             if (err.code === 'ENOENT') {
-                // File not found, serve index.html for client-side routing
-                const indexPath = path.join(__dirname, '../public/index.html');
-                fs.readFile(indexPath, (err, content) => {
-                    if (err) {
-                        res.writeHead(404, { 'Content-Type': 'text/plain' });
-                        res.end('404 - File not found');
-                    } else {
-                        res.writeHead(200, { 'Content-Type': 'text/html' });
-                        res.end(content);
-                    }
-                });
+                // For HTML routes, serve index.html for client-side routing
+                // For asset requests, return 404
+                const ext = path.extname(requestPath).toLowerCase();
+                if (ext && (ext === '.css' || ext === '.js' || ext === '.png' || ext === '.jpg' || ext === '.gif' || ext === '.svg' || ext === '.ico')) {
+                    res.writeHead(404, { 'Content-Type': 'text/plain' });
+                    res.end('404 - File not found');
+                } else {
+                    // Serve index.html for HTML routes
+                    const indexPath = path.join(publicDir, 'index.html');
+                    fs.readFile(indexPath, (err, content) => {
+                        if (err) {
+                            res.writeHead(404, { 'Content-Type': 'text/plain' });
+                            res.end('404 - File not found');
+                        } else {
+                            res.writeHead(200, { 'Content-Type': 'text/html' });
+                            res.end(content);
+                        }
+                    });
+                }
             } else {
                 res.writeHead(500, { 'Content-Type': 'text/plain' });
                 res.end('500 - Server error');
             }
         } else {
-            const contentType = getContentType(filePath);
+            const contentType = getContentType(requestPath);
             res.writeHead(200, { 'Content-Type': contentType });
             res.end(content);
         }
