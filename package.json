@@ -2,9 +2,6 @@
   "name": "kaisen-md-dashboard",
   "version": "1.0.0",
   "description": "WhatsApp Bot Management Dashboard - Serverless Edition",
-  "engines": {
-    "node": "22.x"
-  },
   "scripts": {
     "dev": "node dev-server.js",
     "start": "node dev-server.js",
