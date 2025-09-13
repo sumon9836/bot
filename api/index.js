@@ -62,7 +62,7 @@ function isAuthenticated(req) {
 function sendAuthRequired(req, res) {
     res.writeHead(401, {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': req.headers.origin || 'https://your-domain.com',
+        'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': 'true'
     });
     res.end(JSON.stringify({

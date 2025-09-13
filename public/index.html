@@ -145,61 +145,56 @@
                 </div>
             </section>
 
-            <!-- Active Sessions -->
-            <section class="card">
+            <!-- Sessions Section -->
+            <section class="card sessions-section" id="sessions-section">
                 <div class="card-header">
                     <h2><i class="fas fa-users"></i> Active Sessions</h2>
                     <div class="card-actions">
+                        <div class="session-count">
+                            <span id="sessionCount">0</span> sessions
+                        </div>
                         <button id="refreshBtn" class="btn btn-primary">
                             <i class="fas fa-sync-alt"></i>
                             Refresh
                         </button>
                     </div>
                 </div>
-
-            <!-- Sessions Section -->
-            <div id="sessions-section"></div>
-            <section class="sessions-section">
-                <div class="section-header">
-                    <h2>Active Sessions</h2>
-                    <div class="session-count">
-                        <span id="sessionCount">0</span> sessions
-                    </div>
-                </div>
+                <div class="card-content"></div>
 
                 <!-- Loading State -->
-                <div id="sessionsLoader" class="loader-container">
-                    <div class="loader">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <p>Loading sessions...</p>
+                    <div id="sessionsLoader" class="loader-container">
+                        <div class="loader">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading sessions...</p>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Error State -->
-                <div id="sessionsError" class="error-container" style="display: none;">
-                    <div class="error-content">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <h3>Failed to Load Sessions</h3>
-                        <p id="sessionsErrorMessage">Unable to fetch active sessions. Please try again.</p>
-                        <button id="retrySessionsBtn" class="btn btn-primary">
-                            <i class="fas fa-redo"></i>
-                            Retry
-                        </button>
+                    <!-- Error State -->
+                    <div id="sessionsError" class="error-container" style="display: none;">
+                        <div class="error-content">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Failed to Load Sessions</h3>
+                            <p id="sessionsErrorMessage">Unable to fetch active sessions. Please try again.</p>
+                            <button id="retrySessionsBtn" class="btn btn-primary">
+                                <i class="fas fa-redo"></i>
+                                Retry
+                            </button>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Empty State -->
-                <div id="sessionsEmpty" class="empty-container" style="display: none;">
-                    <div class="empty-content">
-                        <i class="fas fa-users"></i>
-                        <h3>No Active Sessions</h3>
-                        <p>No paired numbers found. Add a new number to get started.</p>
+                    <!-- Empty State -->
+                    <div id="sessionsEmpty" class="empty-container" style="display: none;">
+                        <div class="empty-content">
+                            <i class="fas fa-users"></i>
+                            <h3>No Active Sessions</h3>
+                            <p>No paired numbers found. Add a new number to get started.</p>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Sessions Grid -->
-                <div id="sessionsGrid" class="sessions-grid" style="display: none;">
-                    <!-- Sessions will be populated here -->
+                    <!-- Sessions Grid -->
+                    <div id="sessionsGrid" class="sessions-grid" style="display: none;">
+                        <!-- Sessions will be populated here -->
+                    </div>
                 </div>
             </section>
         </main>

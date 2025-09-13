@@ -412,6 +412,12 @@ async function makeApiRequest(endpoint, options = {}) {
             ...options
         });
         
+        // Handle unauthorized access gracefully for blocklist
+        if (response.status === 401 && endpoint.includes('blocklist')) {
+            console.log('Unauthorized access to blocklist - requires admin login');
+            return {};
+        }
+        
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
@@ -445,7 +451,9 @@ async function getSessions() {
 
 async function getBlocklist() {
     try {
-        return await makeApiRequest('/admin/blocklist');
+        return await makeApiRequest('/admin/blocklist', {
+            credentials: 'include'
+        });
     } catch (error) {
         console.error('Blocklist API error:', error);
         // Return empty object to handle gracefully
@@ -744,12 +752,21 @@ pairForm.addEventListener('submit', async (e) => {
 });
 
 
-refreshBtn.addEventListener('click', loadSessions);
-retrySessionsBtn.addEventListener('click', loadSessions);
+// Event listeners for sessions
+if (refreshBtn) {
+    refreshBtn.addEventListener('click', loadSessions);
+}
+if (retrySessionsBtn) {
+    retrySessionsBtn.addEventListener('click', loadSessions);
+}
 
 // Blocklist event listeners
-refreshBlocklistBtn.addEventListener('click', loadBlocklist);
-retryBlocklistBtn.addEventListener('click', loadBlocklist);
+if (refreshBlocklistBtn) {
+    refreshBlocklistBtn.addEventListener('click', loadBlocklist);
+}
+if (retryBlocklistBtn) {
+    retryBlocklistBtn.addEventListener('click', loadBlocklist);
+}
 
 // Input Formatting
 pairNumberInput.addEventListener('input', (e) => {
@@ -873,9 +890,11 @@ document.addEventListener('DOMContentLoaded', () => {
     loadBlocklist();
     
     // Add smooth scrolling to refresh button
-    refreshBtn.addEventListener('click', () => {
-        smoothScrollTo('sessions-section');
-    });
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            smoothScrollTo('sessions-section');
+        });
+    }
 });
 
 // Optimized auto-refresh with better performance
