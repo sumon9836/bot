@@ -493,12 +493,32 @@ body::after {
     margin-bottom: 8px;
 }
 
-/* ========== ENHANCED PHONE INPUT (NO DEFAULT) ========== */
+/* ========== ENHANCED ANIMATED PHONE INPUT ========== */
 .input-wrapper {
     position: relative;
     display: flex;
     align-items: center;
-    overflow: visible;
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid var(--glass-border);
+    border-radius: var(--border-radius);
+    padding: 10px 15px;
+    box-shadow: 0 0 15px rgba(255, 105, 180, 0.5);
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: var(--transition-smooth);
+}
+
+.input-wrapper.focused {
+    border-color: var(--pink-primary);
+    background: rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0 20px rgba(255, 105, 180, 0.7);
+    transform: translateY(-2px);
+}
+
+.input-wrapper.has-country-code {
+    border-color: var(--pink-primary);
+    box-shadow: 0 0 25px rgba(255, 105, 180, 0.8);
 }
 
 .input-icon {
@@ -516,30 +536,96 @@ body::after {
     filter: drop-shadow(0 0 5px var(--pink-glow));
 }
 
+.input-wrapper.has-country-code .input-icon {
+    opacity: 0.3;
+}
+
+/* Animated Country Code Prefix */
+.country-code-display {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%) translateX(-60px);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 3;
+    pointer-events: auto;
+    cursor: pointer;
+    font-weight: bold;
+    color: var(--pink-primary);
+    font-size: 0.9rem;
+    white-space: nowrap;
+    background: linear-gradient(135deg, rgba(255, 105, 180, 0.2), rgba(255, 105, 180, 0.1));
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 105, 180, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.country-code-display.show {
+    transform: translateY(-50%) translateX(0);
+    opacity: 1;
+    animation: slideInBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.country-code-display:hover {
+    background: linear-gradient(135deg, rgba(255, 105, 180, 0.3), rgba(255, 105, 180, 0.2));
+    transform: translateY(-50%) translateX(0) scale(1.05);
+}
+
+@keyframes slideInBounce {
+    0% {
+        transform: translateY(-50%) translateX(-80px) scale(0.8);
+        opacity: 0;
+    }
+    60% {
+        transform: translateY(-50%) translateX(5px) scale(1.1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(-50%) translateX(0) scale(1);
+        opacity: 1;
+    }
+}
+
+/* Enhanced Input Field */
 input[type="tel"] {
     width: 100%;
-    padding: 20px 50px 20px 20px;
-    background: rgba(0, 0, 0, 0.4);
-    border: 2px solid var(--glass-border);
-    border-radius: var(--border-radius);
-    color: var(--white-pure);
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--blue-primary);
     font-size: 0.9rem;
     font-weight: 500;
+    padding-left: 20px;
+    padding-right: 50px;
     transition: var(--transition-smooth);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    min-height: 24px;
 }
 
 input[type="tel"]:focus {
     outline: none;
-    border-color: var(--pink-primary);
-    background: rgba(0, 0, 0, 0.6);
-    box-shadow: 0 0 0 4px var(--pink-glow), inset 0 0 20px rgba(255, 27, 107, 0.1);
-    transform: translateY(-2px);
 }
 
 input[type="tel"]::placeholder {
     color: var(--gray-medium);
+    font-weight: 400;
+}
+
+/* Dynamic Padding When Country Code is Shown */
+.input-wrapper.has-country-code input[type="tel"] {
+    padding-left: 90px;
+}
+
+/* Flag Image Styling */
+.country-code-display img {
+    width: 20px;
+    height: 14px;
+    border-radius: 2px;
+    margin-left: 6px;
+    object-fit: cover;
 }
 
 .form-help {

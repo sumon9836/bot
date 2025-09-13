@@ -335,7 +335,7 @@ function detectCountryCode(value) {
     return null;
 }
 
-// 🌟 Enhanced Phone Input with Real-time Country Detection
+// 🌟 Enhanced Phone Input with Animated Country Detection
 function initPhoneInputAnimation() {
     const inputWrapper = pairNumberInput.closest('.input-wrapper');
 
@@ -346,9 +346,14 @@ function initPhoneInputAnimation() {
     if (!countryDisplay) {
         countryDisplay = document.createElement('div');
         countryDisplay.className = 'country-code-display';
-        countryDisplay.style.display = 'none';
+        countryDisplay.innerHTML = '<span class="country-code"></span><img class="country-flag" />';
         inputWrapper.appendChild(countryDisplay);
     }
+
+    const countryCodeSpan = countryDisplay.querySelector('.country-code');
+    const flagImg = countryDisplay.querySelector('.country-flag');
+
+    let lockedCode = null; // Store detected country code
 
     // Add focus event
     pairNumberInput.addEventListener('focus', () => {
@@ -360,56 +365,91 @@ function initPhoneInputAnimation() {
         // Only remove focused class if there's no value
         if (!pairNumberInput.value.trim()) {
             inputWrapper.classList.remove('focused');
-            countryDisplay.style.display = 'none';
+            lockedCode = null;
             countryDisplay.classList.remove('show');
             inputWrapper.classList.remove('has-country-code');
         }
     });
 
     // Add click to clear detection
-    if (countryDisplay) {
-        countryDisplay.addEventListener('click', () => {
-            // Reset everything
-            pairNumberInput.value = '';
-            countryDisplay.style.display = 'none';
+    countryDisplay.addEventListener('click', () => {
+        // Reset everything
+        pairNumberInput.value = '';
+        lockedCode = null;
+        countryDisplay.classList.remove('show');
+        inputWrapper.classList.remove('has-country-code', 'has-value');
+        countryCodeSpan.textContent = '';
+        flagImg.src = '';
+        pairNumberInput.focus();
+        console.log('Country code reset - enter full number with country code');
+    });
+
+    // Enhanced input handling with locking mechanism
+    pairNumberInput.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, ''); // only digits
+
+        // Reset if input cleared
+        if (!value) {
+            lockedCode = null;
             countryDisplay.classList.remove('show');
             inputWrapper.classList.remove('has-country-code', 'has-value');
-            pairNumberInput.focus();
-            console.log('Country code reset - enter full number with country code');
-        });
-    }
+            countryCodeSpan.textContent = '';
+            flagImg.src = '';
+            e.target.value = '';
+            return;
+        }
 
-    // Real-time country detection on input
-    pairNumberInput.addEventListener('input', (e) => {
-        const value = e.target.value;
+        inputWrapper.classList.add('has-value');
 
-        // Allow digits, spaces, dashes, and plus sign
-        const cleanValue = value.replace(/[^\d\s\-\+]/g, '');
-        e.target.value = cleanValue;
-
-        // Update visual state
-        if (cleanValue.trim()) {
-            inputWrapper.classList.add('has-value');
-
-            // Try to detect country
-            const detection = detectCountryFromPhoneNumber(cleanValue);
-
-            if (detection) {
-                const { countryInfo, countryCode } = detection;
-                countryDisplay.innerHTML = `${countryInfo.flag} ${countryInfo.name} (+${countryCode})`;
-                countryDisplay.style.display = 'block';
-                countryDisplay.classList.add('show');
-                inputWrapper.classList.add('has-country-code');
-                console.log(`Country detected: ${countryInfo.flag} ${countryInfo.name} (+${countryCode})`);
-            } else {
-                countryDisplay.style.display = 'none';
-                countryDisplay.classList.remove('show');
-                inputWrapper.classList.remove('has-country-code');
+        // If already locked, just keep number after code
+        if (lockedCode) {
+            if (value.startsWith(lockedCode)) {
+                e.target.value = '+' + value.slice(lockedCode.length);
             }
+            return;
+        }
+
+        // Try to detect country from current input
+        const detection = detectCountryFromPhoneNumber(value);
+
+        if (detection) {
+            const { countryCode, countryInfo } = detection;
+            lockedCode = countryCode;
+            
+            // Update display with flag URL and country code
+            countryCodeSpan.textContent = `+${countryCode}`;
+            
+            // Use flag emoji first, fallback to flag URL if available
+            if (countryInfo.flag) {
+                // For emoji flags, we'll use the emoji directly
+                flagImg.style.display = 'none';
+                countryCodeSpan.textContent = `${countryInfo.flag} +${countryCode}`;
+            } else {
+                // Fallback to flag URLs for specific countries
+                const flagUrls = {
+                    "91": "https://flagcdn.com/w20/in.png",
+                    "880": "https://flagcdn.com/w20/bd.png", 
+                    "1": "https://flagcdn.com/w20/us.png"
+                };
+                
+                if (flagUrls[countryCode]) {
+                    flagImg.src = flagUrls[countryCode];
+                    flagImg.style.display = 'inline-block';
+                } else {
+                    flagImg.style.display = 'none';
+                }
+            }
+
+            countryDisplay.classList.add('show');
+            inputWrapper.classList.add('has-country-code');
+
+            // Replace input so code isn't duplicated
+            e.target.value = '+' + value.slice(countryCode.length);
+            
+            console.log(`Country detected: ${countryInfo.flag} ${countryInfo.name} (+${countryCode})`);
         } else {
-            inputWrapper.classList.remove('has-value', 'has-country-code');
-            countryDisplay.style.display = 'none';
             countryDisplay.classList.remove('show');
+            inputWrapper.classList.remove('has-country-code');
         }
     });
 }
