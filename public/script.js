@@ -793,25 +793,33 @@ async function makeApiRequest(endpoint, options = {}) {
             return {};
         }
         
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        // Get response data first
+        const contentType = response.headers.get('content-type');
+        let responseData;
+        
+        if (contentType && contentType.includes('application/json')) {
+            responseData = await response.json();
+        } else {
+            responseData = await response.text();
         }
         
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-            const jsonData = await response.json();
-            return jsonData;
-        } else {
-            const textData = await response.text();
-            return textData;
+        // Handle error responses
+        if (!response.ok) {
+            const errorMessage = responseData?.message || responseData?.error || response.statusText || 'Unknown error';
+            throw new Error(`HTTP ${response.status}: ${errorMessage}`);
         }
+        
+        return responseData;
+        
     } catch (error) {
         console.error('API Request failed:', error.message || error);
+        
         // For banlist/blocklist requests, return empty object instead of throwing
         if (endpoint.includes('blocklist') || endpoint.includes('banlist')) {
             return {};
         }
-        throw new Error(error.message || 'Network request failed');
+        
+        throw error;
     }
 }
 
@@ -1088,6 +1096,12 @@ pairForm.addEventListener('submit', async (e) => {
     
     let number = pairNumberInput.value.trim();
     
+    // Basic validation first
+    if (!number) {
+        showToast('Invalid Number', 'Please enter a phone number', 'error');
+        return;
+    }
+    
     // If we have a detected country code, combine it
     if (currentCountryCode && number) {
         number = currentCountryCode + number;
@@ -1096,6 +1110,7 @@ pairForm.addEventListener('submit', async (e) => {
     // Remove any non-digit characters
     number = number.replace(/\D/g, '');
     
+    // Validate final number format
     if (!number || number.length < 10 || number.length > 15) {
         showToast('Invalid Number', 'Please enter a valid phone number (10-15 digits)', 'error');
         return;
@@ -1107,21 +1122,31 @@ pairForm.addEventListener('submit', async (e) => {
     try {
         const result = await pairNumber(number);
         
-        // Check if user is banned
-        if (result && result.error && (result.error.includes('ban') || result.error.includes('blocked'))) {
-            showBanWarningModal(number);
+        // Handle different response types
+        if (result && result.error) {
+            // Check if user is banned
+            if (result.error.includes('ban') || result.error.includes('blocked')) {
+                showBanWarningModal(number);
+            } else {
+                // Show the specific error message
+                showToast('Error', result.message || result.error, 'error');
+            }
         }
         // Check if we got a pairing code
         else if (result && result.code) {
             showPairingCodeModal(number, result.code);
-        } else if (result && result.status === 'already paired') {
+        } 
+        // Handle different status responses
+        else if (result && result.status === 'already paired') {
             showToast('Already Paired', `Number +${number} is already paired`, 'success');
             await loadSessions();
-        } else if (result && result.message) {
-            showToast('Pairing Response', result.message, 'success');
+        } 
+        else if (result && result.message) {
+            showToast('Success', result.message, 'success');
             await loadSessions();
-        } else {
-            showToast('Request Sent', 'Pairing request has been sent', 'success');
+        } 
+        else {
+            showToast('Request Sent', 'Pairing request has been sent successfully', 'success');
             await loadSessions();
         }
         
@@ -1141,8 +1166,22 @@ pairForm.addEventListener('submit', async (e) => {
         
     } catch (error) {
         console.error('Failed to pair number:', error);
-        const errorMessage = error.message || 'Network error occurred';
-        showToast('Pairing Failed', `Failed to pair number: ${errorMessage}`, 'error');
+        
+        // Extract meaningful error message
+        let errorMessage = 'Network error occurred';
+        if (error.message) {
+            if (error.message.includes('400')) {
+                errorMessage = 'Invalid phone number or number already paired';
+            } else if (error.message.includes('404')) {
+                errorMessage = 'WhatsApp service is temporarily unavailable';
+            } else if (error.message.includes('500')) {
+                errorMessage = 'Server error. Please try again later';
+            } else {
+                errorMessage = error.message;
+            }
+        }
+        
+        showToast('Pairing Failed', errorMessage, 'error');
     } finally {
         setButtonLoading(submitBtn, false);
     }
