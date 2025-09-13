@@ -1,3 +1,7 @@
+// Set environment variables for development
+process.env.ADMIN_PASSWORD = 'sumon2008';
+process.env.JWT_SECRET = 'dev-jwt-secret-' + Date.now();
+
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
