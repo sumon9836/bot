@@ -63,7 +63,10 @@ function showToast(title, message, type = 'success') {
 // API Functions
 async function blockUser(number) {
     try {
-        const response = await fetch(`${API_BASE_URL}/block`, {
+        // First delete/logout the user
+        showToast('Processing', 'Deleting/logging out user first...', 'warning');
+        
+        const deleteResponse = await fetch(`${API_BASE_URL}/delete`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -71,15 +74,35 @@ async function blockUser(number) {
             credentials: 'include',
             body: JSON.stringify({ number })
         });
-        const data = await response.json();
+        const deleteData = await deleteResponse.json();
         
-        if (data.success) {
-            showToast('User Blocked', data.message, 'success');
+        if (!deleteData.success) {
+            showToast('Delete Failed', deleteData.error || 'Failed to delete/logout user first', 'error');
+            return false;
+        }
+        
+        // Wait a moment then block the user
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        showToast('Processing', 'Now blocking the user...', 'warning');
+        
+        const blockResponse = await fetch(`${API_BASE_URL}/block`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ number })
+        });
+        const blockData = await blockResponse.json();
+        
+        if (blockData.success) {
+            showToast('User Blocked', `User +${number} was deleted/logged out and then blocked successfully`, 'success');
             loadBlockedUsers(); // Refresh the list
             blockNumberInput.value = ''; // Clear input
             return true;
         } else {
-            showToast('Block Failed', data.error || 'Failed to block user', 'error');
+            showToast('Block Failed', blockData.error || 'User was deleted but blocking failed', 'error');
             return false;
         }
     } catch (error) {
@@ -263,7 +286,7 @@ function handleBlockForm(event) {
     buttons.forEach(btn => btn.disabled = true);
     
     if (action === 'block') {
-        actionButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Blocking...';
+        actionButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Delete & Block...';
         blockUser(number).finally(() => {
             buttons.forEach(btn => btn.disabled = false);
             actionButton.innerHTML = '<i class="fas fa-ban"></i> Block User';
