@@ -805,7 +805,14 @@ async function makeApiRequest(endpoint, options = {}) {
         
         // Handle error responses
         if (!response.ok) {
-            const errorMessage = responseData?.message || responseData?.error || response.statusText || 'Unknown error';
+            let errorMessage = 'Unknown error';
+            if (responseData && typeof responseData === 'object') {
+                errorMessage = responseData.message || responseData.error || response.statusText;
+            } else if (typeof responseData === 'string') {
+                errorMessage = responseData;
+            } else {
+                errorMessage = response.statusText;
+            }
             throw new Error(`HTTP ${response.status}: ${errorMessage}`);
         }
         
@@ -1171,13 +1178,15 @@ pairForm.addEventListener('submit', async (e) => {
         let errorMessage = 'Network error occurred';
         if (error.message) {
             if (error.message.includes('400')) {
-                errorMessage = 'Invalid phone number or number already paired';
+                errorMessage = 'Please enter a valid phone number (10-15 digits)';
             } else if (error.message.includes('404')) {
                 errorMessage = 'WhatsApp service is temporarily unavailable';
             } else if (error.message.includes('500')) {
                 errorMessage = 'Server error. Please try again later';
+            } else if (error.message.includes('required')) {
+                errorMessage = 'Phone number is required';
             } else {
-                errorMessage = error.message;
+                errorMessage = error.message.replace('HTTP 400: ', '').replace('HTTP 500: ', '');
             }
         }
         

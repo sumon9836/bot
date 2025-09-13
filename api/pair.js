@@ -21,10 +21,11 @@ module.exports = async function handler(req, res) {
     }
     
     try {
-        // Safely extract and validate number from query
-        const rawNumber = req.query?.number;
+        // Parse URL to extract query parameters properly
+        const url = new URL(req.url, `http://${req.headers.host}`);
+        const rawNumber = url.searchParams.get('number');
         
-        if (!rawNumber || typeof rawNumber !== 'string') {
+        if (!rawNumber || typeof rawNumber !== 'string' || rawNumber.trim() === '') {
             return json(res, 400, {
                 error: 'Phone number is required',
                 message: 'Please provide a valid phone number'
