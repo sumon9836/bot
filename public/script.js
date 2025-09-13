@@ -176,6 +176,67 @@ function showPairingCodeModal(number, code) {
     }, 5000);
 }
 
+function showBanWarningModal(number) {
+    // Remove any existing modal
+    const existingModal = document.getElementById('banModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Create modal HTML
+    const modal = document.createElement('div');
+    modal.id = 'banModal';
+    modal.className = 'pairing-modal-overlay';
+    modal.innerHTML = `
+        <div class="pairing-modal">
+            <div class="pairing-modal-header">
+                <h2><i class="fas fa-ban"></i> Account Banned</h2>
+                <button class="modal-close" onclick="closeBanModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="pairing-modal-content">
+                <div class="ban-warning">
+                    <div class="ban-icon">
+                        <i class="fas fa-user-slash"></i>
+                    </div>
+                    <h3>You Are Banned</h3>
+                    <p>The number <strong>+${number}</strong> has been blocked from using this bot.</p>
+                    <p>If you believe this is an error, please contact the developer.</p>
+                    
+                    <div class="contact-info">
+                        <h4><i class="fas fa-phone"></i> Need Help?</h4>
+                        <p>Contact the developer to resolve this issue or register a new number.</p>
+                        <div class="contact-actions">
+                            <button class="btn btn-primary" onclick="contactDeveloper()">
+                                <i class="fas fa-envelope"></i>
+                                Contact Developer
+                            </button>
+                            <button class="btn btn-secondary" onclick="registerNewNumber()">
+                                <i class="fas fa-plus"></i>
+                                Register New Number
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pairing-modal-footer">
+                <button class="btn btn-secondary" onclick="closeBanModal()">
+                    <i class="fas fa-times"></i>
+                    Close
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Show modal with animation
+    setTimeout(() => {
+        modal.classList.add('show');
+    }, 10);
+}
+
 // Global functions for modal
 window.closePairingModal = function() {
     const modal = document.getElementById('pairingModal');
@@ -187,6 +248,29 @@ window.closePairingModal = function() {
     }
     // Reload sessions when modal is closed
     loadSessions();
+};
+
+window.closeBanModal = function() {
+    const modal = document.getElementById('banModal');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.remove();
+        }, 300);
+    }
+};
+
+window.contactDeveloper = function() {
+    showToast('Contact Info', 'Please contact the developer through the official support channels', 'success');
+    // You can modify this to open a contact form, email, or redirect to support
+};
+
+window.registerNewNumber = function() {
+    closeBanModal();
+    // Clear the input field and focus it for new number entry
+    pairNumberInput.value = '';
+    pairNumberInput.focus();
+    showToast('New Number', 'Please enter a different phone number to register', 'success');
 };
 
 window.copyPairingCodeEnhanced = function(code) {
@@ -495,8 +579,13 @@ pairForm.addEventListener('submit', async (e) => {
     try {
         const result = await pairNumber(number);
         
+        // Check if user is banned
+        if (result && result.error && result.error.includes('is ban')) {
+            showBanWarningModal(number);
+            pairNumberInput.value = '';
+        }
         // Check if we got a pairing code
-        if (result && result.code) {
+        else if (result && result.code) {
             showPairingCodeModal(number, result.code);
             pairNumberInput.value = '';
         } else if (result && result.status === 'already paired') {

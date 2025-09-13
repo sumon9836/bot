@@ -5,6 +5,10 @@ const fs = require('fs');
 
 const PORT = process.env.PORT || 5000;
 const API_BASE_URL = process.env.API_BASE_URL || 'http://ballast.proxy.rlwy.net:23161';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'kaisen-admin-2025';
+
+// Simple session store (in production, use Redis or database)
+const sessions = new Set();
 
 // MIME types for static files
 const mimeTypes = {
@@ -27,6 +31,44 @@ const mimeTypes = {
 function getContentType(filePath) {
     const ext = path.extname(filePath).toLowerCase();
     return mimeTypes[ext] || 'text/plain';
+}
+
+// Generate simple session ID
+function generateSessionId() {
+    return Math.random().toString(36).substring(2) + Date.now().toString(36);
+}
+
+// Parse cookies from request
+function parseCookies(req) {
+    const cookies = {};
+    const cookieHeader = req.headers.cookie;
+    if (cookieHeader) {
+        cookieHeader.split(';').forEach(cookie => {
+            const parts = cookie.trim().split('=');
+            cookies[parts[0]] = parts[1];
+        });
+    }
+    return cookies;
+}
+
+// Check if user has valid session
+function isAuthenticated(req) {
+    const cookies = parseCookies(req);
+    const sessionId = cookies.admin_session;
+    return sessionId && sessions.has(sessionId);
+}
+
+// Send authentication required response
+function sendAuthRequired(req, res) {
+    res.writeHead(401, {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': req.headers.origin || 'https://your-domain.com',
+        'Access-Control-Allow-Credentials': 'true'
+    });
+    res.end(JSON.stringify({
+        error: 'Authentication required',
+        message: 'Please login to access admin features'
+    }));
 }
 
 // Serve static files safely
@@ -145,6 +187,34 @@ async function handleAPIRequest(res, endpoint) {
     }
 }
 
+// Handle POST request body
+function parsePostBody(req) {
+    return new Promise((resolve, reject) => {
+        let body = '';
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
+        req.on('end', () => {
+            try {
+                resolve(body ? JSON.parse(body) : {});
+            } catch (e) {
+                try {
+                    // Try URL-encoded format
+                    const params = new URLSearchParams(body);
+                    const result = {};
+                    for (const [key, value] of params) {
+                        result[key] = value;
+                    }
+                    resolve(result);
+                } catch (e2) {
+                    resolve({});
+                }
+            }
+        });
+        req.on('error', reject);
+    });
+}
+
 // Create HTTP server
 const server = http.createServer(async (req, res) => {
     const parsedUrl = url.parse(req.url, true);
@@ -170,6 +240,65 @@ const server = http.createServer(async (req, res) => {
         } else if (pathname === '/api/sessions') {
             console.log('📊 Fetching sessions...');
             await handleAPIRequest(res, '/sessions');
+        } else if (pathname === '/api/admin/login' && req.method === 'POST') {
+            const body = await parsePostBody(req);
+            if (body.password === ADMIN_PASSWORD) {
+                const sessionId = generateSessionId();
+                sessions.add(sessionId);
+                res.writeHead(200, {
+                    'Content-Type': 'application/json',
+                    'Set-Cookie': `admin_session=${sessionId}; HttpOnly; SameSite=Strict; Path=/; Max-Age=3600`,
+                    'Access-Control-Allow-Credentials': 'true'
+                });
+                res.end(JSON.stringify({ success: true, message: 'Login successful' }));
+            } else {
+                res.writeHead(401, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Invalid password' }));
+            }
+        } else if (pathname === '/api/admin/logout' && req.method === 'POST') {
+            const cookies = parseCookies(req);
+            const sessionId = cookies.admin_session;
+            if (sessionId) {
+                sessions.delete(sessionId);
+            }
+            res.writeHead(200, {
+                'Content-Type': 'application/json',
+                'Set-Cookie': 'admin_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0'
+            });
+            res.end(JSON.stringify({ success: true, message: 'Logout successful' }));
+        } else if (pathname === '/api/admin/block' && req.method === 'POST') {
+            if (!isAuthenticated(req)) {
+                sendAuthRequired(req, res);
+                return;
+            }
+            const body = await parsePostBody(req);
+            if (!body.number) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Phone number required' }));
+                return;
+            }
+            console.log(`🚫 Blocking user: ${body.number}`);
+            await handleAPIRequest(res, `/block?number=${encodeURIComponent(body.number)}`);
+        } else if (pathname === '/api/admin/unblock' && req.method === 'POST') {
+            if (!isAuthenticated(req)) {
+                sendAuthRequired(req, res);
+                return;
+            }
+            const body = await parsePostBody(req);
+            if (!body.number) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Phone number required' }));
+                return;
+            }
+            console.log(`✅ Unblocking user: ${body.number}`);
+            await handleAPIRequest(res, `/unblock?number=${encodeURIComponent(body.number)}`);
+        } else if (pathname === '/api/admin/blocklist') {
+            if (!isAuthenticated(req)) {
+                sendAuthRequired(req, res);
+                return;
+            }
+            console.log('📋 Fetching blocklist...');
+            await handleAPIRequest(res, '/blocklist');
         } else if (pathname === '/api/health') {
             res.writeHead(200, {
                 'Content-Type': 'application/json',
@@ -186,6 +315,59 @@ const server = http.createServer(async (req, res) => {
             });
             res.end(JSON.stringify({ error: 'Invalid API request' }));
         }
+    } else if (pathname === '/admin') {
+        // Check if user is authenticated
+        if (!isAuthenticated(req)) {
+            // Serve login page instead of admin page
+            res.writeHead(200, { 'Content-Type': 'text/html' });
+            res.end(`
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>𝐊ąìʂҽղ-𝐌𝐃 | Admin Login</title>
+                    <link rel="stylesheet" href="styles.css">
+                </head>
+                <body>
+                    <div class="container">
+                        <div style="max-width: 400px; margin: 100px auto; padding: 40px; background: rgba(255,255,255,0.1); border-radius: 20px; backdrop-filter: blur(12px);">
+                            <h1 style="text-align: center; color: #fff; margin-bottom: 30px;">🔒 Admin Login</h1>
+                            <form id="loginForm" style="display: flex; flex-direction: column; gap: 20px;">
+                                <input type="password" id="password" placeholder="Admin Password" required style="padding: 15px; border: none; border-radius: 10px; background: rgba(255,255,255,0.2); color: #fff; font-size: 16px;">
+                                <button type="submit" style="padding: 15px; border: none; border-radius: 10px; background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; font-size: 16px; cursor: pointer;">Login</button>
+                            </form>
+                            <p style="text-align: center; margin-top: 20px;"><a href="/" style="color: #6366f1;">← Back to Dashboard</a></p>
+                        </div>
+                    </div>
+                    <script>
+                        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+                            e.preventDefault();
+                            const password = document.getElementById('password').value;
+                            try {
+                                const response = await fetch('/api/admin/login', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ password }),
+                                    credentials: 'include'
+                                });
+                                const data = await response.json();
+                                if (data.success) {
+                                    window.location.reload();
+                                } else {
+                                    alert('Invalid password');
+                                }
+                            } catch (error) {
+                                alert('Login failed');
+                            }
+                        });
+                    </script>
+                </body>
+                </html>
+            `);
+            return;
+        }
+        serveStaticFile(res, '/admin.html');
     } else {
         // Serve static files
         const filePath = pathname === '/' ? '/index.html' : pathname;
