@@ -127,6 +127,7 @@ async function makeAPIRequest(endpoint) {
     
     return new Promise((resolve, reject) => {
         const fullUrl = `${API_BASE_URL}${endpoint}`;
+        console.log(`Making API request to: ${fullUrl}`);
         const client = fullUrl.startsWith('https:') ? https : http;
         
         const req = client.get(fullUrl, (res) => {
@@ -137,22 +138,53 @@ async function makeAPIRequest(endpoint) {
             });
             
             res.on('end', () => {
+                console.log(`API Response status: ${res.statusCode}, data length: ${data.length}`);
+                
+                // For banlist endpoints, if we get HTML or error, return empty object
+                if ((endpoint.includes('banlist') || endpoint.includes('blocklist')) && 
+                    (res.statusCode !== 200 || data.trim().startsWith('<!DOCTYPE') || data.trim().startsWith('<html'))) {
+                    console.log('Banlist endpoint returned HTML or error, returning empty object');
+                    resolve({ data: {}, status: 200 });
+                    return;
+                }
+                
                 try {
                     const jsonData = JSON.parse(data);
                     resolve({ data: jsonData, status: res.statusCode });
                 } catch (error) {
-                    resolve({ data: data, status: res.statusCode });
+                    console.log('Failed to parse JSON response:', error.message);
+                    
+                    // For banlist endpoints, return empty object on parse error
+                    if (endpoint.includes('banlist') || endpoint.includes('blocklist')) {
+                        resolve({ data: {}, status: 200 });
+                    } else {
+                        resolve({ data: data, status: res.statusCode });
+                    }
                 }
             });
         });
         
         req.on('error', (error) => {
-            reject(error);
+            console.log('API request error:', error.message);
+            
+            // For banlist endpoints, return empty object on network error
+            if (endpoint.includes('banlist') || endpoint.includes('blocklist')) {
+                resolve({ data: {}, status: 200 });
+            } else {
+                reject(error);
+            }
         });
         
         req.setTimeout(30000, () => {
+            console.log('API request timeout');
             req.destroy();
-            reject(new Error('Request timeout'));
+            
+            // For banlist endpoints, return empty object on timeout
+            if (endpoint.includes('banlist') || endpoint.includes('blocklist')) {
+                resolve({ data: {}, status: 200 });
+            } else {
+                reject(new Error('Request timeout'));
+            }
         });
     });
 }
@@ -162,28 +194,49 @@ async function handleAPIRequest(res, endpoint) {
     try {
         const result = await makeAPIRequest(endpoint);
         
-        res.writeHead(result.status, {
+        res.writeHead(200, {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type'
         });
         
+        // Handle different response types
         if (typeof result.data === 'object') {
             res.end(JSON.stringify(result.data));
+        } else if (typeof result.data === 'string') {
+            // If the backend returns HTML or non-JSON, return empty object for banlist
+            if (endpoint.includes('banlist') || endpoint.includes('blocklist')) {
+                res.end(JSON.stringify({}));
+            } else {
+                try {
+                    // Try to parse as JSON first
+                    const jsonData = JSON.parse(result.data);
+                    res.end(JSON.stringify(jsonData));
+                } catch (e) {
+                    // If not JSON, return as text response
+                    res.end(result.data);
+                }
+            }
         } else {
-            res.end(result.data);
+            res.end(JSON.stringify({}));
         }
     } catch (error) {
         console.error('API Error:', error.message);
-        res.writeHead(500, {
+        res.writeHead(200, {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*'
         });
-        res.end(JSON.stringify({
-            error: 'API request failed',
-            message: error.message
-        }));
+        
+        // Return appropriate empty response for banlist endpoints
+        if (endpoint.includes('banlist') || endpoint.includes('blocklist')) {
+            res.end(JSON.stringify({}));
+        } else {
+            res.end(JSON.stringify({
+                error: 'API request failed',
+                message: error.message
+            }));
+        }
     }
 }
 

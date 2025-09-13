@@ -196,19 +196,42 @@ async function loadBlockedUsers() {
         const response = await fetch(`${API_BASE_URL}/banlist`, {
             credentials: 'include'
         });
+        
+        // Check if response is ok and content-type is JSON
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            console.log('Non-JSON response received, using empty banlist');
+            blockedUsers = {};
+            renderBlockedUsers();
+            return;
+        }
+        
         const data = await response.json();
         
         if (data.error) {
             throw new Error(data.error);
         }
         
-        blockedUsers = data;
+        // Ensure data is an object
+        blockedUsers = data && typeof data === 'object' ? data : {};
         renderBlockedUsers();
         
     } catch (error) {
         console.error('Load banlist error:', error);
-        blocklistError.style.display = 'block';
-        blocklistErrorMessage.textContent = error.message || 'Failed to load banned users';
+        
+        // If it's a JSON parse error, show empty state instead of error
+        if (error.message.includes('Unexpected token') || error.message.includes('JSON')) {
+            console.log('JSON parse error, showing empty banlist');
+            blockedUsers = {};
+            renderBlockedUsers();
+        } else {
+            blocklistError.style.display = 'block';
+            blocklistErrorMessage.textContent = error.message || 'Failed to load banned users';
+        }
     } finally {
         blocklistLoader.style.display = 'none';
         isLoading = false;

@@ -451,7 +451,9 @@ async function getSessions() {
 
 async function getBanlist() {
     try {
-        return await makeApiRequest('/banlist');
+        const response = await makeApiRequest('/banlist');
+        // Ensure we always return an object
+        return response && typeof response === 'object' ? response : {};
     } catch (error) {
         console.error('Banlist API error:', error);
         // Return empty object to handle gracefully
