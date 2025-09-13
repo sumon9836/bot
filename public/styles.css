@@ -90,6 +90,30 @@
     }
 }
 
+/* Scroll Dismiss Effects */
+.scroll-dismiss {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 0.3s ease-out;
+}
+
+.scroll-dismiss.dismissed {
+    opacity: 0;
+    transform: translateY(-20px);
+    pointer-events: none;
+}
+
+/* Auto-hide elements on scroll */
+@media (max-width: 768px) {
+    .header {
+        transition: transform 0.3s ease-out;
+    }
+    
+    .header.scroll-hidden {
+        transform: translateY(-100%);
+    }
+}
+
 /* Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
     * {
@@ -100,6 +124,10 @@
     
     body::before {
         animation: none;
+    }
+    
+    .scroll-dismiss {
+        transition: none !important;
     }
 }
 
@@ -149,10 +177,13 @@
 html {
     scroll-behavior: smooth;
     scroll-padding-top: 100px;
-    font-size: 16px;
-    /* Better mobile scaling */
+    font-size: 12px;
+    /* Better mobile scaling - prevent text scaling issues on phones */
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
+    -webkit-font-feature-settings: "kern";
+    -moz-font-feature-settings: "kern";
+    font-feature-settings: "kern";
 }
 
 body {
@@ -461,7 +492,7 @@ body::after {
 }
 
 .card h2 {
-    font-size: 1.8rem;
+    font-size: 1.3rem;
     font-weight: 700;
     color: var(--white-pure);
     margin: 0;
@@ -485,7 +516,7 @@ body::after {
 }
 
 .form-group label {
-    font-size: 1rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--blue-text);
     text-transform: uppercase;
@@ -523,7 +554,7 @@ input[type="tel"] {
     border: 2px solid var(--glass-border);
     border-radius: var(--border-radius);
     color: var(--white-pure);
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     font-weight: 500;
     transition: var(--transition-smooth);
     backdrop-filter: blur(10px);
@@ -553,7 +584,7 @@ input[type="tel"]::placeholder {
     padding: 18px 36px;
     border: none;
     border-radius: var(--border-radius);
-    font-size: 1rem;
+    font-size: 0.8rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -673,7 +704,7 @@ input[type="tel"]::placeholder {
     border: 1px solid var(--glass-border);
     backdrop-filter: blur(10px);
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.8rem;
     color: var(--blue-text);
     white-space: nowrap;
 }
@@ -741,7 +772,7 @@ input[type="tel"]::placeholder {
     display: flex;
     align-items: center;
     gap: 12px;
-    font-size: 1.2rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: var(--white-pure);
 }
@@ -827,7 +858,7 @@ input[type="tel"]::placeholder {
 }
 
 .loader i {
-    font-size: 2.5rem;
+    font-size: 1.8rem;
     color: var(--pink-primary);
     animation: spin 1s linear infinite;
     filter: drop-shadow(0 0 10px var(--pink-glow));
@@ -835,7 +866,7 @@ input[type="tel"]::placeholder {
 
 .error-content i,
 .empty-content i {
-    font-size: 4rem;
+    font-size: 2.5rem;
     margin-bottom: 20px;
     opacity: 0.6;
     color: var(--blue-primary);
@@ -843,7 +874,7 @@ input[type="tel"]::placeholder {
 
 .error-content h3,
 .empty-content h3 {
-    font-size: 1.8rem;
+    font-size: 1.3rem;
     margin-bottom: 16px;
     color: var(--white-pure);
 }
@@ -884,7 +915,7 @@ input[type="tel"]::placeholder {
 }
 
 .toast-icon {
-    font-size: 1.8rem;
+    font-size: 1.3rem;
     margin-top: 2px;
 }
 
@@ -904,13 +935,13 @@ input[type="tel"]::placeholder {
 
 .toast-title {
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     color: var(--white-pure);
     margin-bottom: 6px;
 }
 
 .toast-text {
-    font-size: 1rem;
+    font-size: 0.8rem;
     color: var(--blue-text);
     line-height: 1.5;
 }
@@ -981,13 +1012,13 @@ input[type="tel"]::placeholder {
 
 .banned-user-info i {
     color: var(--pink-primary);
-    font-size: 1.2rem;
+    font-size: 0.95rem;
 }
 
 .banned-user-number {
     font-weight: 600;
     color: var(--white-pure);
-    font-size: 1rem;
+    font-size: 0.8rem;
 }
 
 .banned-user-reason {
@@ -1020,7 +1051,7 @@ input[type="tel"]::placeholder {
 .stat-value {
     color: var(--white-pure);
     font-weight: 700;
-    font-size: 1.2rem;
+    font-size: 0.95rem;
 }
 
 /* ========== ENHANCED PAIRING MODAL ========== */
@@ -1109,7 +1140,7 @@ input[type="tel"]::placeholder {
     display: flex;
     align-items: center;
     gap: 18px;
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: var(--white-pure);
     background: linear-gradient(135deg, #25D366, #128C7E);
@@ -1228,7 +1259,7 @@ input[type="tel"]::placeholder {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
+    font-size: 1.5rem;
     color: var(--white-pure);
     box-shadow: 
         0 10px 30px rgba(37, 211, 102, 0.4),
@@ -1266,7 +1297,7 @@ input[type="tel"]::placeholder {
 
 .number-text .label {
     color: rgba(37, 211, 102, 0.8);
-    font-size: 1rem;
+    font-size: 0.8rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -1344,7 +1375,7 @@ input[type="tel"]::placeholder {
 
 .pairing-code-enhanced {
     font-family: 'Fira Code', monospace;
-    font-size: 3rem;
+    font-size: 2rem;
     font-weight: 900;
     color: #25D366;
     text-align: center;
@@ -1386,7 +1417,7 @@ input[type="tel"]::placeholder {
     padding: 16px 32px;
     color: white;
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -1505,11 +1536,11 @@ input[type="tel"]::placeholder {
 
 .instruction-header i {
     color: #25D366;
-    font-size: 1.4rem;
+    font-size: 1.1rem;
 }
 
 .instruction-header h3 {
-    font-size: 1.4rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: var(--white-pure);
     margin: 0;
@@ -1565,7 +1596,7 @@ input[type="tel"]::placeholder {
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     flex-shrink: 0;
     box-shadow: 0 6px 15px rgba(37, 211, 102, 0.3);
 }
@@ -1579,14 +1610,14 @@ input[type="tel"]::placeholder {
 
 .step-icon {
     color: #25D366;
-    font-size: 1.2rem;
+    font-size: 0.95rem;
     width: 20px;
     text-align: center;
 }
 
 .step-content span {
     color: rgba(255, 255, 255, 0.9);
-    font-size: 1rem;
+    font-size: 0.8rem;
     line-height: 1.5;
     font-weight: 500;
 }
@@ -1607,7 +1638,7 @@ input[type="tel"]::placeholder {
 .pairing-modal-footer .btn {
     min-width: 200px;
     padding: 16px 32px;
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     font-weight: 700;
     border-radius: 16px;
     background: linear-gradient(135deg, #25D366, #128C7E);
@@ -1708,7 +1739,7 @@ input[type="tel"]::placeholder {
     align-items: center;
     justify-content: center;
     margin: 0 auto 25px;
-    font-size: 2.5rem;
+    font-size: 1.8rem;
     color: white;
     box-shadow: 0 15px 35px rgba(255, 107, 107, 0.3);
     animation: banPulse 2s ease-in-out infinite;
@@ -1721,14 +1752,14 @@ input[type="tel"]::placeholder {
 
 .ban-warning h3 {
     color: #FF6B6B;
-    font-size: 1.8rem;
+    font-size: 1.3rem;
     font-weight: 700;
     margin-bottom: 20px;
 }
 
 .ban-warning p {
     color: rgba(255, 255, 255, 0.8);
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     line-height: 1.6;
     margin-bottom: 15px;
 }
@@ -1882,7 +1913,7 @@ input[type="tel"]::placeholder {
 /* ========== RESPONSIVE DESIGN ========== */
 @media (max-width: 768px) {
     html {
-        font-size: 18px; /* Increased base font size for better mobile readability */
+        font-size: 11px; /* Much smaller base font for mobile phones */
     }
 
     .container {
@@ -1972,23 +2003,23 @@ input[type="tel"]::placeholder {
     }
 
     .card h2 {
-        font-size: 2rem;
+        font-size: 1.5rem;
         margin-bottom: 24px;
     }
 
     .card-icon {
-        font-size: 2.5rem;
+        font-size: 1.8rem;
     }
 
     /* Form Elements - Much Larger for Mobile */
     .form-group label {
-        font-size: 1.1rem;
+        font-size: 0.9rem;
         margin-bottom: 12px;
     }
 
     input[type="tel"] {
         padding: 20px;
-        font-size: 1.2rem;
+        font-size: 0.95rem;
         border-radius: 16px;
         min-height: 56px;
     }
@@ -1998,21 +2029,21 @@ input[type="tel"]::placeholder {
     }
 
     .country-code-display {
-        font-size: 1rem;
+        font-size: 0.8rem;
         padding: 8px 12px;
         left: 16px;
         border-radius: 14px;
     }
 
     .form-help {
-        font-size: 1rem;
+        font-size: 0.8rem;
         line-height: 1.5;
         margin-top: 8px;
     }
 
     .btn {
         padding: 18px 32px;
-        font-size: 1.1rem;
+        font-size: 0.9rem;
         min-height: 56px;
         border-radius: 16px;
     }
@@ -2032,7 +2063,7 @@ input[type="tel"]::placeholder {
     }
 
     .session-info > div {
-        font-size: 1rem;
+        font-size: 0.8rem;
         padding: 4px 0;
     }
 
@@ -2047,11 +2078,11 @@ input[type="tel"]::placeholder {
     }
 
     .toast-title {
-        font-size: 1.2rem;
+        font-size: 0.95rem;
     }
 
     .toast-text {
-        font-size: 1rem;
+        font-size: 0.8rem;
     }
 
     .toast.show {
@@ -2080,9 +2111,9 @@ input[type="tel"]::placeholder {
 }
 
 @media (max-width: 480px) {
-    /* 📱 Ultra-Small Mobile Optimizations - Larger DPI */
+    /* 📱 Ultra-Small Mobile Optimizations - Smaller DPI for phones */
     html {
-        font-size: 20px; /* Even larger base font for small screens */
+        font-size: 10px; /* Much smaller base font for mobile phones */
     }
 
     .header {
@@ -2125,12 +2156,12 @@ input[type="tel"]::placeholder {
     }
 
     .card-icon {
-        font-size: 3rem;
+        font-size: 2rem;
     }
 
     .btn {
         padding: 20px 28px;
-        font-size: 1.2rem;
+        font-size: 0.95rem;
         min-height: 60px;
         border-radius: 18px;
     }
@@ -2158,19 +2189,19 @@ input[type="tel"]::placeholder {
     }
 
     .country-code-display {
-        font-size: 1.1rem;
+        font-size: 0.9rem;
         padding: 10px 14px;
         left: 16px;
         border-radius: 16px;
     }
 
     .form-group label {
-        font-size: 1.2rem;
+        font-size: 0.95rem;
         margin-bottom: 16px;
     }
 
     .form-help {
-        font-size: 1.1rem;
+        font-size: 0.9rem;
         line-height: 1.6;
         margin-top: 12px;
     }
@@ -2182,11 +2213,11 @@ input[type="tel"]::placeholder {
     }
 
     .session-number {
-        font-size: 1.4rem;
+        font-size: 1.1rem;
     }
 
     .session-info > div {
-        font-size: 1.1rem;
+        font-size: 0.9rem;
         padding: 6px 0;
     }
 
@@ -2209,7 +2240,7 @@ input[type="tel"]::placeholder {
     }
 
     .toast-text {
-        font-size: 1.1rem;
+        font-size: 0.9rem;
     }
 
     /* Modal Optimizations */
@@ -2235,7 +2266,7 @@ input[type="tel"]::placeholder {
 
     .copy-btn-enhanced {
         padding: 18px 32px;
-        font-size: 1.2rem;
+        font-size: 0.95rem;
         border-radius: 18px;
     }
 
