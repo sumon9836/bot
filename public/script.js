@@ -280,12 +280,27 @@ function initPhoneInputAnimation() {
         }
     });
     
+    // Add double-click to clear country code
+    if (countryDisplay) {
+        countryDisplay.addEventListener('click', () => {
+            // Reset everything
+            currentCountryCode = null;
+            detectedCountry = null;
+            pairNumberInput.value = '';
+            countryDisplay.style.display = 'none';
+            countryDisplay.classList.remove('show');
+            inputWrapper.classList.remove('has-country-code', 'has-value');
+            pairNumberInput.focus();
+            console.log('Country code reset - enter full number with country code');
+        });
+    }
+    
     // Smart input processing with improved country detection
     pairNumberInput.addEventListener('input', (e) => {
-        let value = e.target.value.replace(/\D/g, ''); // Only allow digits
+        let rawValue = e.target.value.replace(/\D/g, ''); // Only allow digits
         
         // Reset if input is empty
-        if (value.length === 0) {
+        if (rawValue.length === 0) {
             countryDisplay.style.display = 'none';
             countryDisplay.classList.remove('show');
             inputWrapper.classList.remove('has-country-code', 'has-value');
@@ -295,11 +310,23 @@ function initPhoneInputAnimation() {
             return;
         }
         
-        // Try to detect country code from the full input
-        const detection = detectCountryCode(value);
+        // If we already have a country code, just update the local number
+        if (currentCountryCode) {
+            // Validate the local number length
+            if (detectedCountry && rawValue.length > detectedCountry.maxLength) {
+                e.target.value = rawValue.substring(0, detectedCountry.maxLength);
+            } else {
+                e.target.value = rawValue;
+            }
+            inputWrapper.classList.add('has-value');
+            return;
+        }
         
-        if (detection && (!currentCountryCode || currentCountryCode !== detection.code)) {
-            // New country code detected!
+        // Try to detect country code from the full input
+        const detection = detectCountryCode(rawValue);
+        
+        if (detection) {
+            // Country code detected!
             currentCountryCode = detection.code;
             detectedCountry = detection.info;
             
@@ -310,10 +337,9 @@ function initPhoneInputAnimation() {
             
             // Update input value to show only the remaining number
             e.target.value = detection.remainingNumber;
-            value = detection.remainingNumber;
             
             // Add classes for styling
-            inputWrapper.classList.add('has-country-code', 'focused');
+            inputWrapper.classList.add('has-country-code', 'focused', 'has-value');
             
             // Add bounce animation to the flag
             countryDisplay.style.animation = 'none';
@@ -329,20 +355,14 @@ function initPhoneInputAnimation() {
                 // Truncate if too long
                 e.target.value = detection.remainingNumber.substring(0, detection.info.maxLength);
             }
-        } else if (!detection && currentCountryCode) {
-            // If no country code detected but we had one, keep the current one
-            // This handles cases where user is typing after country code detection
-            e.target.value = value;
-        } else if (!detection && !currentCountryCode) {
-            // No country code detected and none stored, just set the value
-            e.target.value = value;
-        }
-        
-        // Update has-value class
-        if (value.length > 0 || currentCountryCode) {
-            inputWrapper.classList.add('has-value');
         } else {
-            inputWrapper.classList.remove('has-value');
+            // No country code detected, just set the value
+            e.target.value = rawValue;
+            if (rawValue.length > 0) {
+                inputWrapper.classList.add('has-value');
+            } else {
+                inputWrapper.classList.remove('has-value');
+            }
         }
     });
 }
@@ -1123,6 +1143,12 @@ pairForm.addEventListener('submit', async (e) => {
     } else if (currentCountryCode && !number) {
         showToast('Incomplete Number', 'Please enter the remaining digits after the country code', 'error');
         return;
+    } else if (!currentCountryCode && number) {
+        // Try to detect country code from the entered number
+        const detection = detectCountryCode(number);
+        if (detection) {
+            number = detection.code + detection.remainingNumber;
+        }
     }
     
     // Remove any non-digit characters
