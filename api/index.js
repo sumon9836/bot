@@ -140,10 +140,10 @@ async function makeAPIRequest(endpoint) {
             res.on('end', () => {
                 console.log(`API Response status: ${res.statusCode}, data length: ${data.length}`);
                 
-                // For banlist endpoints, if we get HTML or error, return empty object
+                // For banlist/blocklist endpoints, if we get HTML or error, return empty object
                 if ((endpoint.includes('banlist') || endpoint.includes('blocklist')) && 
                     (res.statusCode !== 200 || data.trim().startsWith('<!DOCTYPE') || data.trim().startsWith('<html'))) {
-                    console.log('Banlist endpoint returned HTML or error, returning empty object');
+                    console.log('Blocklist endpoint returned HTML or error, returning empty object');
                     resolve({ data: {}, status: 200 });
                     return;
                 }
@@ -167,7 +167,7 @@ async function makeAPIRequest(endpoint) {
         req.on('error', (error) => {
             console.log('API request error:', error.message);
             
-            // For banlist endpoints, return empty object on network error
+            // For banlist/blocklist endpoints, return empty object on network error
             if (endpoint.includes('banlist') || endpoint.includes('blocklist')) {
                 resolve({ data: {}, status: 200 });
             } else {
@@ -179,7 +179,7 @@ async function makeAPIRequest(endpoint) {
             console.log('API request timeout');
             req.destroy();
             
-            // For banlist endpoints, return empty object on timeout
+            // For banlist/blocklist endpoints, return empty object on timeout
             if (endpoint.includes('banlist') || endpoint.includes('blocklist')) {
                 resolve({ data: {}, status: 200 });
             } else {
@@ -360,14 +360,14 @@ const server = http.createServer(async (req, res) => {
             await handleAPIRequest(res, `/unblock?number=${encodeURIComponent(body.number)}`);
         } else if (pathname === '/api/banlist') {
             console.log('📋 Fetching public banlist...');
-            await handleAPIRequest(res, '/banlist');
+            await handleAPIRequest(res, '/blocklist');
         } else if (pathname === '/api/admin/banlist') {
             if (!isAuthenticated(req)) {
                 sendAuthRequired(req, res);
                 return;
             }
             console.log('📋 Fetching admin banlist...');
-            await handleAPIRequest(res, '/banlist');
+            await handleAPIRequest(res, '/blocklist');
         } else if (pathname === '/api/admin/blocklist') {
             if (!isAuthenticated(req)) {
                 sendAuthRequired(req, res);

@@ -197,20 +197,25 @@ async function loadBlockedUsers() {
             credentials: 'include'
         });
         
-        // Check if response is ok and content-type is JSON
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
         const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            console.log('Non-JSON response received, using empty banlist');
+        if (!response.ok || !contentType || !contentType.includes('application/json')) {
+            console.log('Non-JSON response or error received, using empty banlist');
             blockedUsers = {};
             renderBlockedUsers();
             return;
         }
         
-        const data = await response.json();
+        const responseText = await response.text();
+        
+        // Check if response starts with HTML
+        if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<html')) {
+            console.log('HTML response received, using empty banlist');
+            blockedUsers = {};
+            renderBlockedUsers();
+            return;
+        }
+        
+        const data = JSON.parse(responseText);
         
         if (data.error) {
             throw new Error(data.error);
