@@ -39,5 +39,5 @@ localPort = 42295
 externalPort = 3000
 
 [deployment]
-run = ["node", "api/index.js"]
+run = ["vercel", "--prod"]
 deploymentTarget = "autoscale"

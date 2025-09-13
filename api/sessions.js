@@ -19,9 +19,13 @@ module.exports = async function handler(req, res) {
                 const jsonData = JSON.parse(result.data);
                 return json(res, 200, jsonData);
             } catch (e) {
-                res.writeHead(200, { 'Content-Type': 'text/plain' });
-                res.end(result.data);
-                return;
+                // If string can't be parsed as JSON, return it wrapped in an object
+                console.log('Sessions API: Cannot parse response as JSON, wrapping in object:', e.message);
+                return json(res, 200, {
+                    raw_response: result.data,
+                    error: 'Response is not valid JSON',
+                    sessions: []
+                });
             }
         } else {
             return json(res, 200, {});
