@@ -8,7 +8,8 @@ module.exports = async function handler(req, res) {
         return error(res, 405, 'Method not allowed');
     }
     
-    const { number } = req.query;
+    // Safely extract number from query
+    const number = req.query && req.query.number ? req.query.number : null;
     
     if (!number) {
         return error(res, 400, 'Phone number is required');
@@ -18,25 +19,27 @@ module.exports = async function handler(req, res) {
         console.log(`🔗 Pairing request for: ${number}`);
         const result = await fetchProxy(`/pair?number=${encodeURIComponent(number)}`);
         
-        if (typeof result.data === 'object') {
-            return json(res, 200, result.data);
-        } else if (typeof result.data === 'string') {
-            try {
-                const jsonData = JSON.parse(result.data);
-                return json(res, 200, jsonData);
-            } catch (e) {
-                res.writeHead(200, { 'Content-Type': 'text/plain' });
-                res.end(result.data);
-                return;
+        if (result && result.data) {
+            if (typeof result.data === 'object') {
+                return json(res, 200, result.data);
+            } else if (typeof result.data === 'string') {
+                try {
+                    const jsonData = JSON.parse(result.data);
+                    return json(res, 200, jsonData);
+                } catch (e) {
+                    // If it's a plain string response (like pairing code)
+                    return json(res, 200, { code: result.data, status: 'success' });
+                }
             }
-        } else {
-            return json(res, 200, {});
         }
-    } catch (error) {
-        console.error('Pair API Error:', error.message);
+        
+        return json(res, 200, { message: 'Pairing request sent', status: 'pending' });
+        
+    } catch (err) {
+        console.error('Pair API Error:', err);
         return json(res, 500, {
             error: 'Pairing request failed',
-            message: error.message
+            message: err.message || 'Unknown error occurred'
         });
     }
 };

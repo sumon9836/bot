@@ -36,11 +36,13 @@ async function runServerlessFunction(functionPath, req, res) {
                 delete require.cache[id];
             }
         }
-        
+
         const handler = require(functionPath);
         const exportedHandler = handler.default || handler;
-        
+
         if (typeof exportedHandler === 'function') {
+            // Mock request and response objects for serverless functions if needed
+            // For now, we pass the original req and res
             await exportedHandler(req, res);
         } else {
             res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -48,10 +50,15 @@ async function runServerlessFunction(functionPath, req, res) {
         }
     } catch (error) {
         console.error('Function error:', error);
-        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.writeHead(500, { 
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        });
         res.end(JSON.stringify({ 
-            error: 'Function execution failed',
-            message: error.message 
+            error: 'Internal server error',
+            message: error.message || 'Unknown error occurred'
         }));
     }
 }
@@ -65,7 +72,7 @@ const server = http.createServer(async (req, res) => {
     // Handle API routes (serverless functions)
     if (pathname.startsWith('/api/')) {
         const functionPath = '.' + pathname + '.js';
-        
+
         if (fs.existsSync(functionPath)) {
             await runServerlessFunction(functionPath, req, res);
             return;
@@ -78,7 +85,7 @@ const server = http.createServer(async (req, res) => {
 
     // Handle static files
     let filePath = '';
-    
+
     if (pathname === '/') {
         filePath = path.join(__dirname, 'public', 'index.html');
     } else if (pathname === '/admin') {

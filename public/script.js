@@ -336,25 +336,7 @@ function initPhoneInputAnimation() {
         }
     });
     
-    // Handle form submission with country code
-    pairForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        let phoneNumber = pairNumberInput.value.trim();
-        
-        // If we detected a country code, combine it
-        if (currentCountryCode && phoneNumber) {
-            phoneNumber = currentCountryCode + phoneNumber;
-        }
-        
-        // Update the input value for the main form handler
-        pairNumberInput.value = phoneNumber;
-        
-        // Trigger the main form submission
-        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-        Object.defineProperty(submitEvent, 'target', { value: pairForm });
-        pairForm.dispatchEvent(submitEvent);
-    });
+    // Note: Form submission is already handled by the main event listener
 }
 
 // Banlist elements
@@ -824,12 +806,12 @@ async function makeApiRequest(endpoint, options = {}) {
             return textData;
         }
     } catch (error) {
-        console.error('API Request failed:', error);
+        console.error('API Request failed:', error.message || error);
         // For banlist/blocklist requests, return empty object instead of throwing
         if (endpoint.includes('blocklist') || endpoint.includes('banlist')) {
             return {};
         }
-        throw error;
+        throw new Error(error.message || 'Network request failed');
     }
 }
 
@@ -1106,6 +1088,11 @@ pairForm.addEventListener('submit', async (e) => {
     
     let number = pairNumberInput.value.trim();
     
+    // If we have a detected country code, combine it
+    if (currentCountryCode && number) {
+        number = currentCountryCode + number;
+    }
+    
     // Remove any non-digit characters
     number = number.replace(/\D/g, '');
     
@@ -1121,7 +1108,7 @@ pairForm.addEventListener('submit', async (e) => {
         const result = await pairNumber(number);
         
         // Check if user is banned
-        if (result && result.error && result.error.includes('is ban')) {
+        if (result && result.error && (result.error.includes('ban') || result.error.includes('blocked'))) {
             showBanWarningModal(number);
         }
         // Check if we got a pairing code
@@ -1154,7 +1141,8 @@ pairForm.addEventListener('submit', async (e) => {
         
     } catch (error) {
         console.error('Failed to pair number:', error);
-        showToast('Pairing Failed', `Failed to pair number: ${error.message}`, 'error');
+        const errorMessage = error.message || 'Network error occurred';
+        showToast('Pairing Failed', `Failed to pair number: ${errorMessage}`, 'error');
     } finally {
         setButtonLoading(submitBtn, false);
     }

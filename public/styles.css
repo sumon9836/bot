@@ -1272,13 +1272,14 @@ input[type="tel"]::placeholder {
         font-size: 1rem;
     }
 
-    .input-wrapper.focused input[type="tel"] {
+    .input-wrapper.has-country-code input[type="tel"] {
         padding-left: 85px;
     }
 
-    .input-wrapper::before {
-        font-size: 0.85rem;
-        padding: 1px 4px;
+    .country-code-display {
+        font-size: 0.75rem;
+        padding: 2px 6px;
+        left: 10px;
     }
 
     /* Compact Session Cards */
