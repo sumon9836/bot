@@ -62,28 +62,39 @@ function showToast(title, message, type = 'success') {
 
 // API Functions
 async function blockUser(number) {
+    let deleteSuccess = false;
+    let deleteMessage = '';
+    
     try {
-        // First delete/logout the user
-        showToast('Processing', 'Deleting/logging out user first...', 'warning');
+        // First attempt to delete/logout the user
+        showToast('Processing', 'Attempting to delete/logout user first...', 'warning');
         
-        const deleteResponse = await fetch(`${API_BASE_URL}/delete`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify({ number })
-        });
-        const deleteData = await deleteResponse.json();
-        
-        if (!deleteData.success) {
-            showToast('Delete Failed', deleteData.error || 'Failed to delete/logout user first', 'error');
-            return false;
+        try {
+            const deleteResponse = await fetch(`${API_BASE_URL}/delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ number })
+            });
+            const deleteData = await deleteResponse.json();
+            
+            if (deleteData.success) {
+                deleteSuccess = true;
+                deleteMessage = 'User was deleted/logged out and then blocked successfully';
+                // Wait a moment before blocking
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            } else {
+                console.warn('Delete failed, proceeding to block:', deleteData.error);
+                deleteMessage = `User blocked (delete/logout failed: ${deleteData.error || 'unknown error'})`;
+            }
+        } catch (deleteError) {
+            console.warn('Delete request failed, proceeding to block:', deleteError.message);
+            deleteMessage = `User blocked (delete/logout failed: ${deleteError.message})`;
         }
         
-        // Wait a moment then block the user
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
+        // Always proceed to block the user regardless of delete success
         showToast('Processing', 'Now blocking the user...', 'warning');
         
         const blockResponse = await fetch(`${API_BASE_URL}/block`, {
@@ -97,12 +108,15 @@ async function blockUser(number) {
         const blockData = await blockResponse.json();
         
         if (blockData.success) {
-            showToast('User Blocked', `User +${number} was deleted/logged out and then blocked successfully`, 'success');
+            showToast('User Blocked', deleteMessage, 'success');
             loadBlockedUsers(); // Refresh the list
             blockNumberInput.value = ''; // Clear input
             return true;
         } else {
-            showToast('Block Failed', blockData.error || 'User was deleted but blocking failed', 'error');
+            const errorMsg = deleteSuccess 
+                ? 'User was deleted but blocking failed' 
+                : 'Both delete and block operations failed';
+            showToast('Block Failed', blockData.error || errorMsg, 'error');
             return false;
         }
     } catch (error) {
