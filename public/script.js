@@ -14,9 +14,21 @@ const retrySessionsBtn = document.getElementById('retrySessionsBtn');
 const sessionCount = document.getElementById('sessionCount');
 const toast = document.getElementById('toast');
 
+// Blocklist elements
+const refreshBlocklistBtn = document.getElementById('refreshBlocklistBtn');
+const blocklistGrid = document.getElementById('blocklistGrid');
+const blocklistLoader = document.getElementById('blocklistLoader');
+const blocklistError = document.getElementById('blocklistError');
+const blocklistEmpty = document.getElementById('blocklistEmpty');
+const blocklistErrorMessage = document.getElementById('blocklistErrorMessage');
+const retryBlocklistBtn = document.getElementById('retryBlocklistBtn');
+const blockedUserCount = document.getElementById('blockedUserCount');
+
 // Application State
 let sessions = [];
+let blockedUsers = {};
 let isLoading = false;
+let isLoadingBlocklist = false;
 
 // Utility Functions
 function validatePhoneNumber(number) {
@@ -425,6 +437,10 @@ async function getSessions() {
     return await makeApiRequest('/sessions');
 }
 
+async function getBlocklist() {
+    return await makeApiRequest('/admin/blocklist');
+}
+
 // UI Functions
 function showSessionsState(state) {
     // Hide all states first
@@ -561,6 +577,106 @@ async function loadSessions() {
     }
 }
 
+async function loadBlocklist() {
+    if (isLoadingBlocklist) return;
+    
+    isLoadingBlocklist = true;
+    showBlocklistState('loading');
+    
+    try {
+        const response = await getBlocklist();
+        
+        if (response && typeof response === 'object') {
+            blockedUsers = response;
+        } else {
+            blockedUsers = {};
+        }
+        
+        renderBlocklist();
+        
+    } catch (error) {
+        console.error('Failed to load blocklist:', error);
+        blocklistErrorMessage.textContent = `Failed to load blocklist: ${error.message}`;
+        showBlocklistState('error');
+    } finally {
+        isLoadingBlocklist = false;
+    }
+}
+
+function showBlocklistState(state) {
+    // Hide all states first
+    blocklistLoader.style.display = 'none';
+    blocklistError.style.display = 'none';
+    blocklistEmpty.style.display = 'none';
+    blocklistGrid.style.display = 'none';
+    
+    // Show the requested state
+    switch (state) {
+        case 'loading':
+            blocklistLoader.style.display = 'flex';
+            break;
+        case 'error':
+            blocklistError.style.display = 'flex';
+            break;
+        case 'empty':
+            blocklistEmpty.style.display = 'flex';
+            break;
+        case 'data':
+            blocklistGrid.style.display = 'grid';
+            break;
+    }
+}
+
+function renderBlocklist() {
+    const userNumbers = Object.keys(blockedUsers);
+    
+    // Update blocked user count
+    blockedUserCount.textContent = userNumbers.length;
+    
+    if (userNumbers.length === 0) {
+        showBlocklistState('empty');
+        return;
+    }
+    
+    // Clear existing content
+    blocklistGrid.innerHTML = '';
+    
+    // Create cards for each blocked user
+    userNumbers.forEach(number => {
+        const card = createBlockedUserCard(number);
+        blocklistGrid.appendChild(card);
+    });
+    
+    showBlocklistState('data');
+}
+
+function createBlockedUserCard(number) {
+    const card = document.createElement('div');
+    card.className = 'blocked-user-card';
+    card.innerHTML = `
+        <div class="user-info">
+            <div class="user-avatar">
+                <i class="fas fa-user-slash"></i>
+            </div>
+            <div class="user-details">
+                <h3 class="user-number">+${number}</h3>
+                <span class="user-status">
+                    <i class="fas fa-ban"></i>
+                    Blocked
+                </span>
+            </div>
+        </div>
+        <div class="user-actions">
+            <span class="blocked-label">
+                <i class="fas fa-shield-alt"></i>
+                Blocked User
+            </span>
+        </div>
+    `;
+    
+    return card;
+}
+
 
 // Event Handlers
 pairForm.addEventListener('submit', async (e) => {
@@ -608,6 +724,10 @@ pairForm.addEventListener('submit', async (e) => {
 
 refreshBtn.addEventListener('click', loadSessions);
 retrySessionsBtn.addEventListener('click', loadSessions);
+
+// Blocklist event listeners
+refreshBlocklistBtn.addEventListener('click', loadBlocklist);
+retryBlocklistBtn.addEventListener('click', loadBlocklist);
 
 // Input Formatting
 pairNumberInput.addEventListener('input', (e) => {
@@ -726,8 +846,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add entrance animations
     setTimeout(addEntranceAnimations, 100);
     
-    // Load sessions
+    // Load sessions and blocklist
     loadSessions();
+    loadBlocklist();
     
     // Add smooth scrolling to refresh button
     refreshBtn.addEventListener('click', () => {
