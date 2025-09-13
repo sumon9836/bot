@@ -4,7 +4,6 @@ const API_BASE_URL = '/api';
 // DOM Elements
 const pairForm = document.getElementById('pairForm');
 const pairNumberInput = document.getElementById('pairNumber');
-const countryCodeSelect = document.getElementById('countryCode');
 const phoneError = document.getElementById('phoneError');
 const refreshBtn = document.getElementById('refreshBtn');
 const headerRefreshBtn = document.getElementById('headerRefreshBtn');
@@ -226,69 +225,76 @@ const COUNTRY_CODES = {
     '998': { flag: '🇺🇿', name: 'Uzbekistan', maxLength: 9 }
 };
 
-// Initialize country selector
-function initCountrySelector() {
-    if (!countryCodeSelect) return;
+// Auto-detect country from phone number
+function detectCountryFromPhoneNumber(phoneNumber) {
+    // Clean the phone number
+    let cleanNumber = phoneNumber.replace(/\D/g, '');
     
-    // Clear existing options (keep the placeholder)
-    countryCodeSelect.innerHTML = '<option value="">Select Country</option>';
+    // Remove leading + if present in original input
+    if (phoneNumber.startsWith('+')) {
+        cleanNumber = cleanNumber;
+    }
     
-    // Create sorted array of countries
-    const countries = Object.entries(COUNTRY_CODES)
-        .map(([code, data]) => ({ code, ...data }))
-        .sort((a, b) => a.name.localeCompare(b.name));
+    // Try to match country codes (longest first for better accuracy)
+    const sortedCodes = Object.keys(COUNTRY_CODES).sort((a, b) => b.length - a.length);
     
-    // Add options to selector
-    countries.forEach(country => {
-        const option = document.createElement('option');
-        option.value = country.code;
-        option.textContent = `${country.flag} ${country.name} (+${country.code})`;
-        countryCodeSelect.appendChild(option);
-    });
+    for (const code of sortedCodes) {
+        if (cleanNumber.startsWith(code)) {
+            const country = COUNTRY_CODES[code];
+            const nationalNumber = cleanNumber.substring(code.length);
+            
+            // Check if the remaining number length is reasonable for this country
+            if (nationalNumber.length >= 6 && nationalNumber.length <= (country.maxLength || 15)) {
+                return {
+                    countryCode: code,
+                    countryInfo: country,
+                    nationalNumber: nationalNumber,
+                    fullNumber: cleanNumber,
+                    e164: `+${cleanNumber}`
+                };
+            }
+        }
+    }
     
-    console.log('Country selector initialized with', countries.length, 'countries');
+    return null;
 }
 
-// E.164 Phone Number Validation and Normalization
-function normalizeToE164(countryCode, nationalNumber) {
-    if (!countryCode || !nationalNumber) {
-        return { valid: false, error: 'Country code and phone number are required' };
+// E.164 Phone Number Validation and Normalization with Auto-Detection
+function normalizeToE164(phoneNumber) {
+    if (!phoneNumber) {
+        return { valid: false, error: 'Phone number is required' };
     }
     
-    const country = COUNTRY_CODES[countryCode];
-    if (!country) {
-        return { valid: false, error: 'Invalid country code' };
+    // Try to detect country from the phone number
+    const detection = detectCountryFromPhoneNumber(phoneNumber);
+    
+    if (!detection) {
+        return { valid: false, error: 'Unable to detect country from phone number. Please include country code (e.g., +919876543210)' };
     }
     
-    // Clean the national number (remove spaces, dashes, etc.)
-    const digitsOnly = nationalNumber.replace(/\D/g, '');
+    const { countryCode, countryInfo, nationalNumber, e164 } = detection;
     
-    // Remove leading zeros
-    const cleanNumber = digitsOnly.replace(/^0+/, '');
-    
-    // Check length constraints
-    if (cleanNumber.length < 6) {
+    // Validate the national number length
+    if (nationalNumber.length < 6) {
         return { valid: false, error: 'Phone number too short' };
     }
     
-    if (cleanNumber.length > 15) {
+    if (nationalNumber.length > 15) {
         return { valid: false, error: 'Phone number too long' };
     }
     
     // Check country-specific length if available
-    if (country.maxLength && cleanNumber.length > country.maxLength) {
-        return { valid: false, error: `Phone number too long for ${country.name} (max ${country.maxLength} digits)` };
+    if (countryInfo.maxLength && nationalNumber.length > countryInfo.maxLength) {
+        return { valid: false, error: `Phone number too long for ${countryInfo.name} (max ${countryInfo.maxLength} digits)` };
     }
-    
-    // Build E.164 format
-    const e164 = `+${countryCode}${cleanNumber}`;
     
     return { 
         valid: true, 
         e164, 
         countryCode, 
-        nationalNumber: cleanNumber,
-        country: country.name 
+        nationalNumber,
+        country: countryInfo.name,
+        detectedCountry: `${countryInfo.flag} ${countryInfo.name} (+${countryCode})`
     };
 }
 
@@ -330,7 +336,7 @@ function detectCountryCode(value) {
     return null;
 }
 
-// 🌟 Enhanced Phone Input with Smart Country Detection
+// 🌟 Enhanced Phone Input with Real-time Country Detection
 function initPhoneInputAnimation() {
     const inputWrapper = pairNumberInput.closest('.input-wrapper');
     
@@ -355,19 +361,16 @@ function initPhoneInputAnimation() {
         // Only remove focused class if there's no value
         if (!pairNumberInput.value.trim()) {
             inputWrapper.classList.remove('focused');
-            if (!currentCountryCode) {
-                countryDisplay.style.display = 'none';
-                countryDisplay.classList.remove('show');
-            }
+            countryDisplay.style.display = 'none';
+            countryDisplay.classList.remove('show');
+            inputWrapper.classList.remove('has-country-code');
         }
     });
     
-    // Add double-click to clear country code
+    // Add click to clear detection
     if (countryDisplay) {
         countryDisplay.addEventListener('click', () => {
             // Reset everything
-            currentCountryCode = null;
-            detectedCountry = null;
             pairNumberInput.value = '';
             countryDisplay.style.display = 'none';
             countryDisplay.classList.remove('show');
@@ -377,16 +380,37 @@ function initPhoneInputAnimation() {
         });
     }
     
-    // Simple input formatting - no auto-detection
+    // Real-time country detection on input
     pairNumberInput.addEventListener('input', (e) => {
-        // Only allow digits
-        e.target.value = e.target.value.replace(/\D/g, '');
+        const value = e.target.value;
+        
+        // Allow digits, spaces, dashes, and plus sign
+        const cleanValue = value.replace(/[^\d\s\-\+]/g, '');
+        e.target.value = cleanValue;
         
         // Update visual state
-        if (e.target.value.trim()) {
+        if (cleanValue.trim()) {
             inputWrapper.classList.add('has-value');
+            
+            // Try to detect country
+            const detection = detectCountryFromPhoneNumber(cleanValue);
+            
+            if (detection) {
+                const { countryInfo, countryCode } = detection;
+                countryDisplay.innerHTML = `${countryInfo.flag} ${countryInfo.name} (+${countryCode})`;
+                countryDisplay.style.display = 'block';
+                countryDisplay.classList.add('show');
+                inputWrapper.classList.add('has-country-code');
+                console.log(`Country detected: ${countryInfo.flag} ${countryInfo.name} (+${countryCode})`);
+            } else {
+                countryDisplay.style.display = 'none';
+                countryDisplay.classList.remove('show');
+                inputWrapper.classList.remove('has-country-code');
+            }
         } else {
-            inputWrapper.classList.remove('has-value');
+            inputWrapper.classList.remove('has-value', 'has-country-code');
+            countryDisplay.style.display = 'none';
+            countryDisplay.classList.remove('show');
         }
     });
 }
@@ -1154,24 +1178,17 @@ pairForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     hidePhoneError();
     
-    const countryCode = countryCodeSelect.value;
-    const nationalNumber = pairNumberInput.value.trim();
+    const phoneNumber = pairNumberInput.value.trim();
     
-    // Validate inputs
-    if (!countryCode) {
-        showPhoneError('Please select a country');
-        countryCodeSelect.focus();
-        return;
-    }
-    
-    if (!nationalNumber) {
+    // Validate input
+    if (!phoneNumber) {
         showPhoneError('Please enter a phone number');
         pairNumberInput.focus();
         return;
     }
     
-    // Normalize to E.164 format
-    const validation = normalizeToE164(countryCode, nationalNumber);
+    // Normalize to E.164 format with auto-detection
+    const validation = normalizeToE164(phoneNumber);
     if (!validation.valid) {
         showPhoneError(validation.error);
         pairNumberInput.focus();
@@ -1179,7 +1196,7 @@ pairForm.addEventListener('submit', async (e) => {
     }
     
     const number = validation.e164;
-    console.log('Pairing number:', number, 'for', validation.country);
+    console.log('Pairing number:', number, 'for', validation.country, '- Auto-detected:', validation.detectedCountry);
     
     // Validate final number format
     if (!number || number.length < 10 || number.length > 15) {
@@ -1225,7 +1242,6 @@ pairForm.addEventListener('submit', async (e) => {
         
         // Clear input and reset form
         pairNumberInput.value = '';
-        countryCodeSelect.value = '';
         const inputWrapper = pairNumberInput.closest('.input-wrapper');
         if (inputWrapper) {
             inputWrapper.classList.remove('has-country-code', 'has-value', 'focused');
@@ -1437,7 +1453,6 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 WhatsApp Bot Management Dashboard - High-DPI Optimized');
 
     // Initialize enhanced animations and phone input
-    initCountrySelector();
     initEnhancedAnimations();
     initPhoneInputAnimation();
     

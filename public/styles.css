@@ -131,38 +131,7 @@
     }
 }
 
-/* Phone Input Container Styles */
-.phone-input-container {
-    display: flex;
-    gap: 8px;
-    align-items: stretch;
-}
-
-.country-selector {
-    min-width: 200px;
-    padding: 12px 16px;
-    background: rgba(0, 0, 0, 0.6);
-    border: 2px solid var(--glass-border);
-    border-radius: var(--border-radius);
-    color: var(--blue-text);
-    font-size: 0.95rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: var(--transition-smooth);
-    backdrop-filter: blur(8px);
-}
-
-.country-selector:focus {
-    border-color: var(--pink-primary);
-    box-shadow: 0 0 20px var(--pink-glow);
-    outline: none;
-}
-
-.country-selector option {
-    background: var(--black-secondary);
-    color: var(--blue-text);
-    padding: 8px;
-}
+/* Auto-detecting Phone Input Styles */
 
 .error-message {
     color: #ff4444;
