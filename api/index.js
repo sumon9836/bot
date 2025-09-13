@@ -37,7 +37,8 @@ function serveStaticFile(res, filePath) {
     const safePath = path.resolve(publicDir, requestPath);
     
     // Ensure the resolved path is within the public directory
-    if (!safePath.startsWith(publicDir)) {
+    const relativePath = path.relative(publicDir, safePath);
+    if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
         res.writeHead(403, { 'Content-Type': 'text/plain' });
         res.end('403 - Forbidden');
         return;
