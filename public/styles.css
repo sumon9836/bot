@@ -43,11 +43,13 @@
     --border-radius-lg: 20px;
     --border-radius-xl: 24px;
     
-    /* 🎭 Animations */
+    /* 🎭 Ultra Smooth Animations */
+    --transition-lightning: all 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     --transition-elastic: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --transition-magic: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* ========== RESET & BASE STYLES ========== */
@@ -73,7 +75,20 @@ body {
     position: relative;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    animation: pageLoad 0.8s ease-out;
     text-rendering: optimizeLegibility;
+}
+
+/* Beautiful Page Load Animation */
+@keyframes pageLoad {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* 🌌 Animated Background with Particle Effect */
@@ -384,33 +399,12 @@ body::after {
     margin-bottom: 8px;
 }
 
-/* 🇮🇳 INDIAN PHONE INPUT WITH FLAG ANIMATION */
+/* ========== ENHANCED PHONE INPUT (NO DEFAULT) ========== */
 .input-wrapper {
     position: relative;
     display: flex;
     align-items: center;
-}
-
-.input-wrapper::before {
-    content: '🇮🇳 +91';
-    position: absolute;
-    left: 16px;
-    color: var(--gray-medium);
-    font-weight: 600;
-    z-index: 2;
-    opacity: 0;
-    transform: translateX(-20px);
-    transition: var(--transition-bounce);
-    pointer-events: none;
-}
-
-.input-wrapper.focused::before {
-    opacity: 1;
-    transform: translateX(0);
-}
-
-.input-wrapper.focused input[type="tel"] {
-    padding-left: 90px;
+    overflow: visible;
 }
 
 .input-icon {
