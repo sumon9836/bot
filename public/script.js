@@ -333,6 +333,9 @@ function initPhoneInputAnimation() {
             // Update country code display with animation
             countryDisplay.innerHTML = `${detection.info.flag} +${detection.code}`;
             countryDisplay.style.display = 'block';
+            
+            // Force reflow before adding animation class
+            countryDisplay.offsetHeight;
             countryDisplay.classList.add('show');
             
             // Update input value to show only the remaining number
@@ -341,11 +344,10 @@ function initPhoneInputAnimation() {
             // Add classes for styling
             inputWrapper.classList.add('has-country-code', 'focused', 'has-value');
             
-            // Add bounce animation to the flag
-            countryDisplay.style.animation = 'none';
+            // Add enhanced bounce animation
             setTimeout(() => {
-                countryDisplay.style.animation = 'flagBounce 0.6s ease-out';
-            }, 10);
+                countryDisplay.style.animation = 'flagBounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+            }, 50);
             
             // Show success feedback
             console.log(`Country detected: ${detection.info.flag} ${detection.info.name} (+${detection.code})`);
