@@ -2530,42 +2530,44 @@ body:has(.brand .logo .fas.fa-user-shield) {
 /* Country Code Display Element */
 .country-code-display {
     position: absolute;
-    left: 16px;
+    left: 12px;
     top: 50%;
     transform: translateY(-50%);
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     z-index: 3;
     opacity: 0;
-    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     pointer-events: auto;
     cursor: pointer;
     white-space: nowrap;
-    background: linear-gradient(135deg, #25D366, #128C7E);
-    padding: 6px 12px;
-    border-radius: 12px;
-    border: 2px solid rgba(37, 211, 102, 0.3);
-    box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
-    backdrop-filter: blur(15px);
+    background: linear-gradient(135deg, var(--pink-primary), var(--pink-secondary));
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 27, 107, 0.3);
+    box-shadow: 0 4px 15px var(--pink-glow);
+    backdrop-filter: blur(10px);
     color: var(--white-pure);
     display: flex;
     align-items: center;
-    gap: 6px;
-    transform: translateY(-50%) translateX(-100px) scale(0.7);
+    gap: 8px;
+    min-width: 80px;
+    justify-content: flex-start;
+    transform: translateY(-50%) translateX(-80px) scale(0.8);
 }
 
 .country-code-display.show {
     opacity: 1;
     transform: translateY(-50%) translateX(0) scale(1);
-    border-color: #25D366;
-    box-shadow: 0 0 20px rgba(37, 211, 102, 0.6), 0 8px 30px rgba(37, 211, 102, 0.4);
-    animation: flagBounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    border-color: var(--pink-primary);
+    box-shadow: 0 0 15px var(--pink-glow), 0 4px 20px var(--pink-glow);
+    animation: flagBounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 .country-code-display:hover {
     transform: translateY(-50%) translateX(0) scale(1.05);
-    box-shadow: 0 0 25px rgba(37, 211, 102, 0.8), 0 10px 35px rgba(37, 211, 102, 0.5);
-    background: linear-gradient(135deg, #128C7E, #25D366);
+    box-shadow: 0 0 20px var(--pink-primary), 0 6px 25px var(--pink-glow);
+    background: linear-gradient(135deg, var(--pink-secondary), var(--pink-light));
 }
 
 @keyframes flagBounceIn {
@@ -2597,7 +2599,7 @@ body:has(.brand .logo .fas.fa-user-shield) {
 }
 
 .input-wrapper.has-country-code input[type="tel"] {
-    padding-left: 110px;
+    padding-left: 105px;
     border-color: var(--pink-primary);
     box-shadow: 0 0 0 4px var(--pink-glow), inset 0 0 20px rgba(255, 27, 107, 0.1);
 }

@@ -1,4 +1,3 @@
-// API Configuration - Using Vercel API routes  
 const API_BASE_URL = '/api';
 
 // DOM Elements
@@ -229,20 +228,20 @@ const COUNTRY_CODES = {
 function detectCountryFromPhoneNumber(phoneNumber) {
     // Clean the phone number
     let cleanNumber = phoneNumber.replace(/\D/g, '');
-    
+
     // Remove leading + if present in original input
     if (phoneNumber.startsWith('+')) {
         cleanNumber = cleanNumber;
     }
-    
+
     // Try to match country codes (longest first for better accuracy)
     const sortedCodes = Object.keys(COUNTRY_CODES).sort((a, b) => b.length - a.length);
-    
+
     for (const code of sortedCodes) {
         if (cleanNumber.startsWith(code)) {
             const country = COUNTRY_CODES[code];
             const nationalNumber = cleanNumber.substring(code.length);
-            
+
             // Check if the remaining number length is reasonable for this country
             if (nationalNumber.length >= 6 && nationalNumber.length <= (country.maxLength || 15)) {
                 return {
@@ -255,7 +254,7 @@ function detectCountryFromPhoneNumber(phoneNumber) {
             }
         }
     }
-    
+
     return null;
 }
 
@@ -264,30 +263,30 @@ function normalizeToE164(phoneNumber) {
     if (!phoneNumber) {
         return { valid: false, error: 'Phone number is required' };
     }
-    
+
     // Try to detect country from the phone number
     const detection = detectCountryFromPhoneNumber(phoneNumber);
-    
+
     if (!detection) {
         return { valid: false, error: 'Unable to detect country from phone number. Please include country code (e.g., +919876543210)' };
     }
-    
+
     const { countryCode, countryInfo, nationalNumber, e164 } = detection;
-    
+
     // Validate the national number length
     if (nationalNumber.length < 6) {
         return { valid: false, error: 'Phone number too short' };
     }
-    
+
     if (nationalNumber.length > 15) {
         return { valid: false, error: 'Phone number too long' };
     }
-    
+
     // Check country-specific length if available
     if (countryInfo.maxLength && nationalNumber.length > countryInfo.maxLength) {
         return { valid: false, error: `Phone number too long for ${countryInfo.name} (max ${countryInfo.maxLength} digits)` };
     }
-    
+
     return { 
         valid: true, 
         e164, 
@@ -319,10 +318,10 @@ let detectedCountry = null;
 function detectCountryCode(value) {
     // Remove any non-digits
     const digits = value.replace(/\D/g, '');
-    
+
     // Try to match country codes (longest first for better accuracy)
     const sortedCodes = Object.keys(COUNTRY_CODES).sort((a, b) => b.length - a.length);
-    
+
     for (const code of sortedCodes) {
         if (digits.startsWith(code)) {
             return {
@@ -332,16 +331,16 @@ function detectCountryCode(value) {
             };
         }
     }
-    
+
     return null;
 }
 
 // 🌟 Enhanced Phone Input with Real-time Country Detection
 function initPhoneInputAnimation() {
     const inputWrapper = pairNumberInput.closest('.input-wrapper');
-    
+
     if (!inputWrapper) return;
-    
+
     // Create country code display element if it doesn't exist
     let countryDisplay = inputWrapper.querySelector('.country-code-display');
     if (!countryDisplay) {
@@ -350,12 +349,12 @@ function initPhoneInputAnimation() {
         countryDisplay.style.display = 'none';
         inputWrapper.appendChild(countryDisplay);
     }
-    
+
     // Add focus event
     pairNumberInput.addEventListener('focus', () => {
         inputWrapper.classList.add('focused');
     });
-    
+
     // Add blur event
     pairNumberInput.addEventListener('blur', () => {
         // Only remove focused class if there's no value
@@ -366,7 +365,7 @@ function initPhoneInputAnimation() {
             inputWrapper.classList.remove('has-country-code');
         }
     });
-    
+
     // Add click to clear detection
     if (countryDisplay) {
         countryDisplay.addEventListener('click', () => {
@@ -379,22 +378,22 @@ function initPhoneInputAnimation() {
             console.log('Country code reset - enter full number with country code');
         });
     }
-    
+
     // Real-time country detection on input
     pairNumberInput.addEventListener('input', (e) => {
         const value = e.target.value;
-        
+
         // Allow digits, spaces, dashes, and plus sign
         const cleanValue = value.replace(/[^\d\s\-\+]/g, '');
         e.target.value = cleanValue;
-        
+
         // Update visual state
         if (cleanValue.trim()) {
             inputWrapper.classList.add('has-value');
-            
+
             // Try to detect country
             const detection = detectCountryFromPhoneNumber(cleanValue);
-            
+
             if (detection) {
                 const { countryInfo, countryCode } = detection;
                 countryDisplay.innerHTML = `${countryInfo.flag} ${countryInfo.name} (+${countryCode})`;
@@ -439,7 +438,7 @@ function initEnhancedAnimations() {
         card.style.animationDelay = `${index * 0.1}s`;
         card.classList.add('fade-in-up');
     });
-    
+
     // Add button ripple effect
     const buttons = document.querySelectorAll('.btn');
     buttons.forEach(button => {
@@ -449,7 +448,7 @@ function initEnhancedAnimations() {
             const size = Math.max(rect.width, rect.height);
             const x = e.clientX - rect.left - size / 2;
             const y = e.clientY - rect.top - size / 2;
-            
+
             ripple.style.cssText = `
                 position: absolute;
                 width: ${size}px;
@@ -462,15 +461,15 @@ function initEnhancedAnimations() {
                 animation: ripple 0.6s ease-out;
                 pointer-events: none;
             `;
-            
+
             this.appendChild(ripple);
-            
+
             setTimeout(() => {
                 ripple.remove();
             }, 600);
         });
     });
-    
+
     // Add hover sound effect simulation (visual feedback)
     const interactiveElements = document.querySelectorAll('.btn, .card, .session-card, .input-wrapper');
     interactiveElements.forEach(element => {
@@ -495,15 +494,15 @@ function showToast(title, message, type = 'success') {
     const toastIcon = toast.querySelector('.toast-icon');
     const toastTitle = toast.querySelector('.toast-title');
     const toastText = toast.querySelector('.toast-text');
-    
+
     // Reset classes
     toastIcon.className = `toast-icon ${type}`;
     toast.className = `toast ${type}`;
-    
+
     // Set content
     toastTitle.textContent = title;
     toastText.textContent = message;
-    
+
     // Set appropriate icon
     const icon = toastIcon.querySelector('i');
     if (type === 'success') {
@@ -511,10 +510,10 @@ function showToast(title, message, type = 'success') {
     } else if (type === 'error') {
         icon.className = 'fas fa-exclamation-circle';
     }
-    
+
     // Show toast
     toast.classList.add('show');
-    
+
     // Hide after 4 seconds
     setTimeout(() => {
         toast.classList.remove('show');
@@ -527,7 +526,7 @@ function showPairingCodeModal(number, code) {
     if (existingModal) {
         existingModal.remove();
     }
-    
+
     // Create modal HTML
     const modal = document.createElement('div');
     modal.id = 'pairingModal';
@@ -550,7 +549,7 @@ function showPairingCodeModal(number, code) {
                         <span class="number">+${number}</span>
                     </div>
                 </div>
-                
+
                 <div class="pairing-code-section">
                     <div class="code-header">
                         <div class="whatsapp-icon">
@@ -558,7 +557,7 @@ function showPairingCodeModal(number, code) {
                         </div>
                         <h3>Your Pairing Code</h3>
                     </div>
-                    
+
                     <div class="code-display-card">
                         <div class="code-wrapper">
                             <div class="pairing-code-enhanced" id="pairingCode">${code}</div>
@@ -573,7 +572,7 @@ function showPairingCodeModal(number, code) {
                         </button>
                     </div>
                 </div>
-                
+
                 <div class="instructions-enhanced">
                     <div class="instruction-header">
                         <i class="fas fa-list-ol"></i>
@@ -625,14 +624,14 @@ function showPairingCodeModal(number, code) {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(modal);
-    
+
     // Show modal with animation
     setTimeout(() => {
         modal.classList.add('show');
     }, 10);
-    
+
     // Auto refresh sessions after pairing attempt
     setTimeout(async () => {
         await loadSessions();
@@ -645,7 +644,7 @@ function showBanWarningModal(number) {
     if (existingModal) {
         existingModal.remove();
     }
-    
+
     // Create modal HTML
     const modal = document.createElement('div');
     modal.id = 'banModal';
@@ -666,7 +665,7 @@ function showBanWarningModal(number) {
                     <h3>You Are Banned</h3>
                     <p>The number <strong>+${number}</strong> has been blocked from using this bot.</p>
                     <p>If you believe this is an error, please contact the developer.</p>
-                    
+
                     <div class="contact-info">
                         <h4><i class="fas fa-phone"></i> Need Help?</h4>
                         <p>Contact the developer to resolve this issue or register a new number.</p>
@@ -691,9 +690,9 @@ function showBanWarningModal(number) {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(modal);
-    
+
     // Show modal with animation
     setTimeout(() => {
         modal.classList.add('show');
@@ -741,12 +740,12 @@ window.copyPairingCodeEnhanced = function(code) {
     const copyIcon = copyBtn.querySelector('.copy-icon');
     const copyText = copyBtn.querySelector('.copy-text');
     const copiedText = copyBtn.querySelector('.copied-text');
-    
+
     // Add beautiful copying animation
     copyBtn.classList.add('copying');
     copyIcon.style.transform = 'scale(0.7) rotate(360deg)';
     copyIcon.style.transition = 'all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
-    
+
     // Add sparkle effect to button
     const sparkle = document.createElement('div');
     sparkle.style.cssText = `
@@ -762,7 +761,7 @@ window.copyPairingCodeEnhanced = function(code) {
         pointer-events: none;
     `;
     copyBtn.appendChild(sparkle);
-    
+
     navigator.clipboard.writeText(code).then(() => {
         // Beautiful success animation
         setTimeout(() => {
@@ -770,12 +769,12 @@ window.copyPairingCodeEnhanced = function(code) {
             copyBtn.classList.add('copied');
             copyIcon.innerHTML = '<i class="fas fa-check"></i>';
             copyIcon.style.transform = 'scale(1.3) rotate(0deg)';
-            
+
             // Add bounce effect to the code
             const codeElement = document.getElementById('pairingCode');
             codeElement.classList.add('code-copied');
             codeElement.style.animation = 'bounceSuccess 0.8s ease-out';
-            
+
             // Create floating success particles
             for (let i = 0; i < 3; i++) {
                 const particle = document.createElement('div');
@@ -793,7 +792,7 @@ window.copyPairingCodeEnhanced = function(code) {
                 copyBtn.appendChild(particle);
                 setTimeout(() => particle.remove(), 1000);
             }
-            
+
             // Reset after animation
             setTimeout(() => {
                 copyBtn.classList.remove('copied');
@@ -803,7 +802,7 @@ window.copyPairingCodeEnhanced = function(code) {
                 codeElement.style.animation = '';
             }, 2500);
         }, 400);
-        
+
         // Remove sparkle
         setTimeout(() => sparkle.remove(), 600);
     }).catch(() => {
@@ -814,20 +813,20 @@ window.copyPairingCodeEnhanced = function(code) {
         textArea.select();
         document.execCommand('copy');
         document.body.removeChild(textArea);
-        
+
         setTimeout(() => {
             copyBtn.classList.remove('copying');
             copyBtn.classList.add('copied');
             copyIcon.innerHTML = '<i class="fas fa-check"></i>';
             copyIcon.style.transform = 'scale(1.3)';
-            
+
             setTimeout(() => {
                 copyBtn.classList.remove('copied');
                 copyIcon.innerHTML = '<i class="fas fa-copy"></i>';
                 copyIcon.style.transform = 'scale(1)';
             }, 2500);
         }, 400);
-        
+
         setTimeout(() => sparkle.remove(), 600);
     });
 };
@@ -838,7 +837,7 @@ window.copyPairingCode = window.copyPairingCodeEnhanced;
 function setButtonLoading(button, loading) {
     const btnText = button.querySelector('.btn-text');
     const btnLoader = button.querySelector('.btn-loader');
-    
+
     if (loading) {
         btnText.style.opacity = '0';
         btnLoader.style.display = 'flex';
@@ -853,7 +852,7 @@ function setButtonLoading(button, loading) {
 // API Functions
 async function makeApiRequest(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
-    
+
     try {
         const response = await fetch(url, {
             headers: {
@@ -862,23 +861,23 @@ async function makeApiRequest(endpoint, options = {}) {
             },
             ...options
         });
-        
+
         // Handle unauthorized access gracefully for banlist/blocklist
         if (response.status === 401 && (endpoint.includes('blocklist') || endpoint.includes('banlist'))) {
             console.log('Unauthorized access to banlist - requires admin login');
             return {};
         }
-        
+
         // Get response data first
         const contentType = response.headers.get('content-type');
         let responseData;
-        
+
         if (contentType && contentType.includes('application/json')) {
             responseData = await response.json();
         } else {
             responseData = await response.text();
         }
-        
+
         // Handle error responses
         if (!response.ok) {
             let errorMessage = 'Unknown error';
@@ -891,17 +890,17 @@ async function makeApiRequest(endpoint, options = {}) {
             }
             throw new Error(`HTTP ${response.status}: ${errorMessage}`);
         }
-        
+
         return responseData;
-        
+
     } catch (error) {
         console.error('API Request failed:', error.message || error);
-        
+
         // For banlist/blocklist requests, return empty object instead of throwing
         if (endpoint.includes('blocklist') || endpoint.includes('banlist')) {
             return {};
         }
-        
+
         throw error;
     }
 }
@@ -934,7 +933,7 @@ function showSessionsState(state) {
     sessionsError.style.display = 'none';
     sessionsEmpty.style.display = 'none';
     sessionsGrid.style.display = 'none';
-    
+
     // Show the requested state
     switch (state) {
         case 'loading':
@@ -955,7 +954,7 @@ function showSessionsState(state) {
 function createSessionCard(session, index) {
     // Handle different possible session data structures
     let number, status, connectedAt, deviceInfo;
-    
+
     if (typeof session === 'object') {
         // If session is an object, extract properties
         number = session.number || session.phone || session.id || `Session ${index + 1}`;
@@ -967,10 +966,10 @@ function createSessionCard(session, index) {
         number = session.toString();
         status = 'active';
     }
-    
+
     const card = document.createElement('div');
     card.className = 'session-card';
-    
+
     // Format the connected time
     let timeText = 'Unknown';
     if (connectedAt) {
@@ -983,7 +982,7 @@ function createSessionCard(session, index) {
             timeText = connectedAt.toString();
         }
     }
-    
+
     card.innerHTML = `
         <div class="session-header">
             <div class="session-number">
@@ -1005,42 +1004,42 @@ function createSessionCard(session, index) {
                     <span>Device: ${deviceInfo}</span>
                 </div>
             ` : ''}
-        
+
     `;
-    
+
     return card;
 }
 
 function renderSessions() {
     // Update session count
     sessionCount.textContent = sessions.length;
-    
+
     if (sessions.length === 0) {
         showSessionsState('empty');
         return;
     }
-    
+
     // Clear existing sessions
     sessionsGrid.innerHTML = '';
-    
+
     // Create session cards
     sessions.forEach((session, index) => {
         const card = createSessionCard(session, index);
         sessionsGrid.appendChild(card);
     });
-    
+
     showSessionsState('data');
 }
 
 async function loadSessions() {
     if (isLoading) return;
-    
+
     isLoading = true;
     showSessionsState('loading');
-    
+
     try {
         const response = await getSessions();
-        
+
         // Handle different response formats
         if (Array.isArray(response)) {
             sessions = response;
@@ -1051,9 +1050,9 @@ async function loadSessions() {
             // If response is not what we expect, create empty array
             sessions = [];
         }
-        
+
         renderSessions();
-        
+
     } catch (error) {
         console.error('Failed to load sessions:', error);
         sessionsErrorMessage.textContent = `Failed to load sessions: ${error.message}`;
@@ -1065,21 +1064,21 @@ async function loadSessions() {
 
 async function loadBanlist() {
     if (isLoadingBanlist) return;
-    
+
     isLoadingBanlist = true;
     showBanlistState('loading');
-    
+
     try {
         const response = await getBanlist();
-        
+
         if (response && typeof response === 'object') {
             bannedUsers = response;
         } else {
             bannedUsers = {};
         }
-        
+
         renderBanlist();
-        
+
     } catch (error) {
         console.error('Failed to load banlist:', error);
         banlistErrorMessage.textContent = `Unable to load banned users.`;
@@ -1095,7 +1094,7 @@ function showBanlistState(state) {
     banlistError.style.display = 'none';
     banlistEmpty.style.display = 'none';
     banlistGrid.style.display = 'none';
-    
+
     // Show the requested state
     switch (state) {
         case 'loading':
@@ -1118,29 +1117,29 @@ function renderBanlist() {
     if (!bannedUsers || typeof bannedUsers !== 'object') {
         bannedUsers = {};
     }
-    
+
     const userNumbers = Object.keys(bannedUsers);
-    
+
     // Update banned user count
     if (bannedUserCount) {
         bannedUserCount.textContent = userNumbers.length;
     }
-    
+
     if (userNumbers.length === 0) {
         showBanlistState('empty');
         return;
     }
-    
+
     // Clear existing content
     if (banlistGrid) {
         banlistGrid.innerHTML = '';
-        
+
         // Create cards for each banned user
         userNumbers.forEach(number => {
             const card = createBannedUserCard(number);
             banlistGrid.appendChild(card);
         });
-        
+
         showBanlistState('data');
     }
 }
@@ -1168,7 +1167,7 @@ function createBannedUserCard(number) {
             </span>
         </div>
     `;
-    
+
     return card;
 }
 
@@ -1177,16 +1176,16 @@ function createBannedUserCard(number) {
 pairForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     hidePhoneError();
-    
+
     const phoneNumber = pairNumberInput.value.trim();
-    
+
     // Validate input
     if (!phoneNumber) {
         showPhoneError('Please enter a phone number');
         pairNumberInput.focus();
         return;
     }
-    
+
     // Normalize to E.164 format with auto-detection
     const validation = normalizeToE164(phoneNumber);
     if (!validation.valid) {
@@ -1194,24 +1193,24 @@ pairForm.addEventListener('submit', async (e) => {
         pairNumberInput.focus();
         return;
     }
-    
+
     const number = validation.e164;
     console.log('Pairing number:', number, 'for', validation.country, '- Auto-detected:', validation.detectedCountry);
-    
+
     // Validate final number format
     if (!number || number.length < 10 || number.length > 15) {
         showToast('Invalid Number', 'Please enter a valid phone number (10-15 digits)', 'error');
         return;
     }
-    
+
     // Validation is now handled by E.164 normalization above
-    
+
     const submitBtn = pairForm.querySelector('.btn');
     setButtonLoading(submitBtn, true);
-    
+
     try {
         const result = await pairNumber(number);
-        
+
         // Handle different response types
         if (result && result.error) {
             // Check if user is banned
@@ -1239,7 +1238,7 @@ pairForm.addEventListener('submit', async (e) => {
             showToast('Request Sent', 'Pairing request has been sent successfully', 'success');
             await loadSessions();
         }
-        
+
         // Clear input and reset form
         pairNumberInput.value = '';
         const inputWrapper = pairNumberInput.closest('.input-wrapper');
@@ -1251,10 +1250,10 @@ pairForm.addEventListener('submit', async (e) => {
                 countryDisplay.classList.remove('show');
             }
         }
-        
+
     } catch (error) {
         console.error('Failed to pair number:', error);
-        
+
         // Extract meaningful error message
         let errorMessage = 'Network error occurred';
         if (error.message) {
@@ -1270,7 +1269,7 @@ pairForm.addEventListener('submit', async (e) => {
                 errorMessage = error.message.replace('HTTP 400: ', '').replace('HTTP 500: ', '');
             }
         }
-        
+
         showToast('Pairing Failed', errorMessage, 'error');
     } finally {
         setButtonLoading(submitBtn, false);
@@ -1341,15 +1340,15 @@ function showToast(title, message, type = 'success') {
     const toastIcon = toast.querySelector('.toast-icon');
     const toastTitle = toast.querySelector('.toast-title');
     const toastText = toast.querySelector('.toast-text');
-    
+
     // Reset classes
     toastIcon.className = `toast-icon ${type}`;
     toast.className = `toast ${type}`;
-    
+
     // Set content
     toastTitle.textContent = title;
     toastText.textContent = message;
-    
+
     // Set appropriate icon with animation
     const icon = toastIcon.querySelector('i');
     if (type === 'success') {
@@ -1357,10 +1356,10 @@ function showToast(title, message, type = 'success') {
     } else if (type === 'error') {
         icon.className = 'fas fa-exclamation-circle';
     }
-    
+
     // Show toast with bounce effect
     toast.classList.add('show');
-    
+
     // Add a subtle shake effect for errors
     if (type === 'error') {
         toast.style.animation = 'shake 0.5s ease-in-out';
@@ -1368,7 +1367,7 @@ function showToast(title, message, type = 'success') {
             toast.style.animation = '';
         }, 500);
     }
-    
+
     // Hide after 4 seconds with smooth transition
     setTimeout(() => {
         toast.classList.remove('show');
@@ -1382,7 +1381,7 @@ const animationKeyframes = `
         25% { transform: translateX(-5px); }
         75% { transform: translateX(5px); }
     }
-    
+
     @keyframes flagBounce {
         0% { 
             transform: scale(0.3) translateY(20px);
@@ -1397,7 +1396,7 @@ const animationKeyframes = `
             opacity: 1;
         }
     }
-    
+
     .country-code-display {
         position: absolute;
         left: 12px;
@@ -1415,15 +1414,15 @@ const animationKeyframes = `
         opacity: 0;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
+
     .country-code-display.show {
         opacity: 1;
     }
-    
+
     .input-wrapper.has-country-code input {
         padding-left: 100px;
     }
-    
+
     .input-wrapper.has-country-code .input-icon {
         opacity: 0.3;
     }
@@ -1455,14 +1454,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize enhanced animations and phone input
     initEnhancedAnimations();
     initPhoneInputAnimation();
-    
+
     // Add entrance animations
     setTimeout(addEntranceAnimations, 100);
-    
+
     // Load sessions and banlist
     loadSessions();
     loadBanlist();
-    
+
     // Add smooth scrolling to refresh button
     if (refreshBtn) {
         refreshBtn.addEventListener('click', () => {
