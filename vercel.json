@@ -24,6 +24,10 @@
       "destination": "/public/admin.html"
     },
     {
+      "source": "/login.html",
+      "destination": "/public/login.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/public/$1"
     }
