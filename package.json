@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "WhatsApp Bot Management Dashboard - Serverless Edition",
   "engines": {
-    "node": "18.x"
+    "node": "22.x"
   },
   "scripts": {
     "dev": "node dev-server.js",
