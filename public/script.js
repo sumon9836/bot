@@ -275,13 +275,25 @@ function initPhoneInputAnimation() {
         }
     });
     
-    // Smart input processing
+    // Smart input processing with improved mobile experience
     pairNumberInput.addEventListener('input', (e) => {
         const value = e.target.value;
+        
+        // If we already have a country code detected, don't re-detect
+        if (currentCountryCode) {
+            // Just update the has-value class
+            if (value.length > 0) {
+                inputWrapper.classList.add('has-value');
+            } else {
+                inputWrapper.classList.remove('has-value');
+            }
+            return;
+        }
+        
         const detection = detectCountryCode(value);
         
-        if (detection) {
-            // Country code detected!
+        if (detection && !currentCountryCode) {
+            // Country code detected for the first time!
             currentCountryCode = detection.code;
             detectedCountry = detection.info;
             
@@ -300,11 +312,11 @@ function initPhoneInputAnimation() {
             // Add bounce animation
             countryDisplay.style.animation = 'flagBounce 0.6s ease-out';
             
-            // Show success feedback
-            showToast('Country Detected', `${detection.info.flag} ${detection.info.name} (+${detection.code})`, 'success');
+            // Show success feedback (less intrusive for mobile)
+            console.log(`Country detected: ${detection.info.flag} ${detection.info.name} (+${detection.code})`);
             
         } else if (value.length === 0) {
-            // Reset when input is empty
+            // Reset when input is completely empty
             countryDisplay.style.display = 'none';
             countryDisplay.classList.remove('show');
             inputWrapper.classList.remove('has-country-code');

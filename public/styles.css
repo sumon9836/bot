@@ -200,17 +200,18 @@ body::after {
 
 .header h1 {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: clamp(1.4rem, 3vw, 1.8rem);
-    font-weight: 800;
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    font-weight: 600;
     letter-spacing: -0.01em;
-    background: linear-gradient(135deg, var(--white-pure), var(--blue-primary));
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(0, 212, 255, 0.8));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 20px var(--blue-glow);
+    text-shadow: none;
     position: relative;
     margin: 0;
     line-height: 1.2;
+    opacity: 0.85;
 }
 
 .header h1::after {
@@ -229,24 +230,24 @@ body::after {
 }
 
 .header-subtitle {
-    font-size: 0.8rem;
-    color: var(--blue-text);
-    font-weight: 500;
-    opacity: 0.9;
+    font-size: 0.7rem;
+    color: rgba(125, 211, 252, 0.6);
+    font-weight: 400;
+    opacity: 0.7;
     margin-top: 2px;
     line-height: 1.2;
 }
 
 .developer-credit {
-    font-size: 0.7rem;
-    color: var(--gray-light);
-    font-weight: 400;
-    opacity: 0.6;
-    background: linear-gradient(45deg, var(--pink-light), var(--blue-secondary));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: creditGlow 4s ease-in-out infinite;
+    font-size: 0.65rem;
+    color: rgba(148, 163, 184, 0.5);
+    font-weight: 300;
+    opacity: 0.5;
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    -webkit-text-fill-color: unset;
+    animation: none;
     margin-top: 1px;
     line-height: 1.2;
 }
@@ -1124,34 +1125,38 @@ input[type="tel"]::placeholder {
     .header-content {
         padding: 0 16px;
         flex-direction: column;
-        gap: 16px;
+        gap: 12px;
         text-align: center;
     }
     
     .header-left {
         flex-direction: column;
-        gap: 8px;
+        gap: 6px;
     }
     
     /* 📱 Mobile-Optimized Header Text Sizes */
     .header h1 {
-        font-size: 2.2rem !important;
-        letter-spacing: 1px;
+        font-size: 1.3rem !important;
+        letter-spacing: 0.5px;
         line-height: 1.2;
+        opacity: 0.8;
     }
     
     .header-icon {
-        font-size: 32px !important;
+        font-size: 24px !important;
+        opacity: 0.8;
     }
     
     .header-subtitle {
-        font-size: 0.9rem !important;
-        margin-top: 4px;
+        font-size: 0.65rem !important;
+        margin-top: 2px;
+        opacity: 0.6;
     }
     
     .developer-credit {
-        font-size: 0.75rem !important;
-        margin-top: 2px;
+        font-size: 0.6rem !important;
+        margin-top: 1px;
+        opacity: 0.4;
     }
     
     /* 📱 Mobile-Optimized Header Buttons */
@@ -1216,24 +1221,28 @@ input[type="tel"]::placeholder {
 @media (max-width: 480px) {
     /* 📱 Ultra-Small Mobile Optimizations */
     .header {
-        padding: 16px 0;
+        padding: 12px 0;
     }
     
     .header h1 {
-        font-size: 1.8rem !important;
-        letter-spacing: 0.5px;
+        font-size: 1.1rem !important;
+        letter-spacing: 0.3px;
+        opacity: 0.75;
     }
     
     .header-icon {
-        font-size: 28px !important;
+        font-size: 20px !important;
+        opacity: 0.7;
     }
     
     .header-subtitle {
-        font-size: 0.8rem !important;
+        font-size: 0.6rem !important;
+        opacity: 0.55;
     }
     
     .developer-credit {
-        font-size: 0.7rem !important;
+        font-size: 0.55rem !important;
+        opacity: 0.35;
     }
     
     .card {
@@ -1512,13 +1521,21 @@ body:has(.brand .logo .fas.fa-user-shield) {
 /* Mobile Responsive Country Code Display */
 @media (max-width: 480px) {
     .country-code-display {
-        font-size: 0.85rem;
-        padding: 3px 6px;
-        left: 12px;
+        font-size: 0.8rem;
+        padding: 2px 6px;
+        left: 10px;
+        border-radius: 6px;
     }
     
     .input-wrapper.has-country-code input[type="tel"] {
-        padding-left: 95px;
+        padding-left: 85px;
+        font-size: 0.95rem;
+    }
+    
+    .input-wrapper input[type="tel"] {
+        padding: 14px 40px 14px 14px;
+        font-size: 0.95rem;
+        border-radius: 10px;
     }
 }
 
