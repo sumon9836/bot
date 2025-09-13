@@ -129,13 +129,13 @@ body::after {
     margin: 0 auto;
 }
 
-/* ========== HEADER SECTION ========== */
+/* ========== COMPACT HEADER BAR ========== */
 .header {
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 1px solid var(--glass-border);
-    padding: 20px 0;
+    padding: 12px 0;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -143,7 +143,7 @@ body::after {
 }
 
 .header:hover {
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.95);
     border-bottom-color: var(--pink-primary);
 }
 
@@ -159,50 +159,52 @@ body::after {
 .header-left {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
 }
 
 .header-icon {
-    font-size: 48px;
+    font-size: 32px;
     background: linear-gradient(135deg, var(--pink-primary), var(--blue-primary));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 10px var(--pink-glow));
+    filter: drop-shadow(0 0 8px var(--pink-glow));
     animation: iconPulse 3s ease-in-out infinite;
 }
 
 @keyframes iconPulse {
     0%, 100% { 
         transform: scale(1); 
-        filter: drop-shadow(0 0 10px var(--pink-glow));
+        filter: drop-shadow(0 0 8px var(--pink-glow));
     }
     50% { 
-        transform: scale(1.1); 
-        filter: drop-shadow(0 0 20px var(--pink-primary));
+        transform: scale(1.05); 
+        filter: drop-shadow(0 0 15px var(--pink-primary));
     }
 }
 
 .header h1 {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: clamp(2.5rem, 5vw, 3.5rem);
-    font-weight: 900;
-    letter-spacing: -0.02em;
+    font-size: clamp(1.4rem, 3vw, 1.8rem);
+    font-weight: 800;
+    letter-spacing: -0.01em;
     background: linear-gradient(135deg, var(--white-pure), var(--blue-primary));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 30px var(--blue-glow);
+    text-shadow: 0 0 20px var(--blue-glow);
     position: relative;
+    margin: 0;
+    line-height: 1.2;
 }
 
 .header h1::after {
     content: '';
     position: absolute;
-    bottom: -2px;
+    bottom: -1px;
     left: 0;
     width: 0;
-    height: 2px;
+    height: 1px;
     background: linear-gradient(90deg, var(--pink-primary), var(--blue-primary));
     transition: width 0.6s ease;
 }
@@ -212,33 +214,36 @@ body::after {
 }
 
 .header-subtitle {
-    font-size: 1.1rem;
+    font-size: 0.8rem;
     color: var(--blue-text);
     font-weight: 500;
     opacity: 0.9;
-    margin-top: 4px;
+    margin-top: 2px;
+    line-height: 1.2;
 }
 
 .developer-credit {
-    font-size: 0.9rem;
+    font-size: 0.7rem;
     color: var(--gray-light);
     font-weight: 400;
-    opacity: 0.7;
+    opacity: 0.6;
     background: linear-gradient(45deg, var(--pink-light), var(--blue-secondary));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: creditGlow 4s ease-in-out infinite;
+    margin-top: 1px;
+    line-height: 1.2;
 }
 
 @keyframes creditGlow {
-    0%, 100% { opacity: 0.7; }
-    50% { opacity: 1; }
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 0.9; }
 }
 
 .header-right {
     display: flex;
-    gap: 16px;
+    gap: 12px;
     align-items: center;
 }
 
@@ -1418,66 +1423,109 @@ body:has(.brand .logo .fas.fa-user-shield) {
     box-shadow: 0 8px 32px var(--pink-admin-glow);
 }
 
-/* ========== ENHANCED PHONE INPUT ANIMATION ========== */
-/* 🇮🇳 Seamless Indian Country Code Animation */
+/* ========== INTELLIGENT COUNTRY CODE DETECTION ========== */
+/* 🌍 Smart Country Code Display */
 .input-wrapper {
     position: relative;
-    overflow: hidden;
+    overflow: visible;
 }
 
-.input-wrapper::before {
-    content: '🇮🇳 +91';
+/* Country Code Display Element */
+.country-code-display {
     position: absolute;
     left: 16px;
     top: 50%;
     transform: translateY(-50%) translateX(-30px);
-    color: var(--gray-medium);
-    font-weight: 600;
+    font-weight: 700;
     font-size: 0.95rem;
     z-index: 3;
     opacity: 0;
     transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     pointer-events: none;
     white-space: nowrap;
-    background: rgba(0, 0, 0, 0.8);
-    padding: 2px 6px;
-    border-radius: 6px;
-    border: 1px solid transparent;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(26, 26, 26, 0.9));
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    color: var(--white-pure);
 }
 
-.input-wrapper.focused::before {
+.country-code-display.show {
     opacity: 1;
     transform: translateY(-50%) translateX(0);
-    color: var(--pink-primary);
-    border-color: var(--pink-soft);
-    box-shadow: 0 0 10px var(--pink-glow);
-    animation: flagBounce 0.6s ease-out;
+    border-color: var(--pink-primary);
+    box-shadow: 0 0 15px var(--pink-glow), 0 4px 20px rgba(0, 0, 0, 0.4);
+    animation: flagBounceIn 0.6s ease-out;
 }
 
-@keyframes flagBounce {
-    0% { transform: translateY(-50%) translateX(-30px) scale(0.8); }
-    50% { transform: translateY(-50%) translateX(0) scale(1.1); }
-    100% { transform: translateY(-50%) translateX(0) scale(1); }
+@keyframes flagBounceIn {
+    0% { 
+        transform: translateY(-50%) translateX(-30px) scale(0.7);
+        opacity: 0;
+    }
+    50% { 
+        transform: translateY(-50%) translateX(0) scale(1.15);
+        opacity: 0.8;
+    }
+    100% { 
+        transform: translateY(-50%) translateX(0) scale(1);
+        opacity: 1;
+    }
 }
 
-/* Enhanced Input Field Padding Animation */
+/* Enhanced Input Field with Dynamic Padding */
 .input-wrapper input[type="tel"] {
-    transition: padding-left 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    transition: padding-left 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), border-color 0.3s ease;
 }
 
-.input-wrapper.focused input[type="tel"] {
-    padding-left: 100px;
+.input-wrapper.has-country-code input[type="tel"] {
+    padding-left: 110px;
+    border-color: var(--pink-primary);
+    box-shadow: 0 0 0 4px var(--pink-glow), inset 0 0 20px rgba(255, 27, 107, 0.1);
 }
 
 /* Smooth Icon Transition */
 .input-wrapper .input-icon {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    right: 16px;
 }
 
-.input-wrapper.focused .input-icon {
+.input-wrapper.has-country-code .input-icon {
     color: var(--pink-primary);
     transform: scale(1.2) rotate(5deg);
     filter: drop-shadow(0 0 8px var(--pink-glow));
+}
+
+/* Country Detection Success Animation */
+@keyframes countryDetectedPulse {
+    0% { 
+        box-shadow: 0 0 15px var(--pink-glow), 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+    50% { 
+        box-shadow: 0 0 25px var(--pink-primary), 0 6px 30px rgba(255, 27, 107, 0.6);
+    }
+    100% { 
+        box-shadow: 0 0 15px var(--pink-glow), 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+}
+
+.country-code-display.detected {
+    animation: countryDetectedPulse 1s ease-in-out;
+}
+
+/* Mobile Responsive Country Code Display */
+@media (max-width: 480px) {
+    .country-code-display {
+        font-size: 0.85rem;
+        padding: 3px 6px;
+        left: 12px;
+    }
+    
+    .input-wrapper.has-country-code input[type="tel"] {
+        padding-left: 95px;
+    }
 }
 
 /* ========== SCROLLBAR STYLING ========== */

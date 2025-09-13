@@ -15,29 +15,318 @@ const retrySessionsBtn = document.getElementById('retrySessionsBtn');
 const sessionCount = document.getElementById('sessionCount');
 const toast = document.getElementById('toast');
 
-// 🇮🇳 Phone Input Animation Handler
+// 🌍 Country Codes Database with Flags
+const COUNTRY_CODES = {
+    '1': { flag: '🇺🇸', name: 'United States', maxLength: 10 },
+    '7': { flag: '🇷🇺', name: 'Russia', maxLength: 10 },
+    '20': { flag: '🇪🇬', name: 'Egypt', maxLength: 10 },
+    '27': { flag: '🇿🇦', name: 'South Africa', maxLength: 9 },
+    '30': { flag: '🇬🇷', name: 'Greece', maxLength: 10 },
+    '31': { flag: '🇳🇱', name: 'Netherlands', maxLength: 9 },
+    '32': { flag: '🇧🇪', name: 'Belgium', maxLength: 9 },
+    '33': { flag: '🇫🇷', name: 'France', maxLength: 10 },
+    '34': { flag: '🇪🇸', name: 'Spain', maxLength: 9 },
+    '36': { flag: '🇭🇺', name: 'Hungary', maxLength: 9 },
+    '39': { flag: '🇮🇹', name: 'Italy', maxLength: 10 },
+    '40': { flag: '🇷🇴', name: 'Romania', maxLength: 9 },
+    '41': { flag: '🇨🇭', name: 'Switzerland', maxLength: 9 },
+    '43': { flag: '🇦🇹', name: 'Austria', maxLength: 11 },
+    '44': { flag: '🇬🇧', name: 'United Kingdom', maxLength: 10 },
+    '45': { flag: '🇩🇰', name: 'Denmark', maxLength: 8 },
+    '46': { flag: '🇸🇪', name: 'Sweden', maxLength: 9 },
+    '47': { flag: '🇳🇴', name: 'Norway', maxLength: 8 },
+    '48': { flag: '🇵🇱', name: 'Poland', maxLength: 9 },
+    '49': { flag: '🇩🇪', name: 'Germany', maxLength: 11 },
+    '51': { flag: '🇵🇪', name: 'Peru', maxLength: 9 },
+    '52': { flag: '🇲🇽', name: 'Mexico', maxLength: 10 },
+    '53': { flag: '🇨🇺', name: 'Cuba', maxLength: 8 },
+    '54': { flag: '🇦🇷', name: 'Argentina', maxLength: 10 },
+    '55': { flag: '🇧🇷', name: 'Brazil', maxLength: 11 },
+    '56': { flag: '🇨🇱', name: 'Chile', maxLength: 9 },
+    '57': { flag: '🇨🇴', name: 'Colombia', maxLength: 10 },
+    '58': { flag: '🇻🇪', name: 'Venezuela', maxLength: 10 },
+    '60': { flag: '🇲🇾', name: 'Malaysia', maxLength: 9 },
+    '61': { flag: '🇦🇺', name: 'Australia', maxLength: 9 },
+    '62': { flag: '🇮🇩', name: 'Indonesia', maxLength: 11 },
+    '63': { flag: '🇵🇭', name: 'Philippines', maxLength: 10 },
+    '64': { flag: '🇳🇿', name: 'New Zealand', maxLength: 9 },
+    '65': { flag: '🇸🇬', name: 'Singapore', maxLength: 8 },
+    '66': { flag: '🇹🇭', name: 'Thailand', maxLength: 9 },
+    '81': { flag: '🇯🇵', name: 'Japan', maxLength: 11 },
+    '82': { flag: '🇰🇷', name: 'South Korea', maxLength: 10 },
+    '84': { flag: '🇻🇳', name: 'Vietnam', maxLength: 9 },
+    '86': { flag: '🇨🇳', name: 'China', maxLength: 11 },
+    '90': { flag: '🇹🇷', name: 'Turkey', maxLength: 10 },
+    '91': { flag: '🇮🇳', name: 'India', maxLength: 10 },
+    '92': { flag: '🇵🇰', name: 'Pakistan', maxLength: 10 },
+    '93': { flag: '🇦🇫', name: 'Afghanistan', maxLength: 9 },
+    '94': { flag: '🇱🇰', name: 'Sri Lanka', maxLength: 9 },
+    '95': { flag: '🇲🇲', name: 'Myanmar', maxLength: 9 },
+    '98': { flag: '🇮🇷', name: 'Iran', maxLength: 10 },
+    '212': { flag: '🇲🇦', name: 'Morocco', maxLength: 9 },
+    '213': { flag: '🇩🇿', name: 'Algeria', maxLength: 9 },
+    '216': { flag: '🇹🇳', name: 'Tunisia', maxLength: 8 },
+    '218': { flag: '🇱🇾', name: 'Libya', maxLength: 9 },
+    '220': { flag: '🇬🇲', name: 'Gambia', maxLength: 7 },
+    '221': { flag: '🇸🇳', name: 'Senegal', maxLength: 9 },
+    '222': { flag: '🇲🇷', name: 'Mauritania', maxLength: 8 },
+    '223': { flag: '🇲🇱', name: 'Mali', maxLength: 8 },
+    '224': { flag: '🇬🇳', name: 'Guinea', maxLength: 9 },
+    '225': { flag: '🇨🇮', name: 'Ivory Coast', maxLength: 8 },
+    '226': { flag: '🇧🇫', name: 'Burkina Faso', maxLength: 8 },
+    '227': { flag: '🇳🇪', name: 'Niger', maxLength: 8 },
+    '228': { flag: '🇹🇬', name: 'Togo', maxLength: 8 },
+    '229': { flag: '🇧🇯', name: 'Benin', maxLength: 8 },
+    '230': { flag: '🇲🇺', name: 'Mauritius', maxLength: 8 },
+    '231': { flag: '🇱🇷', name: 'Liberia', maxLength: 8 },
+    '232': { flag: '🇸🇱', name: 'Sierra Leone', maxLength: 8 },
+    '233': { flag: '🇬🇭', name: 'Ghana', maxLength: 9 },
+    '234': { flag: '🇳🇬', name: 'Nigeria', maxLength: 10 },
+    '235': { flag: '🇹🇩', name: 'Chad', maxLength: 8 },
+    '236': { flag: '🇨🇫', name: 'Central African Republic', maxLength: 8 },
+    '237': { flag: '🇨🇲', name: 'Cameroon', maxLength: 9 },
+    '238': { flag: '🇨🇻', name: 'Cape Verde', maxLength: 7 },
+    '239': { flag: '🇸🇹', name: 'Sao Tome and Principe', maxLength: 7 },
+    '240': { flag: '🇬🇶', name: 'Equatorial Guinea', maxLength: 9 },
+    '241': { flag: '🇬🇦', name: 'Gabon', maxLength: 8 },
+    '242': { flag: '🇨🇬', name: 'Republic of the Congo', maxLength: 9 },
+    '243': { flag: '🇨🇩', name: 'Democratic Republic of the Congo', maxLength: 9 },
+    '244': { flag: '🇦🇴', name: 'Angola', maxLength: 9 },
+    '245': { flag: '🇬🇼', name: 'Guinea-Bissau', maxLength: 7 },
+    '246': { flag: '🇮🇴', name: 'British Indian Ocean Territory', maxLength: 7 },
+    '248': { flag: '🇸🇨', name: 'Seychelles', maxLength: 7 },
+    '249': { flag: '🇸🇩', name: 'Sudan', maxLength: 9 },
+    '250': { flag: '🇷🇼', name: 'Rwanda', maxLength: 9 },
+    '251': { flag: '🇪🇹', name: 'Ethiopia', maxLength: 9 },
+    '252': { flag: '🇸🇴', name: 'Somalia', maxLength: 8 },
+    '253': { flag: '🇩🇯', name: 'Djibouti', maxLength: 8 },
+    '254': { flag: '🇰🇪', name: 'Kenya', maxLength: 9 },
+    '255': { flag: '🇹🇿', name: 'Tanzania', maxLength: 9 },
+    '256': { flag: '🇺🇬', name: 'Uganda', maxLength: 9 },
+    '257': { flag: '🇧🇮', name: 'Burundi', maxLength: 8 },
+    '258': { flag: '🇲🇿', name: 'Mozambique', maxLength: 9 },
+    '260': { flag: '🇿🇲', name: 'Zambia', maxLength: 9 },
+    '261': { flag: '🇲🇬', name: 'Madagascar', maxLength: 9 },
+    '262': { flag: '🇷🇪', name: 'Reunion', maxLength: 9 },
+    '263': { flag: '🇿🇼', name: 'Zimbabwe', maxLength: 9 },
+    '264': { flag: '🇳🇦', name: 'Namibia', maxLength: 9 },
+    '265': { flag: '🇲🇼', name: 'Malawi', maxLength: 9 },
+    '266': { flag: '🇱🇸', name: 'Lesotho', maxLength: 8 },
+    '267': { flag: '🇧🇼', name: 'Botswana', maxLength: 8 },
+    '268': { flag: '🇸🇿', name: 'Swaziland', maxLength: 8 },
+    '269': { flag: '🇰🇲', name: 'Comoros', maxLength: 7 },
+    '290': { flag: '🇸🇭', name: 'Saint Helena', maxLength: 4 },
+    '291': { flag: '🇪🇷', name: 'Eritrea', maxLength: 7 },
+    '297': { flag: '🇦🇼', name: 'Aruba', maxLength: 7 },
+    '298': { flag: '🇫🇴', name: 'Faroe Islands', maxLength: 6 },
+    '299': { flag: '🇬🇱', name: 'Greenland', maxLength: 6 },
+    '350': { flag: '🇬🇮', name: 'Gibraltar', maxLength: 8 },
+    '351': { flag: '🇵🇹', name: 'Portugal', maxLength: 9 },
+    '352': { flag: '🇱🇺', name: 'Luxembourg', maxLength: 9 },
+    '353': { flag: '🇮🇪', name: 'Ireland', maxLength: 9 },
+    '354': { flag: '🇮🇸', name: 'Iceland', maxLength: 7 },
+    '355': { flag: '🇦🇱', name: 'Albania', maxLength: 9 },
+    '356': { flag: '🇲🇹', name: 'Malta', maxLength: 8 },
+    '357': { flag: '🇨🇾', name: 'Cyprus', maxLength: 8 },
+    '358': { flag: '🇫🇮', name: 'Finland', maxLength: 10 },
+    '359': { flag: '🇧🇬', name: 'Bulgaria', maxLength: 9 },
+    '370': { flag: '🇱🇹', name: 'Lithuania', maxLength: 8 },
+    '371': { flag: '🇱🇻', name: 'Latvia', maxLength: 8 },
+    '372': { flag: '🇪🇪', name: 'Estonia', maxLength: 8 },
+    '373': { flag: '🇲🇩', name: 'Moldova', maxLength: 8 },
+    '374': { flag: '🇦🇲', name: 'Armenia', maxLength: 8 },
+    '375': { flag: '🇧🇾', name: 'Belarus', maxLength: 9 },
+    '376': { flag: '🇦🇩', name: 'Andorra', maxLength: 6 },
+    '377': { flag: '🇲🇨', name: 'Monaco', maxLength: 8 },
+    '378': { flag: '🇸🇲', name: 'San Marino', maxLength: 10 },
+    '380': { flag: '🇺🇦', name: 'Ukraine', maxLength: 9 },
+    '381': { flag: '🇷🇸', name: 'Serbia', maxLength: 9 },
+    '382': { flag: '🇲🇪', name: 'Montenegro', maxLength: 8 },
+    '383': { flag: '🇽🇰', name: 'Kosovo', maxLength: 9 },
+    '385': { flag: '🇭🇷', name: 'Croatia', maxLength: 9 },
+    '386': { flag: '🇸🇮', name: 'Slovenia', maxLength: 8 },
+    '387': { flag: '🇧🇦', name: 'Bosnia and Herzegovina', maxLength: 8 },
+    '389': { flag: '🇲🇰', name: 'North Macedonia', maxLength: 8 },
+    '420': { flag: '🇨🇿', name: 'Czech Republic', maxLength: 9 },
+    '421': { flag: '🇸🇰', name: 'Slovakia', maxLength: 9 },
+    '423': { flag: '🇱🇮', name: 'Liechtenstein', maxLength: 7 },
+    '500': { flag: '🇫🇰', name: 'Falkland Islands', maxLength: 5 },
+    '501': { flag: '🇧🇿', name: 'Belize', maxLength: 7 },
+    '502': { flag: '🇬🇹', name: 'Guatemala', maxLength: 8 },
+    '503': { flag: '🇸🇻', name: 'El Salvador', maxLength: 8 },
+    '504': { flag: '🇭🇳', name: 'Honduras', maxLength: 8 },
+    '505': { flag: '🇳🇮', name: 'Nicaragua', maxLength: 8 },
+    '506': { flag: '🇨🇷', name: 'Costa Rica', maxLength: 8 },
+    '507': { flag: '🇵🇦', name: 'Panama', maxLength: 8 },
+    '508': { flag: '🇵🇲', name: 'Saint Pierre and Miquelon', maxLength: 6 },
+    '509': { flag: '🇭🇹', name: 'Haiti', maxLength: 8 },
+    '590': { flag: '🇬🇵', name: 'Guadeloupe', maxLength: 9 },
+    '591': { flag: '🇧🇴', name: 'Bolivia', maxLength: 8 },
+    '592': { flag: '🇬🇾', name: 'Guyana', maxLength: 7 },
+    '593': { flag: '🇪🇨', name: 'Ecuador', maxLength: 9 },
+    '594': { flag: '🇬🇫', name: 'French Guiana', maxLength: 9 },
+    '595': { flag: '🇵🇾', name: 'Paraguay', maxLength: 9 },
+    '596': { flag: '🇲🇶', name: 'Martinique', maxLength: 9 },
+    '597': { flag: '🇸🇷', name: 'Suriname', maxLength: 7 },
+    '598': { flag: '🇺🇾', name: 'Uruguay', maxLength: 8 },
+    '599': { flag: '🇨🇼', name: 'Curacao', maxLength: 7 },
+    '670': { flag: '🇹🇱', name: 'East Timor', maxLength: 8 },
+    '672': { flag: '🇦🇶', name: 'Antarctica', maxLength: 6 },
+    '673': { flag: '🇧🇳', name: 'Brunei', maxLength: 7 },
+    '674': { flag: '🇳🇷', name: 'Nauru', maxLength: 7 },
+    '675': { flag: '🇵🇬', name: 'Papua New Guinea', maxLength: 8 },
+    '676': { flag: '🇹🇴', name: 'Tonga', maxLength: 5 },
+    '677': { flag: '🇸🇧', name: 'Solomon Islands', maxLength: 7 },
+    '678': { flag: '🇻🇺', name: 'Vanuatu', maxLength: 7 },
+    '679': { flag: '🇫🇯', name: 'Fiji', maxLength: 7 },
+    '680': { flag: '🇵🇼', name: 'Palau', maxLength: 7 },
+    '681': { flag: '🇼🇫', name: 'Wallis and Futuna', maxLength: 6 },
+    '682': { flag: '🇨🇰', name: 'Cook Islands', maxLength: 5 },
+    '683': { flag: '🇳🇺', name: 'Niue', maxLength: 4 },
+    '684': { flag: '🇦🇸', name: 'American Samoa', maxLength: 7 },
+    '685': { flag: '🇼🇸', name: 'Samoa', maxLength: 7 },
+    '686': { flag: '🇰🇮', name: 'Kiribati', maxLength: 5 },
+    '687': { flag: '🇳🇨', name: 'New Caledonia', maxLength: 6 },
+    '688': { flag: '🇹🇻', name: 'Tuvalu', maxLength: 5 },
+    '689': { flag: '🇵🇫', name: 'French Polynesia', maxLength: 8 },
+    '690': { flag: '🇹🇰', name: 'Tokelau', maxLength: 4 },
+    '691': { flag: '🇫🇲', name: 'Micronesia', maxLength: 7 },
+    '692': { flag: '🇲🇭', name: 'Marshall Islands', maxLength: 7 },
+    '850': { flag: '🇰🇵', name: 'North Korea', maxLength: 10 },
+    '852': { flag: '🇭🇰', name: 'Hong Kong', maxLength: 8 },
+    '853': { flag: '🇲🇴', name: 'Macau', maxLength: 8 },
+    '855': { flag: '🇰🇭', name: 'Cambodia', maxLength: 9 },
+    '856': { flag: '🇱🇦', name: 'Laos', maxLength: 10 },
+    '880': { flag: '🇧🇩', name: 'Bangladesh', maxLength: 10 },
+    '886': { flag: '🇹🇼', name: 'Taiwan', maxLength: 9 },
+    '960': { flag: '🇲🇻', name: 'Maldives', maxLength: 7 },
+    '961': { flag: '🇱🇧', name: 'Lebanon', maxLength: 8 },
+    '962': { flag: '🇯🇴', name: 'Jordan', maxLength: 9 },
+    '963': { flag: '🇸🇾', name: 'Syria', maxLength: 9 },
+    '964': { flag: '🇮🇶', name: 'Iraq', maxLength: 10 },
+    '965': { flag: '🇰🇼', name: 'Kuwait', maxLength: 8 },
+    '966': { flag: '🇸🇦', name: 'Saudi Arabia', maxLength: 9 },
+    '967': { flag: '🇾🇪', name: 'Yemen', maxLength: 9 },
+    '968': { flag: '🇴🇲', name: 'Oman', maxLength: 8 },
+    '970': { flag: '🇵🇸', name: 'Palestine', maxLength: 9 },
+    '971': { flag: '🇦🇪', name: 'United Arab Emirates', maxLength: 9 },
+    '972': { flag: '🇮🇱', name: 'Israel', maxLength: 9 },
+    '973': { flag: '🇧🇭', name: 'Bahrain', maxLength: 8 },
+    '974': { flag: '🇶🇦', name: 'Qatar', maxLength: 8 },
+    '975': { flag: '🇧🇹', name: 'Bhutan', maxLength: 8 },
+    '976': { flag: '🇲🇳', name: 'Mongolia', maxLength: 8 },
+    '977': { flag: '🇳🇵', name: 'Nepal', maxLength: 10 },
+    '992': { flag: '🇹🇯', name: 'Tajikistan', maxLength: 9 },
+    '993': { flag: '🇹🇲', name: 'Turkmenistan', maxLength: 8 },
+    '994': { flag: '🇦🇿', name: 'Azerbaijan', maxLength: 9 },
+    '995': { flag: '🇬🇪', name: 'Georgia', maxLength: 9 },
+    '996': { flag: '🇰🇬', name: 'Kyrgyzstan', maxLength: 9 },
+    '998': { flag: '🇺🇿', name: 'Uzbekistan', maxLength: 9 }
+};
+
+// 🎯 Smart Country Code Detection
+let currentCountryCode = null;
+let detectedCountry = null;
+
+function detectCountryCode(value) {
+    // Remove any non-digits
+    const digits = value.replace(/\D/g, '');
+    
+    // Try to match country codes (longest first for better accuracy)
+    const sortedCodes = Object.keys(COUNTRY_CODES).sort((a, b) => b.length - a.length);
+    
+    for (const code of sortedCodes) {
+        if (digits.startsWith(code)) {
+            return {
+                code,
+                info: COUNTRY_CODES[code],
+                remainingNumber: digits.substring(code.length)
+            };
+        }
+    }
+    
+    return null;
+}
+
+// 🌟 Enhanced Phone Input with Smart Country Detection
 function initPhoneInputAnimation() {
     const inputWrapper = pairNumberInput.closest('.input-wrapper');
     
     if (!inputWrapper) return;
     
-    // Add focus event for Indian flag animation
+    // Create country code display element
+    const countryDisplay = document.createElement('div');
+    countryDisplay.className = 'country-code-display';
+    countryDisplay.style.display = 'none';
+    inputWrapper.appendChild(countryDisplay);
+    
+    // Add focus event
     pairNumberInput.addEventListener('focus', () => {
         inputWrapper.classList.add('focused');
     });
     
-    // Add blur event to remove animation
+    // Add blur event
     pairNumberInput.addEventListener('blur', () => {
-        inputWrapper.classList.remove('focused');
+        if (!pairNumberInput.value || !currentCountryCode) {
+            inputWrapper.classList.remove('focused');
+            countryDisplay.style.display = 'none';
+            currentCountryCode = null;
+            detectedCountry = null;
+        }
     });
     
-    // Add smooth typing animation
+    // Smart input processing
     pairNumberInput.addEventListener('input', (e) => {
         const value = e.target.value;
-        if (value.length > 0) {
+        const detection = detectCountryCode(value);
+        
+        if (detection) {
+            // Country code detected!
+            currentCountryCode = detection.code;
+            detectedCountry = detection.info;
+            
+            // Update country code display
+            countryDisplay.innerHTML = `${detection.info.flag} +${detection.code}`;
+            countryDisplay.style.display = 'block';
+            countryDisplay.classList.add('show');
+            
+            // Update input value to show only the remaining number
+            e.target.value = detection.remainingNumber;
+            
+            // Add classes for styling
+            inputWrapper.classList.add('has-country-code');
+            inputWrapper.classList.add('focused');
+            
+            // Add bounce animation
+            countryDisplay.style.animation = 'flagBounce 0.6s ease-out';
+            
+            // Show success feedback
+            showToast('Country Detected', `${detection.info.flag} ${detection.info.name} (+${detection.code})`, 'success');
+            
+        } else if (value.length === 0) {
+            // Reset when input is empty
+            countryDisplay.style.display = 'none';
+            countryDisplay.classList.remove('show');
+            inputWrapper.classList.remove('has-country-code');
+            currentCountryCode = null;
+            detectedCountry = null;
+        }
+        
+        // Update has-value class
+        if (value.length > 0 || currentCountryCode) {
             inputWrapper.classList.add('has-value');
         } else {
             inputWrapper.classList.remove('has-value');
+        }
+    });
+    
+    // Handle form submission with country code
+    const originalSubmitHandler = pairForm.onsubmit;
+    pairForm.addEventListener('submit', (e) => {
+        if (currentCountryCode && detectedCountry) {
+            // Combine country code with the number
+            const fullNumber = currentCountryCode + pairNumberInput.value;
+            pairNumberInput.value = fullNumber;
         }
     });
 }
