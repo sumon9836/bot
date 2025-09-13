@@ -1125,17 +1125,56 @@ input[type="tel"]::placeholder {
     .header-content {
         padding: 0 16px;
         flex-direction: column;
-        gap: 20px;
+        gap: 16px;
         text-align: center;
     }
     
     .header-left {
         flex-direction: column;
-        gap: 12px;
+        gap: 8px;
+    }
+    
+    /* 📱 Mobile-Optimized Header Text Sizes */
+    .header h1 {
+        font-size: 2.2rem !important;
+        letter-spacing: 1px;
+        line-height: 1.2;
+    }
+    
+    .header-icon {
+        font-size: 32px !important;
+    }
+    
+    .header-subtitle {
+        font-size: 0.9rem !important;
+        margin-top: 4px;
+    }
+    
+    .developer-credit {
+        font-size: 0.75rem !important;
+        margin-top: 2px;
+    }
+    
+    /* 📱 Mobile-Optimized Header Buttons */
+    .header-right {
+        flex-direction: row;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .btn-support {
+        padding: 10px 16px !important;
+        font-size: 0.8rem !important;
+    }
+    
+    .btn-secondary {
+        padding: 10px 12px !important;
+        min-height: auto !important;
     }
     
     .main-content {
-        padding: 40px 16px;
+        padding: 30px 16px;
     }
     
     .action-cards {
@@ -1176,30 +1215,100 @@ input[type="tel"]::placeholder {
 }
 
 @media (max-width: 480px) {
+    /* 📱 Ultra-Small Mobile Optimizations */
+    .header {
+        padding: 16px 0;
+    }
+    
     .header h1 {
-        font-size: 2rem;
+        font-size: 1.8rem !important;
+        letter-spacing: 0.5px;
     }
     
     .header-icon {
-        font-size: 36px;
+        font-size: 28px !important;
+    }
+    
+    .header-subtitle {
+        font-size: 0.8rem !important;
+    }
+    
+    .developer-credit {
+        font-size: 0.7rem !important;
     }
     
     .card {
-        padding: 20px;
+        padding: 18px;
+        margin-bottom: 20px;
+    }
+    
+    .card h2 {
+        font-size: 1.3rem;
     }
     
     .btn {
-        padding: 16px 24px;
-        font-size: 0.9rem;
+        padding: 14px 20px;
+        font-size: 0.85rem;
+        min-height: 48px;
+    }
+    
+    .btn-support {
+        padding: 8px 12px !important;
+        font-size: 0.75rem !important;
+    }
+    
+    .btn-secondary {
+        padding: 8px 10px !important;
     }
     
     input[type="tel"] {
-        padding: 16px;
+        padding: 16px 40px 16px 16px;
         font-size: 1rem;
     }
     
     .input-wrapper.focused input[type="tel"] {
-        padding-left: 80px;
+        padding-left: 85px;
+    }
+    
+    .input-wrapper::before {
+        font-size: 0.85rem;
+        padding: 1px 4px;
+    }
+    
+    /* Compact Session Cards */
+    .session-card {
+        padding: 16px;
+    }
+    
+    .session-number {
+        font-size: 1rem;
+    }
+    
+    .session-info > div {
+        font-size: 0.85rem;
+    }
+    
+    /* Admin Panel Mobile Optimizations */
+    .admin-dashboard .brand {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+    }
+    
+    .admin-dashboard .brand .logo {
+        align-self: center;
+        padding: 8px;
+        font-size: 1.2rem;
+    }
+    
+    .admin-dashboard .form-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .admin-dashboard .form-actions .btn {
+        width: 100%;
+        justify-content: center;
     }
 }
 
@@ -1229,6 +1338,146 @@ a:focus-visible {
 ::-moz-selection {
     background: var(--pink-glow);
     color: var(--white-pure);
+}
+
+/* ========== ADMIN PANEL ENHANCEMENTS ========== */
+/* 💗 Lighter Pink Admin Theme for Better Appeal */
+body:has(.main-content .card .card-header h2 i.fas.fa-ban),
+body:has(.brand .logo .fas.fa-user-shield) {
+    --pink-admin: #ffb3d6;
+    --pink-admin-soft: rgba(255, 179, 214, 0.15);
+    --pink-admin-glow: rgba(255, 179, 214, 0.25);
+    --admin-bg: #0f0f0f;
+    --admin-card: #1a1a1a;
+}
+
+/* Admin Panel Specific Styling */
+.admin-dashboard {
+    background: linear-gradient(135deg, var(--admin-bg) 0%, var(--black-primary) 100%);
+}
+
+.admin-dashboard .header {
+    background: rgba(26, 26, 26, 0.9);
+    border-bottom: 1px solid var(--pink-admin-soft);
+}
+
+.admin-dashboard .brand .logo {
+    background: linear-gradient(135deg, var(--pink-admin), var(--pink-light));
+    color: var(--black-deep);
+    padding: 12px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px var(--pink-admin-glow);
+}
+
+.admin-dashboard .card {
+    background: rgba(26, 26, 26, 0.8);
+    border: 1px solid var(--pink-admin-soft);
+    box-shadow: 0 8px 32px rgba(255, 179, 214, 0.1);
+}
+
+.admin-dashboard .card:hover {
+    border-color: var(--pink-admin);
+    box-shadow: 0 12px 40px var(--pink-admin-glow);
+}
+
+.admin-dashboard .btn-danger {
+    background: linear-gradient(135deg, #ff4757, #ff3742);
+    border: 1px solid #ff4757;
+    box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+}
+
+.admin-dashboard .btn-warning {
+    background: linear-gradient(135deg, #ffa502, #ff9500);
+    border: 1px solid #ffa502;
+    box-shadow: 0 4px 15px rgba(255, 165, 2, 0.3);
+}
+
+.admin-dashboard .btn-success {
+    background: linear-gradient(135deg, var(--pink-admin), var(--pink-light));
+    color: var(--black-deep);
+    border: 1px solid var(--pink-admin);
+    box-shadow: 0 4px 15px var(--pink-admin-glow);
+    font-weight: 700;
+}
+
+.admin-dashboard .btn-primary {
+    background: linear-gradient(135deg, var(--pink-admin), var(--blue-primary));
+    border: 1px solid var(--pink-admin);
+    box-shadow: 0 4px 15px var(--pink-admin-glow);
+}
+
+/* Admin Input Fields with Lighter Pink Accents */
+.admin-dashboard input:focus {
+    border-color: var(--pink-admin);
+    box-shadow: 0 0 0 4px var(--pink-admin-soft), inset 0 0 20px rgba(255, 179, 214, 0.1);
+}
+
+.admin-dashboard .toast {
+    background: rgba(26, 26, 26, 0.95);
+    border: 1px solid var(--pink-admin-soft);
+    box-shadow: 0 8px 32px var(--pink-admin-glow);
+}
+
+/* ========== ENHANCED PHONE INPUT ANIMATION ========== */
+/* 🇮🇳 Seamless Indian Country Code Animation */
+.input-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+
+.input-wrapper::before {
+    content: '🇮🇳 +91';
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%) translateX(-30px);
+    color: var(--gray-medium);
+    font-weight: 600;
+    font-size: 0.95rem;
+    z-index: 3;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    pointer-events: none;
+    white-space: nowrap;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 2px 6px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+}
+
+.input-wrapper.focused::before {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+    color: var(--pink-primary);
+    border-color: var(--pink-soft);
+    box-shadow: 0 0 10px var(--pink-glow);
+    animation: flagBounce 0.6s ease-out;
+}
+
+@keyframes flagBounce {
+    0% { transform: translateY(-50%) translateX(-30px) scale(0.8); }
+    50% { transform: translateY(-50%) translateX(0) scale(1.1); }
+    100% { transform: translateY(-50%) translateX(0) scale(1); }
+}
+
+/* Enhanced Input Field Padding Animation */
+.input-wrapper input[type="tel"] {
+    transition: padding-left 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.input-wrapper.focused input[type="tel"] {
+    padding-left: 100px;
+}
+
+/* Smooth Icon Transition */
+.input-wrapper .input-icon {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-wrapper.focused .input-icon {
+    color: var(--pink-primary);
+    transform: scale(1.2) rotate(5deg);
+    filter: drop-shadow(0 0 8px var(--pink-glow));
 }
 
 /* ========== SCROLLBAR STYLING ========== */
