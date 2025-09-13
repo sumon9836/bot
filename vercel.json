@@ -3,7 +3,7 @@
   "name": "kaisen-md-dashboard",
   "functions": {
     "api/**/*.js": {
-      "runtime": "@vercel/node@3.0.0"
+      "runtime": "@vercel/node@3.1.0"
     }
   },
   "rewrites": [
