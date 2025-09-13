@@ -5,6 +5,7 @@ const API_BASE_URL = '/api';
 const pairForm = document.getElementById('pairForm');
 const pairNumberInput = document.getElementById('pairNumber');
 const refreshBtn = document.getElementById('refreshBtn');
+const headerRefreshBtn = document.getElementById('headerRefreshBtn');
 const sessionsGrid = document.getElementById('sessionsGrid');
 const sessionsLoader = document.getElementById('sessionsLoader');
 const sessionsError = document.getElementById('sessionsError');
@@ -13,6 +14,33 @@ const sessionsErrorMessage = document.getElementById('sessionsErrorMessage');
 const retrySessionsBtn = document.getElementById('retrySessionsBtn');
 const sessionCount = document.getElementById('sessionCount');
 const toast = document.getElementById('toast');
+
+// 🇮🇳 Phone Input Animation Handler
+function initPhoneInputAnimation() {
+    const inputWrapper = pairNumberInput.closest('.input-wrapper');
+    
+    if (!inputWrapper) return;
+    
+    // Add focus event for Indian flag animation
+    pairNumberInput.addEventListener('focus', () => {
+        inputWrapper.classList.add('focused');
+    });
+    
+    // Add blur event to remove animation
+    pairNumberInput.addEventListener('blur', () => {
+        inputWrapper.classList.remove('focused');
+    });
+    
+    // Add smooth typing animation
+    pairNumberInput.addEventListener('input', (e) => {
+        const value = e.target.value;
+        if (value.length > 0) {
+            inputWrapper.classList.add('has-value');
+        } else {
+            inputWrapper.classList.remove('has-value');
+        }
+    });
+}
 
 // Banlist elements
 const refreshBanlistBtn = document.getElementById('refreshBanlistBtn');
@@ -29,6 +57,56 @@ let sessions = [];
 let bannedUsers = {};
 let isLoading = false;
 let isLoadingBanlist = false;
+
+// 🎨 Enhanced UI Animations and Micro-interactions
+function initEnhancedAnimations() {
+    // Add stagger animation to cards
+    const cards = document.querySelectorAll('.card, .session-card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('fade-in-up');
+    });
+    
+    // Add button ripple effect
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 50%;
+                transform: scale(0);
+                animation: ripple 0.6s ease-out;
+                pointer-events: none;
+            `;
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+    
+    // Add hover sound effect simulation (visual feedback)
+    const interactiveElements = document.querySelectorAll('.btn, .card, .session-card, .input-wrapper');
+    interactiveElements.forEach(element => {
+        element.addEventListener('mouseenter', function() {
+            this.style.transform = this.style.transform || '';
+            this.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+        });
+    });
+}
 
 // Utility Functions
 function validatePhoneNumber(number) {
@@ -755,6 +833,9 @@ pairForm.addEventListener('submit', async (e) => {
 if (refreshBtn) {
     refreshBtn.addEventListener('click', loadSessions);
 }
+if (headerRefreshBtn) {
+    headerRefreshBtn.addEventListener('click', loadSessions);
+}
 if (retrySessionsBtn) {
     retrySessionsBtn.addEventListener('click', loadSessions);
 }
@@ -879,7 +960,11 @@ function smoothScrollTo(elementId) {
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('WhatsApp Bot Management Dashboard initialized');
+    console.log('🚀 WhatsApp Bot Management Dashboard - Railay Inspired Design Initialized');
+
+    // Initialize enhanced animations and phone input
+    initEnhancedAnimations();
+    initPhoneInputAnimation();
     
     // Add entrance animations
     setTimeout(addEntranceAnimations, 100);

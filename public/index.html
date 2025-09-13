@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Modern WhatsApp Bot Management Dashboard - Railay Inspired Design">
     <title>𝐊ąìʂҽղ-𝐌𝐃 | Bot Dashboard</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -23,8 +25,6 @@
                     <p class="developer-credit">Powered by Sumon Developer</p>
                 </div>
                 <div class="header-right">
-
-                    </a>
                     <a href="https://chat.whatsapp.com/CQyxExEBMGvEnkA32zqbNY" 
                        target="_blank" 
                        class="btn btn-support" 
@@ -32,7 +32,7 @@
                         <i class="fab fa-whatsapp"></i>
                         <span class="support-text">Support</span>
                     </a>
-                    <button id="refreshBtn" class="btn btn-secondary" title="Refresh Sessions">
+                    <button id="headerRefreshBtn" class="btn btn-secondary" title="Refresh Sessions">
                         <i class="fas fa-sync-alt"></i>
                     </button>
                 </div>
@@ -150,9 +150,8 @@
                         </button>
                     </div>
                 </div>
-                <div class="card-content"></div>
-
-                <!-- Loading State -->
+                <div class="card-content">
+                    <!-- Loading State -->
                     <div id="sessionsLoader" class="loader-container">
                         <div class="loader">
                             <i class="fas fa-spinner fa-spin"></i>
