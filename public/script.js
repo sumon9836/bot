@@ -14,21 +14,21 @@ const retrySessionsBtn = document.getElementById('retrySessionsBtn');
 const sessionCount = document.getElementById('sessionCount');
 const toast = document.getElementById('toast');
 
-// Blocklist elements
-const refreshBlocklistBtn = document.getElementById('refreshBlocklistBtn');
-const blocklistGrid = document.getElementById('blocklistGrid');
-const blocklistLoader = document.getElementById('blocklistLoader');
-const blocklistError = document.getElementById('blocklistError');
-const blocklistEmpty = document.getElementById('blocklistEmpty');
-const blocklistErrorMessage = document.getElementById('blocklistErrorMessage');
-const retryBlocklistBtn = document.getElementById('retryBlocklistBtn');
-const blockedUserCount = document.getElementById('blockedUserCount');
+// Banlist elements
+const refreshBanlistBtn = document.getElementById('refreshBanlistBtn');
+const banlistGrid = document.getElementById('banlistGrid');
+const banlistLoader = document.getElementById('banlistLoader');
+const banlistError = document.getElementById('banlistError');
+const banlistEmpty = document.getElementById('banlistEmpty');
+const banlistErrorMessage = document.getElementById('banlistErrorMessage');
+const retryBanlistBtn = document.getElementById('retryBanlistBtn');
+const bannedUserCount = document.getElementById('bannedUserCount');
 
 // Application State
 let sessions = [];
-let blockedUsers = {};
+let bannedUsers = {};
 let isLoading = false;
-let isLoadingBlocklist = false;
+let isLoadingBanlist = false;
 
 // Utility Functions
 function validatePhoneNumber(number) {
@@ -449,13 +449,11 @@ async function getSessions() {
     return await makeApiRequest('/sessions');
 }
 
-async function getBlocklist() {
+async function getBanlist() {
     try {
-        return await makeApiRequest('/admin/blocklist', {
-            credentials: 'include'
-        });
+        return await makeApiRequest('/admin/banlist');
     } catch (error) {
-        console.error('Blocklist API error:', error);
+        console.error('Banlist API error:', error);
         // Return empty object to handle gracefully
         return {};
     }
@@ -597,92 +595,91 @@ async function loadSessions() {
     }
 }
 
-async function loadBlocklist() {
-    if (isLoadingBlocklist) return;
+async function loadBanlist() {
+    if (isLoadingBanlist) return;
     
-    isLoadingBlocklist = true;
-    showBlocklistState('loading');
+    isLoadingBanlist = true;
+    showBanlistState('loading');
     
     try {
-        const response = await getBlocklist();
+        const response = await getBanlist();
         
         if (response && typeof response === 'object') {
-            blockedUsers = response;
+            bannedUsers = response;
         } else {
-            blockedUsers = {};
+            bannedUsers = {};
         }
         
-        renderBlocklist();
+        renderBanlist();
         
     } catch (error) {
-        console.error('Failed to load blocklist:', error);
-        // Show more user-friendly error message
-        blocklistErrorMessage.textContent = `Unable to load blocked users. This feature requires admin access.`;
-        showBlocklistState('error');
+        console.error('Failed to load banlist:', error);
+        banlistErrorMessage.textContent = `Unable to load banned users.`;
+        showBanlistState('error');
     } finally {
-        isLoadingBlocklist = false;
+        isLoadingBanlist = false;
     }
 }
 
-function showBlocklistState(state) {
+function showBanlistState(state) {
     // Hide all states first
-    blocklistLoader.style.display = 'none';
-    blocklistError.style.display = 'none';
-    blocklistEmpty.style.display = 'none';
-    blocklistGrid.style.display = 'none';
+    banlistLoader.style.display = 'none';
+    banlistError.style.display = 'none';
+    banlistEmpty.style.display = 'none';
+    banlistGrid.style.display = 'none';
     
     // Show the requested state
     switch (state) {
         case 'loading':
-            blocklistLoader.style.display = 'flex';
+            banlistLoader.style.display = 'flex';
             break;
         case 'error':
-            blocklistError.style.display = 'flex';
+            banlistError.style.display = 'flex';
             break;
         case 'empty':
-            blocklistEmpty.style.display = 'flex';
+            banlistEmpty.style.display = 'flex';
             break;
         case 'data':
-            blocklistGrid.style.display = 'grid';
+            banlistGrid.style.display = 'grid';
             break;
     }
 }
 
-function renderBlocklist() {
-    // Handle case where blockedUsers might be null or undefined
-    if (!blockedUsers || typeof blockedUsers !== 'object') {
-        blockedUsers = {};
+function renderBanlist() {
+    // Handle case where bannedUsers might be null or undefined
+    if (!bannedUsers || typeof bannedUsers !== 'object') {
+        bannedUsers = {};
     }
     
-    const userNumbers = Object.keys(blockedUsers);
+    const userNumbers = Object.keys(bannedUsers);
     
-    // Update blocked user count
-    if (blockedUserCount) {
-        blockedUserCount.textContent = userNumbers.length;
+    // Update banned user count
+    if (bannedUserCount) {
+        bannedUserCount.textContent = userNumbers.length;
     }
     
     if (userNumbers.length === 0) {
-        showBlocklistState('empty');
+        showBanlistState('empty');
         return;
     }
     
     // Clear existing content
-    if (blocklistGrid) {
-        blocklistGrid.innerHTML = '';
+    if (banlistGrid) {
+        banlistGrid.innerHTML = '';
         
-        // Create cards for each blocked user
+        // Create cards for each banned user
         userNumbers.forEach(number => {
-            const card = createBlockedUserCard(number);
-            blocklistGrid.appendChild(card);
+            const card = createBannedUserCard(number);
+            banlistGrid.appendChild(card);
         });
         
-        showBlocklistState('data');
+        showBanlistState('data');
     }
 }
 
-function createBlockedUserCard(number) {
+function createBannedUserCard(number) {
     const card = document.createElement('div');
-    card.className = 'blocked-user-card';
+    card.className = 'banned-user-card';
     card.innerHTML = `
         <div class="user-info">
             <div class="user-avatar">
@@ -692,14 +689,14 @@ function createBlockedUserCard(number) {
                 <h3 class="user-number">+${number}</h3>
                 <span class="user-status">
                     <i class="fas fa-ban"></i>
-                    Blocked
+                    Banned
                 </span>
             </div>
         </div>
         <div class="user-actions">
-            <span class="blocked-label">
+            <span class="banned-label">
                 <i class="fas fa-shield-alt"></i>
-                Blocked User
+                Banned User
             </span>
         </div>
     `;
@@ -760,12 +757,12 @@ if (retrySessionsBtn) {
     retrySessionsBtn.addEventListener('click', loadSessions);
 }
 
-// Blocklist event listeners
-if (refreshBlocklistBtn) {
-    refreshBlocklistBtn.addEventListener('click', loadBlocklist);
+// Banlist event listeners
+if (refreshBanlistBtn) {
+    refreshBanlistBtn.addEventListener('click', loadBanlist);
 }
-if (retryBlocklistBtn) {
-    retryBlocklistBtn.addEventListener('click', loadBlocklist);
+if (retryBanlistBtn) {
+    retryBanlistBtn.addEventListener('click', loadBanlist);
 }
 
 // Input Formatting
@@ -885,9 +882,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add entrance animations
     setTimeout(addEntranceAnimations, 100);
     
-    // Load sessions and blocklist
+    // Load sessions and banlist
     loadSessions();
-    loadBlocklist();
+    loadBanlist();
     
     // Add smooth scrolling to refresh button
     if (refreshBtn) {

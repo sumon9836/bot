@@ -1633,15 +1633,15 @@ html {
 }
 
 /* Admin specific animations */
-.blocked-user-card {
+.banned-user-card {
     animation: slideInUp 0.6s ease-out forwards;
 }
 
-.blocked-user-card:nth-child(odd) {
+.banned-user-card:nth-child(odd) {
     animation-delay: 0.1s;
 }
 
-.blocked-user-card:nth-child(even) {
+.banned-user-card:nth-child(even) {
     animation-delay: 0.2s;
 }
 
