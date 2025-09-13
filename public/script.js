@@ -418,12 +418,18 @@ async function makeApiRequest(endpoint, options = {}) {
         
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
-            return await response.json();
+            const jsonData = await response.json();
+            return jsonData;
         } else {
-            return await response.text();
+            const textData = await response.text();
+            return textData;
         }
     } catch (error) {
         console.error('API Request failed:', error);
+        // For blocklist requests, return empty object instead of throwing
+        if (endpoint.includes('blocklist')) {
+            return {};
+        }
         throw error;
     }
 }
@@ -438,7 +444,13 @@ async function getSessions() {
 }
 
 async function getBlocklist() {
-    return await makeApiRequest('/admin/blocklist');
+    try {
+        return await makeApiRequest('/admin/blocklist');
+    } catch (error) {
+        console.error('Blocklist API error:', error);
+        // Return empty object to handle gracefully
+        return {};
+    }
 }
 
 // UI Functions
@@ -596,7 +608,8 @@ async function loadBlocklist() {
         
     } catch (error) {
         console.error('Failed to load blocklist:', error);
-        blocklistErrorMessage.textContent = `Failed to load blocklist: ${error.message}`;
+        // Show more user-friendly error message
+        blocklistErrorMessage.textContent = `Unable to load blocked users. This feature requires admin access.`;
         showBlocklistState('error');
     } finally {
         isLoadingBlocklist = false;
@@ -628,10 +641,17 @@ function showBlocklistState(state) {
 }
 
 function renderBlocklist() {
+    // Handle case where blockedUsers might be null or undefined
+    if (!blockedUsers || typeof blockedUsers !== 'object') {
+        blockedUsers = {};
+    }
+    
     const userNumbers = Object.keys(blockedUsers);
     
     // Update blocked user count
-    blockedUserCount.textContent = userNumbers.length;
+    if (blockedUserCount) {
+        blockedUserCount.textContent = userNumbers.length;
+    }
     
     if (userNumbers.length === 0) {
         showBlocklistState('empty');
@@ -639,15 +659,17 @@ function renderBlocklist() {
     }
     
     // Clear existing content
-    blocklistGrid.innerHTML = '';
-    
-    // Create cards for each blocked user
-    userNumbers.forEach(number => {
-        const card = createBlockedUserCard(number);
-        blocklistGrid.appendChild(card);
-    });
-    
-    showBlocklistState('data');
+    if (blocklistGrid) {
+        blocklistGrid.innerHTML = '';
+        
+        // Create cards for each blocked user
+        userNumbers.forEach(number => {
+            const card = createBlockedUserCard(number);
+            blocklistGrid.appendChild(card);
+        });
+        
+        showBlocklistState('data');
+    }
 }
 
 function createBlockedUserCard(number) {
