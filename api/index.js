@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 
 const PORT = process.env.PORT || 5000;
-const API_BASE_URL = process.env.API_BASE_URL || 'http://ballast.proxy.rlwy.net:23161';
+const API_BASE_URL = process.env.API_URL || 'http://ballast.proxy.rlwy.net:23161';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'sumon2008';
 
 // Simple session store (in production, use Redis or database)
