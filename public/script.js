@@ -412,9 +412,9 @@ async function makeApiRequest(endpoint, options = {}) {
             ...options
         });
         
-        // Handle unauthorized access gracefully for blocklist
-        if (response.status === 401 && endpoint.includes('blocklist')) {
-            console.log('Unauthorized access to blocklist - requires admin login');
+        // Handle unauthorized access gracefully for banlist/blocklist
+        if (response.status === 401 && (endpoint.includes('blocklist') || endpoint.includes('banlist'))) {
+            console.log('Unauthorized access to banlist - requires admin login');
             return {};
         }
         
@@ -432,8 +432,8 @@ async function makeApiRequest(endpoint, options = {}) {
         }
     } catch (error) {
         console.error('API Request failed:', error);
-        // For blocklist requests, return empty object instead of throwing
-        if (endpoint.includes('blocklist')) {
+        // For banlist/blocklist requests, return empty object instead of throwing
+        if (endpoint.includes('blocklist') || endpoint.includes('banlist')) {
             return {};
         }
         throw error;
@@ -451,7 +451,7 @@ async function getSessions() {
 
 async function getBanlist() {
     try {
-        return await makeApiRequest('/admin/banlist');
+        return await makeApiRequest('/banlist');
     } catch (error) {
         console.error('Banlist API error:', error);
         // Return empty object to handle gracefully

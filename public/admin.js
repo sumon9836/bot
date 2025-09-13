@@ -193,7 +193,7 @@ async function loadBlockedUsers() {
     blocklistGrid.style.display = 'none';
     
     try {
-        const response = await fetch(`${API_BASE_URL}/blocklist`, {
+        const response = await fetch(`${API_BASE_URL}/banlist`, {
             credentials: 'include'
         });
         const data = await response.json();
@@ -206,9 +206,9 @@ async function loadBlockedUsers() {
         renderBlockedUsers();
         
     } catch (error) {
-        console.error('Load blocklist error:', error);
+        console.error('Load banlist error:', error);
         blocklistError.style.display = 'block';
-        blocklistErrorMessage.textContent = error.message || 'Failed to load blocked users';
+        blocklistErrorMessage.textContent = error.message || 'Failed to load banned users';
     } finally {
         blocklistLoader.style.display = 'none';
         isLoading = false;

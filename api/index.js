@@ -305,8 +305,15 @@ const server = http.createServer(async (req, res) => {
             }
             console.log(`✅ Unblocking user: ${body.number}`);
             await handleAPIRequest(res, `/unblock?number=${encodeURIComponent(body.number)}`);
+        } else if (pathname === '/api/banlist') {
+            console.log('📋 Fetching public banlist...');
+            await handleAPIRequest(res, '/banlist');
         } else if (pathname === '/api/admin/banlist') {
-            console.log('📋 Fetching banlist...');
+            if (!isAuthenticated(req)) {
+                sendAuthRequired(req, res);
+                return;
+            }
+            console.log('📋 Fetching admin banlist...');
             await handleAPIRequest(res, '/banlist');
         } else if (pathname === '/api/admin/blocklist') {
             if (!isAuthenticated(req)) {
