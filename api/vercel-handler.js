@@ -6,8 +6,18 @@ const fs = require('fs');
 const API_BASE_URL = process.env.API_URL || 'http://ballast.proxy.rlwy.net:23161';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'sumon2008';
 
-// Simple session store (in production, use Redis or database)
-const sessions = new Set();
+// Simple session store for Vercel (using a Map with timestamps for basic persistence)
+const sessions = new Map();
+
+// Clean expired sessions (basic cleanup for stateless functions)
+function cleanExpiredSessions() {
+    const now = Date.now();
+    for (const [sessionId, timestamp] of sessions.entries()) {
+        if (now - timestamp > 3600000) { // 1 hour expiry
+            sessions.delete(sessionId);
+        }
+    }
+}
 
 // MIME types for static files
 const mimeTypes = {
@@ -52,9 +62,22 @@ function parseCookies(req) {
 
 // Check if user has valid session
 function isAuthenticated(req) {
+    cleanExpiredSessions();
     const cookies = parseCookies(req);
     const sessionId = cookies.admin_session;
-    return sessionId && sessions.has(sessionId);
+    if (!sessionId || !sessions.has(sessionId)) {
+        return false;
+    }
+    
+    // Check if session is still valid (not expired)
+    const sessionTime = sessions.get(sessionId);
+    const now = Date.now();
+    if (now - sessionTime > 3600000) { // 1 hour expiry
+        sessions.delete(sessionId);
+        return false;
+    }
+    
+    return true;
 }
 
 // Handle POST request body
@@ -285,7 +308,7 @@ module.exports = async (req, res) => {
             const body = await parsePostBody(req);
             if (body.password === ADMIN_PASSWORD) {
                 const sessionId = generateSessionId();
-                sessions.add(sessionId);
+                sessions.set(sessionId, Date.now()); // Store with timestamp
                 res.status(200);
                 res.setHeader('Content-Type', 'application/json');
                 res.setHeader('Set-Cookie', `admin_session=${sessionId}; HttpOnly; SameSite=Strict; Path=/; Max-Age=3600`);
@@ -430,7 +453,63 @@ module.exports = async (req, res) => {
             `);
             return;
         }
-        serveStaticFile(res, '/admin.html');
+        // Serve admin dashboard (create inline since admin.html might not exist)
+        res.status(200);
+        res.setHeader('Content-Type', 'text/html');
+        res.send(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>𝐊ąìʂҽղ-𝐌𝐃 | Admin Dashboard</title>
+                <link rel="stylesheet" href="styles.css">
+                <link rel="preconnect" href="https://fonts.googleapis.com">
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+            </head>
+            <body>
+                <div class="container">
+                    <header class="header">
+                        <div class="header-content">
+                            <div class="header-left">
+                                <i class="fab fa-whatsapp header-icon"></i>
+                                <h1>𝐊ąìʂҽղ-𝐌𝐃 Admin</h1>
+                                <p class="header-subtitle">Advanced Bot Management</p>
+                            </div>
+                            <div class="header-right">
+                                <button id="logoutBtn" class="btn btn-secondary">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Logout
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+                    <main class="main-content">
+                        <div style="text-align: center; padding: 40px; color: white;">
+                            <h2>🔐 Admin Dashboard</h2>
+                            <p>You are successfully logged in to the admin panel.</p>
+                            <a href="/" class="btn btn-primary" style="display: inline-block; margin-top: 20px;">
+                                <i class="fas fa-home"></i>
+                                Go to Main Dashboard
+                            </a>
+                        </div>
+                    </main>
+                </div>
+                <script>
+                    document.getElementById('logoutBtn').addEventListener('click', async () => {
+                        try {
+                            await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' });
+                            window.location.href = '/';
+                        } catch (error) {
+                            console.error('Logout failed:', error);
+                        }
+                    });
+                </script>
+            </body>
+            </html>
+        `);
     } else {
         // Serve static files
         const filePath = pathname === '/' ? '/index.html' : pathname;
