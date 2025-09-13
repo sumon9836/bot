@@ -55,18 +55,26 @@
                             <form id="pairForm" class="action-form">
                                 <div class="form-group">
                                     <label for="pairNumber">Phone Number</label>
-                                    <div class="input-wrapper">
-                                        <i class="fas fa-phone input-icon"></i>
-                                        <input 
-                                            type="tel" 
-                                            id="pairNumber" 
-                                            placeholder="e.g., 919123456789 or 1234567890"
-                                            required
-                                            pattern="[0-9]{10,15}"
-                                            title="Enter phone number with or without country code"
-                                        >
+                                    <div class="phone-input-container">
+                                        <select id="countryCode" class="country-selector" required>
+                                            <option value="">Select Country</option>
+                                        </select>
+                                        <div class="input-wrapper">
+                                            <i class="fas fa-phone input-icon"></i>
+                                            <input 
+                                                type="tel" 
+                                                id="pairNumber" 
+                                                placeholder="Enter phone number"
+                                                required
+                                                inputmode="numeric"
+                                                autocomplete="tel"
+                                                pattern="^\+?[\d\s-]{6,18}$"
+                                                title="Enter phone number"
+                                            >
+                                        </div>
                                     </div>
-                                    <small class="form-help">Enter full number with country code (e.g., 919123456789) or click the flag to reset</small>
+                                    <small class="form-help">Select your country and enter your national phone number</small>
+                                    <div id="phoneError" class="error-message" style="display: none;"></div>
                                 </div>
                                 <button type="submit" class="btn btn-primary">
                                     <span class="btn-text">Pair Number</span>
@@ -204,6 +212,6 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js" defer></script>
 </body>
 </html>

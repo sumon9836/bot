@@ -35,9 +35,9 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 33343
+localPort = 43287
 externalPort = 3000
 
 [deployment]
-run = ["vercel", "--prod"]
+run = ["node", "dev-server.js"]
 deploymentTarget = "autoscale"

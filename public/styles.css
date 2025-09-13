@@ -59,6 +59,93 @@
     box-sizing: border-box;
 }
 
+/* High-DPI Display Optimizations for Crisp Text and Elements */
+@media (min-resolution: 2dppx) {
+    /* Ultra-thin borders for high DPI displays */
+    .card, 
+    .session-card, 
+    .banned-user-card,
+    .header,
+    .toast,
+    .input-wrapper,
+    .country-selector,
+    .btn {
+        border-width: 0.5px;
+    }
+    
+    /* Keep default text rendering for crispness */
+}
+
+@media (min-resolution: 3dppx) {
+    /* Ultra high DPI (3x displays like some mobile devices) */
+    .card, 
+    .session-card, 
+    .banned-user-card,
+    .header,
+    .toast,
+    .input-wrapper,
+    .country-selector,
+    .btn {
+        border-width: 0.33px;
+    }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    body::before {
+        animation: none;
+    }
+}
+
+/* Phone Input Container Styles */
+.phone-input-container {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.country-selector {
+    min-width: 200px;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid var(--glass-border);
+    border-radius: var(--border-radius);
+    color: var(--blue-text);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    backdrop-filter: blur(8px);
+}
+
+.country-selector:focus {
+    border-color: var(--pink-primary);
+    box-shadow: 0 0 20px var(--pink-glow);
+    outline: none;
+}
+
+.country-selector option {
+    background: var(--black-secondary);
+    color: var(--blue-text);
+    padding: 8px;
+}
+
+.error-message {
+    color: #ff4444;
+    font-size: 0.9rem;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: rgba(255, 68, 68, 0.1);
+    border-radius: var(--border-radius);
+    border-left: 3px solid #ff4444;
+}
+
 html {
     scroll-behavior: smooth;
     scroll-padding-top: 100px;
@@ -76,10 +163,7 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     position: relative;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
     animation: pageLoad 0.8s ease-out;
-    text-rendering: optimizeLegibility;
 }
 
 /* Beautiful Page Load Animation */
@@ -150,8 +234,8 @@ body::after {
 /* ========== ULTRA-COMPACT TRANSPARENT HEADER ========== */
 .header {
     background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(15px) saturate(150%);
-    -webkit-backdrop-filter: blur(15px) saturate(150%);
+    backdrop-filter: blur(8px) saturate(140%);
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
     border-bottom: 1px solid rgba(255, 27, 107, 0.1);
     padding: 8px 0;
     position: sticky;
@@ -297,8 +381,8 @@ body::after {
 /* ========== MODERN CARDS ========== */
 .card {
     background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
     border: 1px solid var(--glass-border);
     border-radius: var(--border-radius-xl);
     padding: 40px;
@@ -334,7 +418,7 @@ body::after {
 }
 
 .card:hover {
-    transform: translateY(-8px) scale(1.02);
+    transform: translateY(-8px);
     border-color: var(--pink-primary);
     box-shadow: var(--shadow-glow), var(--shadow-strong);
 }
@@ -513,7 +597,7 @@ input[type="tel"]::placeholder {
 }
 
 .btn-primary:hover {
-    transform: translateY(-4px) scale(1.05);
+    transform: translateY(-4px);
     box-shadow: 0 12px 40px var(--pink-glow), 0 0 20px var(--pink-primary);
     background: linear-gradient(135deg, var(--pink-secondary), var(--pink-light));
 }
@@ -543,7 +627,7 @@ input[type="tel"]::placeholder {
 }
 
 .btn-support:hover {
-    transform: translateY(-2px) scale(1.03);
+    transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(37, 211, 102, 0.5);
 }
 
@@ -614,8 +698,8 @@ input[type="tel"]::placeholder {
 
 .session-card {
     background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
     border: 1px solid var(--glass-border);
     border-radius: var(--border-radius-lg);
     padding: 28px;
@@ -718,7 +802,7 @@ input[type="tel"]::placeholder {
 .error-content,
 .empty-content {
     background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(10px);
     border: 1px solid var(--glass-border);
     border-radius: var(--border-radius-xl);
     padding: 50px;
@@ -777,8 +861,8 @@ input[type="tel"]::placeholder {
     bottom: 30px;
     right: 30px;
     background: rgba(0, 0, 0, 0.9);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: 1px solid var(--glass-border);
     border-radius: var(--border-radius-lg);
     padding: 24px;
@@ -857,7 +941,7 @@ input[type="tel"]::placeholder {
 
 .banned-user-card {
     background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(10px);
     border: 1px solid var(--glass-border);
     border-radius: var(--border-radius);
     padding: 20px;

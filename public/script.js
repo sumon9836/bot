@@ -4,6 +4,8 @@ const API_BASE_URL = '/api';
 // DOM Elements
 const pairForm = document.getElementById('pairForm');
 const pairNumberInput = document.getElementById('pairNumber');
+const countryCodeSelect = document.getElementById('countryCode');
+const phoneError = document.getElementById('phoneError');
 const refreshBtn = document.getElementById('refreshBtn');
 const headerRefreshBtn = document.getElementById('headerRefreshBtn');
 const sessionsGrid = document.getElementById('sessionsGrid');
@@ -223,6 +225,86 @@ const COUNTRY_CODES = {
     '996': { flag: '🇰🇬', name: 'Kyrgyzstan', maxLength: 9 },
     '998': { flag: '🇺🇿', name: 'Uzbekistan', maxLength: 9 }
 };
+
+// Initialize country selector
+function initCountrySelector() {
+    if (!countryCodeSelect) return;
+    
+    // Clear existing options (keep the placeholder)
+    countryCodeSelect.innerHTML = '<option value="">Select Country</option>';
+    
+    // Create sorted array of countries
+    const countries = Object.entries(COUNTRY_CODES)
+        .map(([code, data]) => ({ code, ...data }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+    
+    // Add options to selector
+    countries.forEach(country => {
+        const option = document.createElement('option');
+        option.value = country.code;
+        option.textContent = `${country.flag} ${country.name} (+${country.code})`;
+        countryCodeSelect.appendChild(option);
+    });
+    
+    console.log('Country selector initialized with', countries.length, 'countries');
+}
+
+// E.164 Phone Number Validation and Normalization
+function normalizeToE164(countryCode, nationalNumber) {
+    if (!countryCode || !nationalNumber) {
+        return { valid: false, error: 'Country code and phone number are required' };
+    }
+    
+    const country = COUNTRY_CODES[countryCode];
+    if (!country) {
+        return { valid: false, error: 'Invalid country code' };
+    }
+    
+    // Clean the national number (remove spaces, dashes, etc.)
+    const digitsOnly = nationalNumber.replace(/\D/g, '');
+    
+    // Remove leading zeros
+    const cleanNumber = digitsOnly.replace(/^0+/, '');
+    
+    // Check length constraints
+    if (cleanNumber.length < 6) {
+        return { valid: false, error: 'Phone number too short' };
+    }
+    
+    if (cleanNumber.length > 15) {
+        return { valid: false, error: 'Phone number too long' };
+    }
+    
+    // Check country-specific length if available
+    if (country.maxLength && cleanNumber.length > country.maxLength) {
+        return { valid: false, error: `Phone number too long for ${country.name} (max ${country.maxLength} digits)` };
+    }
+    
+    // Build E.164 format
+    const e164 = `+${countryCode}${cleanNumber}`;
+    
+    return { 
+        valid: true, 
+        e164, 
+        countryCode, 
+        nationalNumber: cleanNumber,
+        country: country.name 
+    };
+}
+
+// Show/hide phone error
+function showPhoneError(message) {
+    if (phoneError) {
+        phoneError.textContent = message;
+        phoneError.style.display = 'block';
+    }
+}
+
+function hidePhoneError() {
+    if (phoneError) {
+        phoneError.style.display = 'none';
+    }
+}
 
 // 🎯 Smart Country Code Detection
 let currentCountryCode = null;
@@ -1130,31 +1212,34 @@ function createBannedUserCard(number) {
 // Event Handlers
 pairForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    hidePhoneError();
     
-    let number = pairNumberInput.value.trim();
+    const countryCode = countryCodeSelect.value;
+    const nationalNumber = pairNumberInput.value.trim();
     
-    // Basic validation first
-    if (!number && !currentCountryCode) {
-        showToast('Invalid Number', 'Please enter a phone number', 'error');
+    // Validate inputs
+    if (!countryCode) {
+        showPhoneError('Please select a country');
+        countryCodeSelect.focus();
         return;
     }
     
-    // If we have a detected country code, combine it
-    if (currentCountryCode && number) {
-        number = currentCountryCode + number;
-    } else if (currentCountryCode && !number) {
-        showToast('Incomplete Number', 'Please enter the remaining digits after the country code', 'error');
+    if (!nationalNumber) {
+        showPhoneError('Please enter a phone number');
+        pairNumberInput.focus();
         return;
-    } else if (!currentCountryCode && number) {
-        // Try to detect country code from the entered number
-        const detection = detectCountryCode(number);
-        if (detection) {
-            number = detection.code + detection.remainingNumber;
-        }
     }
     
-    // Remove any non-digit characters
-    number = number.replace(/\D/g, '');
+    // Normalize to E.164 format
+    const validation = normalizeToE164(countryCode, nationalNumber);
+    if (!validation.valid) {
+        showPhoneError(validation.error);
+        pairNumberInput.focus();
+        return;
+    }
+    
+    const number = validation.e164;
+    console.log('Pairing number:', number, 'for', validation.country);
     
     // Validate final number format
     if (!number || number.length < 10 || number.length > 15) {
@@ -1421,9 +1506,10 @@ function smoothScrollTo(elementId) {
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 WhatsApp Bot Management Dashboard - Railay Inspired Design Initialized');
+    console.log('🚀 WhatsApp Bot Management Dashboard - High-DPI Optimized');
 
     // Initialize enhanced animations and phone input
+    initCountrySelector();
     initEnhancedAnimations();
     initPhoneInputAnimation();
     
