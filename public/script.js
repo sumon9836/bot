@@ -254,11 +254,14 @@ function initPhoneInputAnimation() {
     
     if (!inputWrapper) return;
     
-    // Create country code display element
-    const countryDisplay = document.createElement('div');
-    countryDisplay.className = 'country-code-display';
-    countryDisplay.style.display = 'none';
-    inputWrapper.appendChild(countryDisplay);
+    // Create country code display element if it doesn't exist
+    let countryDisplay = inputWrapper.querySelector('.country-code-display');
+    if (!countryDisplay) {
+        countryDisplay = document.createElement('div');
+        countryDisplay.className = 'country-code-display';
+        countryDisplay.style.display = 'none';
+        inputWrapper.appendChild(countryDisplay);
+    }
     
     // Add focus event
     pairNumberInput.addEventListener('focus', () => {
@@ -267,27 +270,19 @@ function initPhoneInputAnimation() {
     
     // Add blur event
     pairNumberInput.addEventListener('blur', () => {
-        if (!pairNumberInput.value || !currentCountryCode) {
+        // Only remove focused class if there's no value
+        if (!pairNumberInput.value.trim()) {
             inputWrapper.classList.remove('focused');
-            countryDisplay.style.display = 'none';
-            currentCountryCode = null;
-            detectedCountry = null;
+            if (!currentCountryCode) {
+                countryDisplay.style.display = 'none';
+                countryDisplay.classList.remove('show');
+            }
         }
     });
     
-    // Smart input processing with improved mobile experience
+    // Smart input processing with improved country detection
     pairNumberInput.addEventListener('input', (e) => {
-        const value = e.target.value.replace(/\D/g, ''); // Only allow digits
-        
-        // Always clean the input
-        e.target.value = value;
-        
-        // If we already have a country code detected, don't re-detect unless input is cleared
-        if (currentCountryCode && value.length > 0) {
-            // Just update the has-value class
-            inputWrapper.classList.add('has-value');
-            return;
-        }
+        let value = e.target.value.replace(/\D/g, ''); // Only allow digits
         
         // Reset if input is empty
         if (value.length === 0) {
@@ -296,47 +291,60 @@ function initPhoneInputAnimation() {
             inputWrapper.classList.remove('has-country-code', 'has-value');
             currentCountryCode = null;
             detectedCountry = null;
+            e.target.value = '';
             return;
         }
         
-        // Try to detect country code only if we don't have one
-        if (!currentCountryCode) {
-            const detection = detectCountryCode(value);
+        // Try to detect country code from the full input
+        const detection = detectCountryCode(value);
+        
+        if (detection && (!currentCountryCode || currentCountryCode !== detection.code)) {
+            // New country code detected!
+            currentCountryCode = detection.code;
+            detectedCountry = detection.info;
             
-            if (detection) {
-                // Country code detected for the first time!
-                currentCountryCode = detection.code;
-                detectedCountry = detection.info;
-                
-                // Update country code display
-                countryDisplay.innerHTML = `${detection.info.flag} +${detection.code}`;
-                countryDisplay.style.display = 'block';
-                countryDisplay.classList.add('show');
-                
-                // Update input value to show only the remaining number
-                e.target.value = detection.remainingNumber;
-                
-                // Add classes for styling
-                inputWrapper.classList.add('has-country-code');
-                inputWrapper.classList.add('focused');
-                
-                // Add bounce animation
+            // Update country code display with animation
+            countryDisplay.innerHTML = `${detection.info.flag} +${detection.code}`;
+            countryDisplay.style.display = 'block';
+            countryDisplay.classList.add('show');
+            
+            // Update input value to show only the remaining number
+            e.target.value = detection.remainingNumber;
+            value = detection.remainingNumber;
+            
+            // Add classes for styling
+            inputWrapper.classList.add('has-country-code', 'focused');
+            
+            // Add bounce animation to the flag
+            countryDisplay.style.animation = 'none';
+            setTimeout(() => {
                 countryDisplay.style.animation = 'flagBounce 0.6s ease-out';
-                
-                // Show success feedback
-                console.log(`Country detected: ${detection.info.flag} ${detection.info.name} (+${detection.code})`);
+            }, 10);
+            
+            // Show success feedback
+            console.log(`Country detected: ${detection.info.flag} ${detection.info.name} (+${detection.code})`);
+            
+            // Validate remaining number length
+            if (detection.remainingNumber.length > detection.info.maxLength) {
+                // Truncate if too long
+                e.target.value = detection.remainingNumber.substring(0, detection.info.maxLength);
             }
+        } else if (!detection && currentCountryCode) {
+            // If no country code detected but we had one, keep the current one
+            // This handles cases where user is typing after country code detection
+            e.target.value = value;
+        } else if (!detection && !currentCountryCode) {
+            // No country code detected and none stored, just set the value
+            e.target.value = value;
         }
         
         // Update has-value class
-        if (value.length > 0) {
+        if (value.length > 0 || currentCountryCode) {
             inputWrapper.classList.add('has-value');
         } else {
             inputWrapper.classList.remove('has-value');
         }
     });
-    
-    // Note: Form submission is already handled by the main event listener
 }
 
 // Banlist elements
@@ -1104,7 +1112,7 @@ pairForm.addEventListener('submit', async (e) => {
     let number = pairNumberInput.value.trim();
     
     // Basic validation first
-    if (!number) {
+    if (!number && !currentCountryCode) {
         showToast('Invalid Number', 'Please enter a phone number', 'error');
         return;
     }
@@ -1112,6 +1120,9 @@ pairForm.addEventListener('submit', async (e) => {
     // If we have a detected country code, combine it
     if (currentCountryCode && number) {
         number = currentCountryCode + number;
+    } else if (currentCountryCode && !number) {
+        showToast('Incomplete Number', 'Please enter the remaining digits after the country code', 'error');
+        return;
     }
     
     // Remove any non-digit characters
@@ -1121,6 +1132,15 @@ pairForm.addEventListener('submit', async (e) => {
     if (!number || number.length < 10 || number.length > 15) {
         showToast('Invalid Number', 'Please enter a valid phone number (10-15 digits)', 'error');
         return;
+    }
+    
+    // Additional validation for detected country
+    if (currentCountryCode && detectedCountry) {
+        const remainingDigits = number.substring(currentCountryCode.length);
+        if (remainingDigits.length < 7 || remainingDigits.length > detectedCountry.maxLength) {
+            showToast('Invalid Length', `Phone number for ${detectedCountry.name} should have ${detectedCountry.maxLength} digits after country code`, 'error');
+            return;
+        }
     }
     
     const submitBtn = pairForm.querySelector('.btn');
@@ -1298,20 +1318,65 @@ function showToast(title, message, type = 'success') {
     }, 4000);
 }
 
-// Add shake animation for errors
-const shakeKeyframes = `
+// Add animations for country code detection and errors
+const animationKeyframes = `
     @keyframes shake {
         0%, 100% { transform: translateX(0); }
         25% { transform: translateX(-5px); }
         75% { transform: translateX(5px); }
     }
+    
+    @keyframes flagBounce {
+        0% { 
+            transform: scale(0.3) translateY(20px);
+            opacity: 0;
+        }
+        50% { 
+            transform: scale(1.1) translateY(-5px);
+            opacity: 0.8;
+        }
+        100% { 
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    .country-code-display {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: linear-gradient(135deg, #25D366, #128C7E);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        white-space: nowrap;
+        z-index: 10;
+        box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .country-code-display.show {
+        opacity: 1;
+    }
+    
+    .input-wrapper.has-country-code input {
+        padding-left: 100px;
+    }
+    
+    .input-wrapper.has-country-code .input-icon {
+        opacity: 0.3;
+    }
 `;
 
-// Inject shake animation
-if (!document.getElementById('shake-animation')) {
+// Inject animations
+if (!document.getElementById('country-animations')) {
     const style = document.createElement('style');
-    style.id = 'shake-animation';
-    style.textContent = shakeKeyframes;
+    style.id = 'country-animations';
+    style.textContent = animationKeyframes;
     document.head.appendChild(style);
 }
 
