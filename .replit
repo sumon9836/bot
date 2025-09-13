@@ -34,6 +34,10 @@ waitForPort = 5000
 localPort = 5000
 externalPort = 80
 
+[[ports]]
+localPort = 33559
+externalPort = 3000
+
 [deployment]
 run = ["node", "api/index.js"]
 deploymentTarget = "autoscale"
