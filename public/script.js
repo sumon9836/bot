@@ -471,7 +471,7 @@ function initPhoneInputAnimation() {
                 resetCountryDisplay();
             }
         }
-    });
+    });</old_str>
 
     // Handle paste events
     pairNumberInput.addEventListener('paste', (e) => {
@@ -1254,15 +1254,25 @@ pairForm.addEventListener('submit', async (e) => {
         return;
     }
 
+    let fullNumber;
+    
+    // If country is detected, construct full number
+    if (detectedCountry) {
+        fullNumber = detectedCountry.countryCode + phoneNumber;
+        console.log(`🔗 Constructing full number: ${detectedCountry.countryCode} + ${phoneNumber} = ${fullNumber}`);
+    } else {
+        fullNumber = phoneNumber;
+    }
+
     // Normalize to E.164 format with auto-detection
-    const validation = normalizeToE164(phoneNumber);
+    const validation = normalizeToE164(fullNumber);
     if (!validation.valid) {
         showPhoneError(validation.error);
         pairNumberInput.focus();
         return;
     }
 
-    const number = validation.e164;
+    const number = validation.e164;</old_str>
     console.log('Pairing number:', number, 'for', validation.country, '- Auto-detected:', validation.detectedCountry);
 
     // Validate final number format

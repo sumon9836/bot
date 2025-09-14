@@ -498,28 +498,39 @@ body::after {
     position: relative;
     display: flex;
     align-items: center;
-    background: rgba(0, 0, 0, 0.4);
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2));
     border: 2px solid var(--glass-border);
-    border-radius: var(--border-radius);
-    padding: 10px 15px;
-    box-shadow: 0 0 15px rgba(255, 105, 180, 0.5);
+    border-radius: 16px;
+    padding: 14px 20px;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 0 20px rgba(255, 105, 180, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
     overflow: hidden;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    transition: var(--transition-smooth);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    min-height: 56px;
 }
 
 .input-wrapper.focused {
     border-color: var(--pink-primary);
-    background: rgba(0, 0, 0, 0.6);
-    box-shadow: 0 0 20px rgba(255, 105, 180, 0.7);
-    transform: translateY(-2px);
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.3));
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(255, 105, 180, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transform: translateY(-3px) scale(1.02);
 }
 
 .input-wrapper.has-country-code {
-    border-color: var(--pink-primary);
-    box-shadow: 0 0 25px rgba(255, 105, 180, 0.8);
-}
+    border-color: #25D366;
+    background: linear-gradient(135deg, rgba(37, 211, 102, 0.1), rgba(0, 0, 0, 0.4));
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(37, 211, 102, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}</old_str>
 
 .input-icon {
     position: absolute;
@@ -540,35 +551,39 @@ body::after {
     opacity: 0.3;
 }
 
-/* Simplified Country Code Display */
+/* Enhanced Country Code Display */
 .country-code-display {
     position: absolute;
-    left: 12px;
+    left: 16px;
     top: 50%;
-    transform: translateY(-50%) translateX(-100px);
+    transform: translateY(-50%) translateX(-120px);
     opacity: 0;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     z-index: 3;
     pointer-events: auto;
     cursor: pointer;
-    font-weight: 700;
-    font-size: 0.9rem;
+    font-weight: 800;
+    font-size: 0.85rem;
     white-space: nowrap;
     background: linear-gradient(135deg, 
-        rgba(255, 255, 255, 0.1), 
-        rgba(255, 255, 255, 0.05));
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    padding: 6px 10px;
+        rgba(37, 211, 102, 0.9), 
+        rgba(18, 140, 126, 0.8));
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    box-shadow: 
+        0 8px 25px rgba(37, 211, 102, 0.4),
+        0 4px 15px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    padding: 8px 12px;
     display: flex;
     align-items: center;
-    gap: 4px;
-    min-width: 70px;
+    gap: 6px;
+    min-width: 80px;
     color: var(--white-pure);
-}
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}</old_str>
 
 .country-badge {
     display: flex;
@@ -585,22 +600,28 @@ body::after {
 .country-code-display.show {
     transform: translateY(-50%) translateX(0);
     opacity: 1;
-    animation: slideInBounce 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    animation: slideInBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 .country-code-display.detected {
-    animation: subtlePulse 0.4s ease-out;
-    border-color: var(--pink-primary);
-    box-shadow: 0 0 15px var(--pink-glow);
+    animation: detectPulse 0.6s ease-out;
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 
+        0 0 25px rgba(37, 211, 102, 0.8),
+        0 8px 30px rgba(37, 211, 102, 0.4);
 }
 
 .country-code-display.complete {
     background: linear-gradient(135deg, 
-        rgba(255, 27, 107, 0.2), 
-        rgba(0, 212, 255, 0.1));
-    border-color: var(--pink-primary);
-    box-shadow: 0 0 20px var(--pink-glow);
-}
+        rgba(37, 211, 102, 1), 
+        rgba(18, 140, 126, 0.9));
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 
+        0 0 30px rgba(37, 211, 102, 0.9),
+        0 8px 35px rgba(37, 211, 102, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    transform: translateY(-50%) translateX(0) scale(1.05);
+}</old_str>
 
 .country-code-display.focused {
     transform: translateY(-50%) translateX(0) scale(1.02);
@@ -618,19 +639,39 @@ body::after {
 
 @keyframes slideInBounce {
     0% {
-        transform: translateY(-50%) translateX(-100px) scale(0.8);
+        transform: translateY(-50%) translateX(-120px) scale(0.7);
         opacity: 0;
+        filter: blur(5px);
     }
-    60% {
-        transform: translateY(-50%) translateX(5px) scale(1.05);
-        opacity: 0.9;
+    50% {
+        transform: translateY(-50%) translateX(8px) scale(1.1);
+        opacity: 0.8;
+        filter: blur(1px);
     }
-    80% {
-        transform: translateY(-50%) translateX(-2px) scale(0.98);
+    70% {
+        transform: translateY(-50%) translateX(-3px) scale(0.95);
         opacity: 1;
+        filter: blur(0);
     }
     100% {
         transform: translateY(-50%) translateX(0) scale(1);
+        opacity: 1;
+        filter: blur(0);
+    }
+}
+
+@keyframes detectPulse {
+    0% {
+        transform: translateY(-50%) translateX(0) scale(1);
+        box-shadow: 0 0 15px rgba(37, 211, 102, 0.6);
+    }
+    50% {
+        transform: translateY(-50%) translateX(0) scale(1.08);
+        box-shadow: 0 0 35px rgba(37, 211, 102, 1);
+    }
+    100% {
+        transform: translateY(-50%) translateX(0) scale(1);
+        box-shadow: 0 0 25px rgba(37, 211, 102, 0.8);</old_str>
         opacity: 1;
     }
 }
@@ -678,17 +719,17 @@ input[type="tel"]::placeholder {
 
 /* Enhanced Input Field with Dynamic Padding */
 .input-wrapper.has-country-code input[type="tel"] {
-    padding-left: 115px;
-    border-color: #25D366;
-    box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
-    background: rgba(37, 211, 102, 0.02);
+    padding-left: 120px;
+    color: #25D366;
+    font-weight: 600;
+    background: transparent;
 }
 
 .input-wrapper.number-complete input[type="tel"] {
-    border-color: #25D366;
-    box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.2);
-    background: rgba(37, 211, 102, 0.05);
-}
+    color: #25D366;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(37, 211, 102, 0.3);
+}</old_str>
 
 .input-wrapper.has-value.has-country-code .input-icon {
     color: #25D366;
