@@ -18,9 +18,9 @@ export function useBanlist(options: UseBanlistOptions = {}) {
   const abortControllerRef = useRef<AbortController>();
 
   const fetchBanlist = useCallback(async (showLoadingState = true) => {
-    // Cancel previous request
+    // Cancel previous request silently
     if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
+      // Just replace the controller, don't abort the old one
     }
 
     abortControllerRef.current = new AbortController();
@@ -117,14 +117,10 @@ export function useBanlist(options: UseBanlistOptions = {}) {
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = undefined;
       }
-      if (abortControllerRef.current && !abortControllerRef.current.signal.aborted) {
-        try {
-          abortControllerRef.current.abort();
-        } catch (error) {
-          // Ignore abort errors during cleanup
-        }
-      }
+      // Just clear the ref, don't call abort during cleanup to avoid React errors
+      abortControllerRef.current = undefined;
     };
   }, [fetchBanlist, autoRefresh, pollingInterval]);
 

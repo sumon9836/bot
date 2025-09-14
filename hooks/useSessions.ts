@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useApi } from './useApi';
 import { Session } from '../lib/types';
 
 interface UseSessionsOptions {
@@ -16,16 +15,10 @@ export function useSessions(options: UseSessionsOptions = {}) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
-  const abortControllerRef = useRef<AbortController>();
-  const { get } = useApi();
+  const mountedRef = useRef(true);
 
   const fetchSessions = useCallback(async (showLoadingState = true) => {
-    // Cancel previous request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    abortControllerRef.current = new AbortController();
+    if (!mountedRef.current) return;
     
     if (showLoadingState) {
       setLoading(true);
@@ -33,12 +26,11 @@ export function useSessions(options: UseSessionsOptions = {}) {
     setError(null);
 
     try {
-      const response = await fetch('/api/sessions', {
-        signal: abortControllerRef.current.signal,
-      });
-
+      const response = await fetch('/api/sessions');
       const data = await response.json();
 
+      if (!mountedRef.current) return;
+      
       if (response.ok) {
         // Handle different response formats
         let sessionList: Session[] = [];
@@ -49,6 +41,28 @@ export function useSessions(options: UseSessionsOptions = {}) {
           sessionList = data.data;
         } else if (data.sessions && Array.isArray(data.sessions)) {
           sessionList = data.sessions;
+        } else if (data.data && Array.isArray(data.data.active) && data.data.status) {
+          // Handle backend format: {success: true, data: {active: [...], status: {...}}}
+          const { active, status } = data.data;
+          sessionList = active.map((number: string) => ({
+            id: number,
+            number: number,
+            status: status[number]?.connected ? 'Connected' : 'Disconnected',
+            lastSeen: status[number]?.lastSeen,
+            platform: status[number]?.platform || 'WhatsApp',
+            user: status[number]?.user !== 'unknown' ? status[number]?.user : undefined
+          }));
+        } else if (Array.isArray(data.active) && data.status) {
+          // Handle direct backend format: {active: [...], status: {...}}
+          const { active, status } = data;
+          sessionList = active.map((number: string) => ({
+            id: number,
+            number: number,
+            status: status[number]?.connected ? 'Connected' : 'Disconnected',
+            lastSeen: status[number]?.lastSeen,
+            platform: status[number]?.platform || 'WhatsApp',
+            user: status[number]?.user !== 'unknown' ? status[number]?.user : undefined
+          }));
         } else if (typeof data === 'object' && data !== null) {
           // Convert object to array (for cases where sessions are returned as an object)
           sessionList = Object.keys(data).map(key => ({
@@ -70,15 +84,17 @@ export function useSessions(options: UseSessionsOptions = {}) {
         }
       }
     } catch (err) {
-      if (err && (err as Error).name !== 'AbortError') {
-        const errorMessage = 'Failed to fetch sessions';
-        setError(errorMessage);
-        if (showLoadingState) {
-          showToast?.('Network Error', errorMessage, 'error');
-        }
+      if (!mountedRef.current) return;
+      
+      const errorMessage = 'Failed to fetch sessions';
+      setError(errorMessage);
+      if (showLoadingState) {
+        showToast?.('Network Error', errorMessage, 'error');
       }
     } finally {
-      setLoading(false);
+      if (mountedRef.current) {
+        setLoading(false);
+      }
     }
   }, [showToast]);
 
@@ -87,24 +103,21 @@ export function useSessions(options: UseSessionsOptions = {}) {
   }, [fetchSessions]);
 
   useEffect(() => {
+    mountedRef.current = true;
     fetchSessions(true);
 
     if (autoRefresh && pollingInterval > 0) {
       intervalRef.current = setInterval(() => {
-        fetchSessions(false); // Silent refresh
+        if (mountedRef.current) {
+          fetchSessions(false); // Silent refresh
+        }
       }, pollingInterval);
     }
 
     return () => {
+      mountedRef.current = false;
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
-      }
-      if (abortControllerRef.current && !abortControllerRef.current.signal.aborted) {
-        try {
-          abortControllerRef.current.abort();
-        } catch (error) {
-          // Ignore abort errors during cleanup
-        }
       }
     };
   }, [fetchSessions, autoRefresh, pollingInterval]);
