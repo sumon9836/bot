@@ -1,0 +1,305 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useToast } from '../../hooks/useToast';
+import { ToastContainer } from '../../components/Toast';
+import { Loader } from '../../components/Loader';
+
+interface BlockedUser {
+  number: string;
+  blockedAt?: string;
+}
+
+export default function AdminDashboard() {
+  const [blockNumber, setBlockNumber] = useState('');
+  const [blockedUsers, setBlockedUsers] = useState<BlockedUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toasts, showToast, removeToast } = useToast();
+
+  // Check authentication
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    try {
+      const response = await fetch('/api/admin/blocklist', {
+        credentials: 'include'
+      });
+
+      if (response.status === 401 || response.status === 403) {
+        window.location.href = '/login';
+        return;
+      }
+    } catch (error) {
+      window.location.href = '/login';
+      return;
+    }
+    
+    loadBlockedUsers();
+  };
+
+  const loadBlockedUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/admin/blocklist', {
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        setBlockedUsers([]);
+        return;
+      }
+
+      const responseText = await response.text();
+      
+      if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<html')) {
+        setBlockedUsers([]);
+        return;
+      }
+
+      try {
+        const data = JSON.parse(responseText);
+        
+        let userList: BlockedUser[] = [];
+        if (typeof data === 'object' && data !== null) {
+          userList = Object.keys(data).map(number => ({
+            number,
+            blockedAt: data[number].blockedAt || new Date().toISOString()
+          }));
+        }
+        
+        setBlockedUsers(userList);
+      } catch {
+        setBlockedUsers([]);
+      }
+    } catch (error) {
+      console.error('Error loading blocked users:', error);
+      setBlockedUsers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const validatePhoneNumber = (number: string) => {
+    const phoneRegex = /^[0-9]{10,15}$/;
+    return phoneRegex.test(number.trim());
+  };
+
+  const formatPhoneNumber = (number: string) => {
+    return number.trim().replace(/\D/g, '');
+  };
+
+  const handleAction = async (action: 'block' | 'unblock' | 'delete') => {
+    const number = formatPhoneNumber(blockNumber);
+    
+    if (!validatePhoneNumber(number)) {
+      showToast('Invalid Number', 'Please enter a valid phone number (10-15 digits)', 'error');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch(`/api/admin/${action}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ number })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        const messages = {
+          block: 'User blocked successfully',
+          unblock: 'User unblocked successfully', 
+          delete: 'User deleted/logged out successfully'
+        };
+        
+        showToast('Success', messages[action], 'success');
+        setBlockNumber('');
+        loadBlockedUsers();
+      } else {
+        showToast('Action Failed', data.error || `Failed to ${action} user`, 'error');
+      }
+    } catch (error) {
+      showToast('Network Error', 'Failed to connect to server', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUnblockUser = async (number: string) => {
+    try {
+      const response = await fetch('/api/admin/unblock', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ number })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        showToast('Success', 'User unblocked successfully', 'success');
+        loadBlockedUsers();
+      } else {
+        showToast('Unblock Failed', data.error || 'Failed to unblock user', 'error');
+      }
+    } catch (error) {
+      showToast('Network Error', 'Failed to connect to server', 'error');
+    }
+  };
+
+  return (
+    <>
+      {/* Header */}
+      <header className="header">
+        <div className="header-content">
+          <div className="brand">
+            <div className="logo">
+              <i className="fas fa-user-shield"></i>
+            </div>
+            <div className="brand-text">
+              <h1>𝐊ąìʂҽղ-𝐌𝐃</h1>
+              <span>Admin Dashboard</span>
+            </div>
+          </div>
+          <div className="nav-links">
+            <a href="/" className="nav-link">
+              <i className="fas fa-home"></i>
+              Main Dashboard
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <main className="main-content">
+        {/* Block Management Section */}
+        <section className="card">
+          <div className="card-header">
+            <h2><i className="fas fa-ban"></i> Block Management</h2>
+            <p>Block or unblock users from using the bot</p>
+          </div>
+          <div className="card-content">
+            <form className="form" onSubmit={(e) => e.preventDefault()}>
+              <div className="input-group">
+                <label htmlFor="blockNumber">
+                  <i className="fab fa-whatsapp"></i>
+                  Phone Number
+                </label>
+                <input 
+                  type="text" 
+                  id="blockNumber"
+                  value={blockNumber}
+                  onChange={(e) => setBlockNumber(e.target.value.replace(/\D/g, ''))}
+                  placeholder="917003816486" 
+                  maxLength={15}
+                  pattern="[0-9]{10,15}"
+                  required
+                />
+                <small>Enter phone number without + or spaces</small>
+              </div>
+              <div className="form-actions">
+                <button 
+                  type="button"
+                  className="btn btn-danger" 
+                  onClick={() => handleAction('block')}
+                  disabled={isSubmitting}
+                >
+                  <i className="fas fa-ban"></i>
+                  {isSubmitting ? 'Processing...' : 'Delete & Block User'}
+                </button>
+                <button 
+                  type="button"
+                  className="btn btn-warning"
+                  onClick={() => handleAction('delete')}
+                  disabled={isSubmitting}
+                >
+                  <i className="fas fa-trash"></i>
+                  Delete/Logout
+                </button>
+                <button 
+                  type="button"
+                  className="btn btn-success"
+                  onClick={() => handleAction('unblock')}
+                  disabled={isSubmitting}
+                >
+                  <i className="fas fa-check-circle"></i>
+                  Unblock User
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        {/* Blocked Users List */}
+        <section className="card">
+          <div className="card-header">
+            <h2><i className="fas fa-list"></i> Blocked Users</h2>
+            <div className="card-actions">
+              <button onClick={loadBlockedUsers} className="btn btn-primary">
+                <i className="fas fa-sync-alt"></i>
+                Refresh
+              </button>
+            </div>
+          </div>
+          <div className="card-content">
+            {loading ? (
+              <Loader message="Loading blocked users..." />
+            ) : blockedUsers.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">
+                  <i className="fas fa-users-slash"></i>
+                </div>
+                <h3>No Blocked Users</h3>
+                <p>No users are currently blocked.</p>
+              </div>
+            ) : (
+              <>
+                <div className="blocklist-grid">
+                  {blockedUsers.map(user => (
+                    <div key={user.number} className="blocked-user-card">
+                      <div className="user-info">
+                        <div className="user-avatar">
+                          <i className="fas fa-user-slash"></i>
+                        </div>
+                        <div className="user-details">
+                          <h3 className="user-number">+{user.number}</h3>
+                          <span className="user-status">
+                            <i className="fas fa-ban"></i>
+                            Blocked
+                          </span>
+                        </div>
+                      </div>
+                      <div className="user-actions">
+                        <button 
+                          className="btn btn-sm btn-success"
+                          onClick={() => handleUnblockUser(user.number)}
+                        >
+                          <i className="fas fa-unlock"></i>
+                          Unblock
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="stats-summary">
+                  <div className="stat-item">
+                    <span className="stat-label">Total Blocked:</span>
+                    <span className="stat-value">{blockedUsers.length}</span>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </section>
+      </main>
+
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+    </>
+  );
+}

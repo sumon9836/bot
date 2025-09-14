@@ -18,6 +18,10 @@ author = "agent"
 task = "workflow.run"
 args = "Development Server"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Next.js Development Server"
+
 [[workflows.workflow]]
 name = "Development Server"
 author = "agent"
@@ -39,9 +43,25 @@ mode = "sequential"
 task = "shell.exec"
 args = "node dev-server.js"
 
+[[workflows.workflow]]
+name = "Next.js Development Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 40027
+externalPort = 3000
 
 [deployment]
 run = ["sh", "-c", "node dev-server.js"]
