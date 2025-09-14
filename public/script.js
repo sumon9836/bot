@@ -340,7 +340,7 @@ function initPhoneInputAnimation() {
 
     if (!inputWrapper) return;
 
-    // Create enhanced country code display element
+    // Create simplified country code display element
     let countryDisplay = inputWrapper.querySelector('.country-code-display');
     if (!countryDisplay) {
         countryDisplay = document.createElement('div');
@@ -350,14 +350,12 @@ function initPhoneInputAnimation() {
                 <span class="country-flag"></span>
                 <span class="country-code">+</span>
             </div>
-            <div class="country-name"></div>
         `;
         inputWrapper.appendChild(countryDisplay);
     }
 
     const countryFlag = countryDisplay.querySelector('.country-flag');
     const countryCodeSpan = countryDisplay.querySelector('.country-code');
-    const countryName = countryDisplay.querySelector('.country-name');
 
     let detectedCountry = null;
     let isAnimating = false;
@@ -395,21 +393,19 @@ function initPhoneInputAnimation() {
         inputWrapper.classList.remove('has-country-code', 'has-value', 'number-complete');
         countryFlag.textContent = '';
         countryCodeSpan.textContent = '+';
-        countryName.textContent = '';
         pairNumberInput.value = '';
     }
 
-    // Professional animation for country detection
+    // Simplified animation for country detection
     function animateCountryDetection(detection) {
         if (isAnimating) return;
         
         isAnimating = true;
         const { countryCode, countryInfo, isComplete } = detection;
 
-        // Set country information
+        // Set country information - only flag and code
         countryFlag.textContent = countryInfo.flag || '🌍';
         countryCodeSpan.textContent = `+${countryCode}`;
-        countryName.textContent = countryInfo.name;
 
         // Add detection animation classes
         countryDisplay.classList.add('show', 'detected');
@@ -424,9 +420,9 @@ function initPhoneInputAnimation() {
         setTimeout(() => {
             isAnimating = false;
             countryDisplay.classList.remove('detected');
-        }, 600);
+        }, 400);
 
-        console.log(`🌍 Country detected: ${countryInfo.flag} ${countryInfo.name} (+${countryCode})`);
+        console.log(`🌍 Country detected: ${countryInfo.flag} (+${countryCode})`);
     }
 
     // Enhanced input handling with smooth animations
