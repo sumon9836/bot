@@ -540,53 +540,151 @@ body::after {
     opacity: 0.3;
 }
 
-/* Animated Country Code Prefix */
+/* Professional Country Code Display */
 .country-code-display {
-    display: flex;
-    align-items: center;
     position: absolute;
-    left: 10px;
+    left: 12px;
     top: 50%;
-    transform: translateY(-50%) translateX(-60px);
+    transform: translateY(-50%) translateX(-120px);
     opacity: 0;
-    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     z-index: 3;
     pointer-events: auto;
     cursor: pointer;
-    font-weight: bold;
-    color: var(--pink-primary);
-    font-size: 0.9rem;
+    font-weight: 600;
+    font-size: 0.85rem;
     white-space: nowrap;
-    background: linear-gradient(135deg, rgba(255, 105, 180, 0.2), rgba(255, 105, 180, 0.1));
-    padding: 4px 8px;
-    border-radius: 6px;
-    border: 1px solid rgba(255, 105, 180, 0.3);
-    backdrop-filter: blur(10px);
+    background: linear-gradient(135deg, 
+        rgba(37, 211, 102, 0.15), 
+        rgba(18, 140, 126, 0.1));
+    border: 1px solid rgba(37, 211, 102, 0.3);
+    border-radius: 12px;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.2);
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 90px;
+}
+
+.country-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #25D366;
+    font-weight: 700;
+}
+
+.country-flag {
+    font-size: 1.1rem;
+    animation: flagWave 2s ease-in-out infinite;
+}
+
+.country-name {
+    font-size: 0.7rem;
+    color: rgba(37, 211, 102, 0.8);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
 }
 
 .country-code-display.show {
     transform: translateY(-50%) translateX(0);
     opacity: 1;
-    animation: slideInBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    animation: professionalSlideIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.country-code-display.show .country-name {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.country-code-display.detected {
+    animation: detectionPulse 0.6s ease-out;
+    border-color: #25D366;
+    box-shadow: 0 0 25px rgba(37, 211, 102, 0.5);
+}
+
+.country-code-display.complete {
+    background: linear-gradient(135deg, 
+        rgba(37, 211, 102, 0.25), 
+        rgba(18, 140, 126, 0.15));
+    border-color: #25D366;
+    box-shadow: 0 0 30px rgba(37, 211, 102, 0.6);
+}
+
+.country-code-display.focused {
+    transform: translateY(-50%) translateX(0) scale(1.02);
+    box-shadow: 0 0 25px rgba(37, 211, 102, 0.4);
 }
 
 .country-code-display:hover {
-    background: linear-gradient(135deg, rgba(255, 105, 180, 0.3), rgba(255, 105, 180, 0.2));
     transform: translateY(-50%) translateX(0) scale(1.05);
+    background: linear-gradient(135deg, 
+        rgba(37, 211, 102, 0.3), 
+        rgba(18, 140, 126, 0.2));
+    border-color: #25D366;
+    box-shadow: 0 0 30px rgba(37, 211, 102, 0.6);
 }
 
-@keyframes slideInBounce {
+@keyframes professionalSlideIn {
     0% {
-        transform: translateY(-50%) translateX(-80px) scale(0.8);
+        transform: translateY(-50%) translateX(-120px) scale(0.7) rotate(-5deg);
         opacity: 0;
+        filter: blur(3px);
+    }
+    30% {
+        transform: translateY(-50%) translateX(10px) scale(1.1) rotate(2deg);
+        opacity: 0.7;
+        filter: blur(1px);
     }
     60% {
-        transform: translateY(-50%) translateX(5px) scale(1.1);
-        opacity: 0.8;
+        transform: translateY(-50%) translateX(-3px) scale(0.95) rotate(-1deg);
+        opacity: 0.9;
+        filter: blur(0px);
+    }
+    80% {
+        transform: translateY(-50%) translateX(2px) scale(1.02) rotate(0.5deg);
+        opacity: 1;
     }
     100% {
-        transform: translateY(-50%) translateX(0) scale(1);
+        transform: translateY(-50%) translateX(0) scale(1) rotate(0deg);
         opacity: 1;
+        filter: blur(0px);
+    }
+}
+
+@keyframes detectionPulse {
+    0% {
+        box-shadow: 0 4px 20px rgba(37, 211, 102, 0.2);
+        border-color: rgba(37, 211, 102, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 40px rgba(37, 211, 102, 0.8);
+        border-color: #25D366;
+        transform: translateY(-50%) translateX(0) scale(1.08);
+    }
+    100% {
+        box-shadow: 0 0 25px rgba(37, 211, 102, 0.5);
+        border-color: #25D366;
+        transform: translateY(-50%) translateX(0) scale(1);
+    }
+}
+
+@keyframes flagWave {
+    0%, 100% { 
+        transform: rotate(0deg) scale(1); 
+    }
+    25% { 
+        transform: rotate(-2deg) scale(1.05); 
+    }
+    75% { 
+        transform: rotate(2deg) scale(1.05); 
     }
 }
 
@@ -614,9 +712,24 @@ input[type="tel"]::placeholder {
     font-weight: 400;
 }
 
-/* Dynamic Padding When Country Code is Shown */
+/* Enhanced Input Field with Dynamic Padding */
 .input-wrapper.has-country-code input[type="tel"] {
-    padding-left: 90px;
+    padding-left: 115px;
+    border-color: #25D366;
+    box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
+    background: rgba(37, 211, 102, 0.02);
+}
+
+.input-wrapper.number-complete input[type="tel"] {
+    border-color: #25D366;
+    box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.2);
+    background: rgba(37, 211, 102, 0.05);
+}
+
+.input-wrapper.has-value.has-country-code .input-icon {
+    color: #25D366;
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 8px rgba(37, 211, 102, 0.5));
 }
 
 /* Flag Image Styling */
@@ -2723,20 +2836,54 @@ body:has(.brand .logo .fas.fa-user-shield) {
 @media (max-width: 480px) {
     .country-code-display {
         font-size: 0.8rem;
-        padding: 2px 6px;
+        padding: 6px 10px;
         left: 10px;
-        border-radius: 6px;
+        border-radius: 10px;
+        min-width: 80px;
+        gap: 6px;
+    }
+
+    .country-badge {
+        gap: 4px;
+    }
+
+    .country-flag {
+        font-size: 1rem;
+    }
+
+    .country-name {
+        font-size: 0.65rem;
     }
 
     .input-wrapper.has-country-code input[type="tel"] {
-        padding-left: 85px;
+        padding-left: 95px;
         font-size: 0.95rem;
     }
 
     .input-wrapper input[type="tel"] {
-        padding: 14px 40px 14px 14px;
+        padding: 16px 40px 16px 16px;
         font-size: 0.95rem;
-        border-radius: 10px;
+        border-radius: 12px;
+        min-height: 54px;
+    }
+
+    .country-code-display.show {
+        animation: mobileSlideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+}
+
+@keyframes mobileSlideIn {
+    0% {
+        transform: translateY(-50%) translateX(-100px) scale(0.8);
+        opacity: 0;
+    }
+    60% {
+        transform: translateY(-50%) translateX(5px) scale(1.05);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(-50%) translateX(0) scale(1);
+        opacity: 1;
     }
 }
 
