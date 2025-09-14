@@ -73,9 +73,10 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
 
       if (response.success) {
         // Show pairing code or WhatsApp link
-        if (response.pairCode || response.qr || response.link) {
+        const pairCode = response.code || response.pairCode;
+        if (pairCode || response.qr || response.link) {
           setPairCodeData({
-            code: response.pairCode,
+            code: pairCode,
             qr: response.qr,
             link: response.link
           });
@@ -84,7 +85,7 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
           showToast?.('Success', 'Phone number paired successfully!', 'success');
         }
         resetDetection();
-        onSuccess?.(phoneNumber, response.pairCode);
+        onSuccess?.(phoneNumber, pairCode);
       } else {
         // Handle specific error messages from backend
         if (response.error && (response.error.includes('ban') || response.error.includes('blocked'))) {

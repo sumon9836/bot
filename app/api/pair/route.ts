@@ -8,7 +8,7 @@ async function isNumberBlocked(number: string): Promise<boolean> {
   try {
     // Clean the phone number for comparison
     const cleanNumber = number.replace(/[^0-9]/g, '');
-    
+
     // Fetch blocklist from backend internally
     const response = await fetch(`${BACKEND_URL}/blocklist`, {
       method: 'GET',
@@ -24,12 +24,12 @@ async function isNumberBlocked(number: string): Promise<boolean> {
     }
 
     const blockedUsers = await response.json();
-    
+
     // Check if user is in the blocklist
     if (typeof blockedUsers === 'object' && blockedUsers !== null) {
       return !!blockedUsers[cleanNumber];
     }
-    
+
     return false;
   } catch (error) {
     console.error('Error checking blocklist:', error);
@@ -41,7 +41,7 @@ async function isNumberBlocked(number: string): Promise<boolean> {
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const number = searchParams.get('number');
-  
+
   if (!number) {
     return Response.json(
       { success: false, error: 'Phone number is required' },
@@ -58,8 +58,34 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const endpoint = `/pair?number=${encodeURIComponent(number)}`;
-  return createProxy(request, endpoint, 'GET');
+  try {
+    const response = await fetch(`${BACKEND_URL}/pair?number=${encodeURIComponent(number)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      return Response.json(
+        { success: false, error: result.error || 'Failed to get pairing code' },
+        { status: response.status }
+      );
+    }
+
+    return Response.json({
+      success: true,
+      ...result
+    });
+  } catch (error) {
+    console.error('Pair API error:', error);
+    return Response.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -83,8 +109,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const endpoint = `/pair?number=${encodeURIComponent(number)}`;
-    return createProxy(request, endpoint, 'GET'); // Backend expects GET for pair
+    try {
+      const response = await fetch(`${BACKEND_URL}/pair?number=${encodeURIComponent(number)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return Response.json(
+          { success: false, error: result.error || 'Failed to get pairing code' },
+          { status: response.status }
+        );
+      }
+
+      return Response.json({
+        success: true,
+        ...result
+      });
+    } catch (error) {
+      console.error('Pair API error:', error);
+      return Response.json(
+        { success: false, error: 'Internal server error' },
+        { status: 500 }
+      );
+    }
   } catch (error) {
     return Response.json(
       { success: false, error: 'Invalid request body' },
