@@ -29,6 +29,7 @@ export interface Session {
   status: string;
   lastSeen?: string;
   platform?: string;
+  user?: string;
 }
 
 export interface ApiResponse<T = any> {

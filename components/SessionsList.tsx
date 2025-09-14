@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useSessions } from '../hooks/useSessions';
@@ -14,6 +15,7 @@ interface SessionCardProps {
     status: string;
     lastSeen?: string;
     platform?: string;
+    user?: string;
   };
 }
 
@@ -26,8 +28,16 @@ function SessionCard({ session }: SessionCardProps) {
         </div>
         <div className="user-details">
           <h3 className="user-number">+{session.number}</h3>
+          {session.user && session.user !== 'Unknown' && (
+            <div className="user-name" style={{ color: 'var(--pink-primary)', fontSize: '0.9rem', fontWeight: '600', marginBottom: '4px' }}>
+              {session.user}
+            </div>
+          )}
           <span className="user-status">
-            <i className="fas fa-circle" style={{ color: '#25D366' }}></i>
+            <i 
+              className="fas fa-circle" 
+              style={{ color: session.status === 'Connected' ? '#25D366' : '#ff4444' }}
+            ></i>
             {session.status || 'Active'}
           </span>
           {session.lastSeen && (
