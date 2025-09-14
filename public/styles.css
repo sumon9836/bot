@@ -493,58 +493,46 @@ body::after {
     margin-bottom: 8px;
 }
 
-/* ========== ENHANCED ANIMATED PHONE INPUT ========== */
+/* ========== CLEAN PHONE INPUT ========== */
 .input-wrapper {
     position: relative;
     display: flex;
     align-items: center;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2));
-    border: 2px solid var(--glass-border);
-    border-radius: 16px;
-    padding: 14px 20px;
-    box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.3),
-        0 0 20px rgba(255, 105, 180, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    overflow: hidden;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    min-height: 56px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    min-height: 48px;
 }
 
 .input-wrapper.focused {
-    border-color: var(--pink-primary);
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.3));
-    box-shadow: 
-        0 12px 40px rgba(0, 0, 0, 0.4),
-        0 0 30px rgba(255, 105, 180, 0.8),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    transform: translateY(-3px) scale(1.02);
+    border-color: #4F46E5;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1), 0 2px 8px rgba(0, 0, 0, 0.15);
+    transform: none;
 }
 
 .input-wrapper.has-country-code {
     border-color: #25D366;
-    background: linear-gradient(135deg, rgba(37, 211, 102, 0.1), rgba(0, 0, 0, 0.4));
-    box-shadow: 
-        0 12px 40px rgba(0, 0, 0, 0.4),
-        0 0 30px rgba(37, 211, 102, 0.6),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 0 0 2px rgba(37, 211, 102, 0.1), 0 2px 6px rgba(0, 0, 0, 0.1);
 }</old_str>
 
 .input-icon {
     position: absolute;
-    right: 16px;
-    color: var(--gray-medium);
+    right: 12px;
+    color: #6B7280;
     z-index: 2;
-    transition: var(--transition-smooth);
+    transition: color 0.3s ease;
     opacity: 1;
 }
 
 .input-wrapper.focused .input-icon {
-    color: var(--pink-primary);
-    transform: scale(1.2);
-    filter: drop-shadow(0 0 5px var(--pink-glow));
+    color: #4F46E5;
+    transform: none;
+    filter: none;
 }
 
 .input-wrapper.has-country-code .input-icon {
@@ -554,15 +542,15 @@ body::after {
 /* Enhanced Country Code Display */
 .country-code-display {
     position: absolute;
-    left: 16px;
+    left: 12px;
     top: 50%;
-    transform: translateY(-50%) translateX(-120px);
+    transform: translateY(-50%) translateX(-80px);
     opacity: 0;
-    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    transition: all 0.3s ease;
     z-index: 3;
     pointer-events: auto;
     cursor: pointer;
-    font-weight: 800;
+    font-weight: 500;
     font-size: 0.85rem;
     white-space: nowrap;
     background: linear-gradient(135deg, 
@@ -693,18 +681,18 @@ body::after {
     }
 }
 
-/* Enhanced Input Field */
+/* Clean Input Field */
 input[type="tel"] {
     width: 100%;
     background: transparent;
     border: none;
     outline: none;
-    color: var(--blue-primary);
-    font-size: 0.9rem;
-    font-weight: 500;
-    padding-left: 20px;
-    padding-right: 50px;
-    transition: var(--transition-smooth);
+    color: #374151;
+    font-size: 16px;
+    font-weight: 400;
+    padding-left: 8px;
+    padding-right: 40px;
+    transition: color 0.3s ease;
     min-height: 24px;
 }
 
@@ -713,28 +701,28 @@ input[type="tel"]:focus {
 }
 
 input[type="tel"]::placeholder {
-    color: var(--gray-medium);
+    color: #9CA3AF;
     font-weight: 400;
 }
 
-/* Enhanced Input Field with Dynamic Padding */
+/* Input Field with Country Code */
 .input-wrapper.has-country-code input[type="tel"] {
-    padding-left: 120px;
+    padding-left: 100px;
     color: #25D366;
-    font-weight: 600;
+    font-weight: 500;
     background: transparent;
 }
 
 .input-wrapper.number-complete input[type="tel"] {
     color: #25D366;
-    font-weight: 700;
-    text-shadow: 0 0 10px rgba(37, 211, 102, 0.3);
+    font-weight: 500;
+    text-shadow: none;
 }</old_str>
 
 .input-wrapper.has-value.has-country-code .input-icon {
     color: #25D366;
-    transform: scale(1.1);
-    filter: drop-shadow(0 0 8px rgba(37, 211, 102, 0.5));
+    transform: none;
+    filter: none;
 }
 
 /* Flag Image Styling */

@@ -382,7 +382,7 @@ function initPhoneInputAnimation() {
 
         if (detectedCountry && value.startsWith(detectedCountry.countryCode)) {
             const nationalPart = value.substring(detectedCountry.countryCode.length);
-            e.target.value = nationalPart;
+            // Don't modify the input value - let user keep what they typed
 
             if (nationalPart.length >= 7) {
                 countryDisplay.classList.add('complete');
@@ -391,7 +391,6 @@ function initPhoneInputAnimation() {
                 countryDisplay.classList.remove('complete');
                 inputWrapper.classList.remove('number-complete');
             }
-            return;
         }
 
         const detection = detectCountryFromPhoneNumber(value);
@@ -399,12 +398,9 @@ function initPhoneInputAnimation() {
         if (detection && !detectedCountry) {
             detectedCountry = detection;
             animateCountryDetection(detection);
-
-            const nationalPart = detection.nationalNumber;
-            e.target.value = nationalPart;
-
+            // Don't modify the input value - let user keep what they typed
         } else if (!detection) {
-            e.target.value = value;
+            // Don't modify the input value - let user keep what they typed  
             if (detectedCountry) {
                 resetCountryDisplay();
             }
@@ -1017,23 +1013,30 @@ function createBannedUserCard(number) {
 // Event Handlers
 pairForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    console.log('🔄 Form submitted');
     hidePhoneError();
 
     const phoneNumber = pairNumberInput.value.trim();
+    console.log('📱 Input value:', phoneNumber);
 
     if (!phoneNumber) {
+        console.log('❌ Empty phone number');
         showPhoneError('Please enter a phone number');
         pairNumberInput.focus();
         return;
     }
 
+    // Normalize the phone number for submission
+    let cleanNumber = phoneNumber.replace(/\D/g, ''); // Remove all non-digits
     let fullNumber;
 
-    if (detectedCountry) {
-        fullNumber = detectedCountry.countryCode + phoneNumber;
-        console.log(`🔗 Full number: ${detectedCountry.countryCode} + ${phoneNumber} = ${fullNumber}`);
+    if (detectedCountry && !cleanNumber.startsWith(detectedCountry.countryCode)) {
+        // If we detected a country and the number doesn't start with that country code, prepend it
+        fullNumber = detectedCountry.countryCode + cleanNumber;
+        console.log(`🔗 Full number: ${detectedCountry.countryCode} + ${cleanNumber} = ${fullNumber}`);
     } else {
-        fullNumber = phoneNumber;
+        // Use the full number as-is (already contains country code or no country detected)
+        fullNumber = cleanNumber;
     }
 
     const validation = normalizeToE164(fullNumber);
