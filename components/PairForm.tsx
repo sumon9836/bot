@@ -74,16 +74,15 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
       if (response.success) {
         // Show pairing code or WhatsApp link
         const pairCode = response.code || response.pairCode;
-        if (pairCode || response.qr || response.link) {
-          setPairCodeData({
-            code: pairCode,
-            qr: response.qr,
-            link: response.link
-          });
-          setShowPairCode(true);
-        } else {
-          showToast?.('Success', 'Phone number paired successfully!', 'success');
-        }
+        
+        // Always show the modal for successful pairing
+        setPairCodeData({
+          code: pairCode,
+          qr: response.qr,
+          link: response.link
+        });
+        setShowPairCode(true);
+        
         resetDetection();
         onSuccess?.(phoneNumber, pairCode);
       } else {
@@ -211,72 +210,127 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
 
       {/* Full Screen WhatsApp Pairing Code Modal */}
       {showPairCode && pairCodeData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-lg" style={{ backgroundColor: 'rgba(0, 0, 0, 0.95)' }}>
-          <div className="w-full h-full max-w-2xl mx-auto flex flex-col justify-center items-center p-8 text-center text-white relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(10px)' }}>
+          <div className="w-full h-full max-w-3xl mx-auto flex flex-col justify-center items-center p-6 text-center text-white relative overflow-y-auto">
             
+            {/* Success Message */}
+            <div className="mb-6 p-4 bg-green-500/20 border border-green-500/40 rounded-xl">
+              <div className="flex items-center justify-center gap-3 mb-2">
+                <i className="fas fa-check-circle text-green-400 text-2xl"></i>
+                <h2 className="text-xl font-bold text-green-300">Phone number {currentNumber} paired successfully!</h2>
+              </div>
+            </div>
+
             {/* Header */}
             <div className="mb-8">
-              <div className="w-20 h-20 mx-auto mb-6 bg-green-500/20 rounded-full flex items-center justify-center border-2 border-green-500/50">
-                <i className="fab fa-whatsapp text-4xl text-green-400"></i>
+              <div className="w-24 h-24 mx-auto mb-6 bg-green-500/20 rounded-full flex items-center justify-center border-2 border-green-500/50 shadow-lg">
+                <i className="fab fa-whatsapp text-5xl text-green-400"></i>
               </div>
-              <h1 className="text-4xl font-bold text-white mb-4">WhatsApp Pairing</h1>
-              <p className="text-xl text-gray-300">Use this code to link your device</p>
+              <h1 className="text-4xl font-bold text-white mb-4">WhatsApp Device Pairing</h1>
+              <p className="text-xl text-gray-300">Use this code to link your device to WhatsApp</p>
             </div>
 
             {/* Pairing Code Display */}
             {pairCodeData.code && (
-              <div className="mb-8 p-8 bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl w-full max-w-md">
-                <p className="text-gray-300 text-lg mb-4">Your Pairing Code:</p>
+              <div className="mb-8 p-8 bg-gradient-to-br from-blue-500/20 to-purple-500/20 border-2 border-blue-500/40 rounded-2xl w-full max-w-lg shadow-2xl">
+                <p className="text-gray-300 text-xl mb-6 font-semibold">Your Pairing Code:</p>
                 <div 
-                  className="text-5xl font-mono font-bold text-blue-300 select-all mb-6 tracking-widest cursor-pointer hover:text-blue-200 transition-colors"
+                  className="text-6xl font-mono font-black text-transparent bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text select-all mb-8 tracking-widest cursor-pointer hover:from-blue-300 hover:to-purple-300 transition-all duration-300 transform hover:scale-105"
                   onClick={() => copyToClipboard(pairCodeData.code!)}
                   title="Click to copy"
+                  style={{ textShadow: '0 0 20px rgba(59, 130, 246, 0.5)' }}
                 >
                   {pairCodeData.code}
                 </div>
                 <button
                   onClick={() => copyToClipboard(pairCodeData.code!)}
-                  className="px-6 py-3 bg-blue-500/20 border border-blue-500/40 text-blue-300 rounded-lg hover:bg-blue-500/30 transition-all duration-200 font-medium flex items-center gap-2 mx-auto"
+                  className="px-8 py-4 bg-gradient-to-r from-blue-500/30 to-purple-500/30 border border-blue-500/50 text-white rounded-xl hover:from-blue-500/40 hover:to-purple-500/40 transition-all duration-300 font-bold text-lg flex items-center gap-3 mx-auto transform hover:scale-105 shadow-lg"
                 >
-                  <i className="fas fa-copy"></i>
-                  Copy Code
+                  <i className="fas fa-copy text-xl"></i>
+                  Copy Pairing Code
                 </button>
               </div>
             )}
 
-            {/* WhatsApp Link */}
-            {pairCodeData.link && (
+            {/* WhatsApp Direct Link */}
+            {pairCodeData.link ? (
               <div className="mb-8">
                 <a 
                   href={pairCodeData.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block px-8 py-4 bg-green-500/20 border-2 border-green-500/40 text-green-300 rounded-xl hover:bg-green-500/30 transition-all duration-200 font-bold text-lg"
+                  className="inline-block px-10 py-5 bg-gradient-to-r from-green-500/30 to-emerald-500/30 border-2 border-green-500/50 text-green-300 rounded-2xl hover:from-green-500/40 hover:to-emerald-500/40 transition-all duration-300 font-bold text-xl transform hover:scale-105 shadow-lg"
                 >
-                  <i className="fab fa-whatsapp mr-3"></i>
+                  <i className="fab fa-whatsapp mr-4 text-2xl"></i>
+                  Open WhatsApp Directly
+                </a>
+              </div>
+            ) : (
+              <div className="mb-8">
+                <a 
+                  href={`https://wa.me/qr/${pairCodeData.code || ''}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block px-10 py-5 bg-gradient-to-r from-green-500/30 to-emerald-500/30 border-2 border-green-500/50 text-green-300 rounded-2xl hover:from-green-500/40 hover:to-emerald-500/40 transition-all duration-300 font-bold text-xl transform hover:scale-105 shadow-lg"
+                >
+                  <i className="fab fa-whatsapp mr-4 text-2xl"></i>
                   Open WhatsApp
                 </a>
               </div>
             )}
 
-            {/* Instructions */}
-            <div className="mb-8 bg-gray-500/10 border border-gray-500/20 rounded-xl p-6 w-full max-w-lg">
-              <h3 className="text-lg font-semibold text-white mb-4">How to pair:</h3>
-              <div className="text-left space-y-2 text-gray-300">
-                <p>1. Open WhatsApp on your phone</p>
-                <p>2. Go to Settings → Linked Devices</p>
-                <p>3. Tap "Link a Device"</p>
-                <p>4. Select "Link with phone number"</p>
-                <p>5. Enter the pairing code above</p>
+            {/* Step-by-Step Instructions */}
+            <div className="mb-8 bg-gray-800/40 border border-gray-600/30 rounded-2xl p-8 w-full max-w-2xl backdrop-blur-sm">
+              <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                <i className="fas fa-list-ol text-blue-400"></i>
+                How to Link Your Device:
+              </h3>
+              <div className="grid gap-4 text-left">
+                <div className="flex items-start gap-4 p-4 bg-gray-700/30 rounded-xl border border-gray-600/20">
+                  <div className="w-8 h-8 bg-blue-500/30 rounded-full flex items-center justify-center text-blue-300 font-bold text-sm flex-shrink-0">1</div>
+                  <div>
+                    <p className="text-white font-semibold mb-1">Open WhatsApp on your phone</p>
+                    <p className="text-gray-400 text-sm">Make sure you have WhatsApp installed and running</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4 p-4 bg-gray-700/30 rounded-xl border border-gray-600/20">
+                  <div className="w-8 h-8 bg-blue-500/30 rounded-full flex items-center justify-center text-blue-300 font-bold text-sm flex-shrink-0">2</div>
+                  <div>
+                    <p className="text-white font-semibold mb-1">Go to Settings → Linked Devices</p>
+                    <p className="text-gray-400 text-sm">Tap the three dots menu, then Settings, then Linked Devices</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4 p-4 bg-gray-700/30 rounded-xl border border-gray-600/20">
+                  <div className="w-8 h-8 bg-blue-500/30 rounded-full flex items-center justify-center text-blue-300 font-bold text-sm flex-shrink-0">3</div>
+                  <div>
+                    <p className="text-white font-semibold mb-1">Tap "Link a Device"</p>
+                    <p className="text-gray-400 text-sm">You'll see options to link using QR code or phone number</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4 p-4 bg-gray-700/30 rounded-xl border border-gray-600/20">
+                  <div className="w-8 h-8 bg-blue-500/30 rounded-full flex items-center justify-center text-blue-300 font-bold text-sm flex-shrink-0">4</div>
+                  <div>
+                    <p className="text-white font-semibold mb-1">Select "Link with phone number instead"</p>
+                    <p className="text-gray-400 text-sm">Choose the phone number option at the bottom</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4 p-4 bg-gradient-to-r from-green-500/20 to-blue-500/20 rounded-xl border border-green-500/30">
+                  <div className="w-8 h-8 bg-green-500/40 rounded-full flex items-center justify-center text-green-300 font-bold text-sm flex-shrink-0">5</div>
+                  <div>
+                    <p className="text-green-300 font-semibold mb-1">Enter the pairing code above</p>
+                    <p className="text-green-200 text-sm">Type or paste the 8-character code exactly as shown</p>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-4 justify-center">
               <button
                 onClick={() => setShowCodeInput(true)}
-                className="px-8 py-3 bg-green-500/20 border border-green-500/30 text-green-300 rounded-lg hover:bg-green-500/30 transition-all duration-200 font-medium"
+                className="px-10 py-4 bg-gradient-to-r from-green-500/30 to-emerald-500/30 border border-green-500/40 text-green-300 rounded-xl hover:from-green-500/40 hover:to-emerald-500/40 transition-all duration-300 font-bold text-lg transform hover:scale-105"
               >
+                <i className="fas fa-check mr-3"></i>
                 I've Entered the Code
               </button>
               
@@ -284,12 +338,26 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
                 onClick={() => {
                   setShowPairCode(false);
                   setPairCodeData(null);
+                  setCurrentNumber('');
                 }}
-                className="px-8 py-3 bg-gray-500/20 border border-gray-500/30 text-gray-300 rounded-lg hover:bg-gray-500/30 transition-all duration-200"
+                className="px-10 py-4 bg-gray-600/30 border border-gray-500/40 text-gray-300 rounded-xl hover:bg-gray-600/40 transition-all duration-300 font-bold text-lg"
               >
+                <i className="fas fa-times mr-3"></i>
                 Cancel
               </button>
             </div>
+
+            {/* Close button */}
+            <button
+              onClick={() => {
+                setShowPairCode(false);
+                setPairCodeData(null);
+                setCurrentNumber('');
+              }}
+              className="absolute top-6 right-6 w-12 h-12 bg-gray-600/40 border border-gray-500/40 text-gray-300 rounded-full hover:bg-gray-600/60 transition-all duration-200 flex items-center justify-center"
+            >
+              <i className="fas fa-times text-xl"></i>
+            </button>
           </div>
         </div>
       )}
