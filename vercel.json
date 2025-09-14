@@ -20,7 +20,11 @@
       "destination": "/public/index.html"
     },
     {
-      "source": "/admin/?",
+      "source": "/admin",
+      "destination": "/public/login.html"
+    },
+    {
+      "source": "/admin/",
       "destination": "/public/login.html"
     },
     {
