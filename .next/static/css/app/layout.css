@@ -1068,7 +1068,14 @@ input[type="tel"]:focus::placeholder {
 }
 
 /* ========== SESSIONS & BANLIST GRIDS ========== */
-.sessions-grid,
+.sessions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-gap: 12px;
+    gap: 12px;
+    margin-top: 20px;
+}
+
 .blocklist-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -1105,11 +1112,47 @@ input[type="tel"]:focus::placeholder {
     box-shadow: var(--shadow-glow);
 }
 
+/* ========== TRANSPARENT SESSION CARD ========== */
+.session-card-transparent {
+    background: rgba(0, 0, 0, 0.3);
+    -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    transition: var(--transition-smooth);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 50px;
+}
+
+.session-card-transparent:hover {
+    border-color: var(--blue-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 212, 255, 0.2);
+}
+
+.session-card-transparent .session-number {
+    color: var(--white-pure);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.session-card-transparent .session-status {
+    color: var(--gray-light);
+    font-size: 0.8rem;
+    opacity: 0.8;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 /* ========== COMPACT BANNED USER CARD ========== */
 .banned-user-card-compact {
-    background: rgba(0, 0, 0, 0.4);
-    -webkit-backdrop-filter: blur(10px);
-            backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.3);
+    -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
     border: 1px solid var(--glass-border);
     border-radius: 8px;
     padding: 12px 16px;
@@ -1375,11 +1418,13 @@ input[type="tel"]:focus::placeholder {
         grid-template-columns: 1fr;
     }
 
+    .sessions-grid,
     .banlist-grid {
         grid-template-columns: 1fr;
         gap: 10px;
     }
 
+    .session-card-transparent,
     .banned-user-card-compact {
         padding: 10px 14px;
         flex-direction: column;
@@ -1388,10 +1433,12 @@ input[type="tel"]:focus::placeholder {
         min-height: auto;
     }
 
+    .session-card-transparent .session-number,
     .banned-user-card-compact .user-number {
         font-size: 0.9rem;
     }
 
+    .session-card-transparent .session-status,
     .banned-user-card-compact .blocked-date {
         font-size: 0.75rem;
     }
