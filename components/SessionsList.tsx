@@ -12,7 +12,7 @@ interface SessionCardProps {
   session: {
     id: string;
     number: string;
-    status: string;
+    status?: string;
     lastSeen?: string;
     platform?: string;
     user?: string;
@@ -20,11 +20,6 @@ interface SessionCardProps {
 }
 
 function SessionCard({ session }: SessionCardProps) {
-  // Only show if status is Connected/Active, hide Disconnected
-  if (session.status === 'Disconnected') {
-    return null;
-  }
-
   return (
     <div className="session-card-transparent">
       <div className="session-number">+{session.number}</div>
