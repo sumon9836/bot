@@ -303,7 +303,7 @@ function hidePhoneError() {
 // Global variables for country detection
 let detectedCountry = null;
 
-// Phone input animation
+// Enhanced phone input with smart country detection and animations
 function initPhoneInputAnimation() {
     const inputWrapper = pairNumberInput.closest('.input-wrapper');
     if (!inputWrapper) return;
@@ -323,6 +323,7 @@ function initPhoneInputAnimation() {
 
     const countryFlag = countryDisplay.querySelector('.country-flag');
     const countryCodeSpan = countryDisplay.querySelector('.country-code');
+    let lastProcessedValue = '';
 
     pairNumberInput.addEventListener('focus', () => {
         inputWrapper.classList.add('focused');
@@ -346,36 +347,70 @@ function initPhoneInputAnimation() {
         inputWrapper.classList.remove('has-country-code', 'has-value', 'number-complete');
         countryFlag.textContent = '';
         countryCodeSpan.textContent = '+';
-        // Don't clear the input value - preserve what user typed
+        lastProcessedValue = '';
     }
 
-    function animateCountryDetection(detection) {
+    function smoothSlideAnimation(detection) {
         const { countryCode, countryInfo, isComplete } = detection;
 
+        // Update flag and country code
         countryFlag.textContent = countryInfo.flag || '🌍';
         countryCodeSpan.textContent = `+${countryCode}`;
 
+        // Add smooth slide-in animation
         countryDisplay.classList.add('show', 'detected');
         inputWrapper.classList.add('has-country-code');
 
+        // Add completion styling if number is complete
         if (isComplete) {
             countryDisplay.classList.add('complete');
             inputWrapper.classList.add('number-complete');
+        } else {
+            countryDisplay.classList.remove('complete');
+            inputWrapper.classList.remove('number-complete');
         }
 
+        // Remove detection pulse after animation
         setTimeout(() => {
             countryDisplay.classList.remove('detected');
-        }, 400);
+        }, 600);
 
         console.log(`🌍 Country detected: ${countryInfo.flag} (+${countryCode})`);
     }
 
-    pairNumberInput.addEventListener('input', (e) => {
-        let value = e.target.value; // Keep the original value as typed by user
-        let digitsOnly = value.replace(/\D/g, ''); // Only use digits for detection logic
+    function cleanAndFormatInput(inputValue) {
+        // Remove all non-digits and plus signs
+        let cleaned = inputValue.replace(/[^\d+]/g, '');
+        
+        // Remove multiple plus signs and keep only digits
+        cleaned = cleaned.replace(/\+/g, '');
+        
+        // Extract digits only for processing
+        return cleaned.replace(/\D/g, '');
+    }
 
-        if (!digitsOnly) {
-            // Only reset UI state if we had a detected country
+    function updateInputValue(cleanedDigits, detectedCountry) {
+        // Update the input field to show only the cleaned digits
+        // The country flag will show the country code visually
+        if (detectedCountry) {
+            const nationalNumber = cleanedDigits.substring(detectedCountry.countryCode.length);
+            pairNumberInput.value = cleanedDigits;
+        } else {
+            pairNumberInput.value = cleanedDigits;
+        }
+    }
+
+    pairNumberInput.addEventListener('input', (e) => {
+        let rawValue = e.target.value;
+        let cleanedDigits = cleanAndFormatInput(rawValue);
+
+        // Prevent infinite loops
+        if (cleanedDigits === lastProcessedValue) {
+            return;
+        }
+        lastProcessedValue = cleanedDigits;
+
+        if (!cleanedDigits) {
             if (detectedCountry) {
                 detectedCountry = null;
                 countryDisplay.classList.remove('show', 'detected', 'complete');
@@ -389,25 +424,29 @@ function initPhoneInputAnimation() {
 
         inputWrapper.classList.add('has-value');
 
-        if (detectedCountry && digitsOnly.startsWith(detectedCountry.countryCode)) {
-            const nationalPart = digitsOnly.substring(detectedCountry.countryCode.length);
+        // Check for country detection
+        const detection = detectCountryFromPhoneNumber(cleanedDigits);
 
-            if (nationalPart.length >= 7) {
-                countryDisplay.classList.add('complete');
-                inputWrapper.classList.add('number-complete');
+        if (detection) {
+            // Update input to show clean number without duplicates
+            updateInputValue(cleanedDigits, detection);
+            
+            // If this is a new country detection or country changed
+            if (!detectedCountry || detectedCountry.countryCode !== detection.countryCode) {
+                detectedCountry = detection;
+                smoothSlideAnimation(detection);
             } else {
-                countryDisplay.classList.remove('complete');
-                inputWrapper.classList.remove('number-complete');
+                // Same country, just update completion status
+                if (detection.isComplete) {
+                    countryDisplay.classList.add('complete');
+                    inputWrapper.classList.add('number-complete');
+                } else {
+                    countryDisplay.classList.remove('complete');
+                    inputWrapper.classList.remove('number-complete');
+                }
             }
-        }
-
-        const detection = detectCountryFromPhoneNumber(digitsOnly);
-
-        if (detection && !detectedCountry) {
-            detectedCountry = detection;
-            animateCountryDetection(detection);
-        } else if (!detection) {
-            // Only reset UI state if we had a detected country
+        } else {
+            // No country detected, clean up
             if (detectedCountry) {
                 detectedCountry = null;
                 countryDisplay.classList.remove('show', 'detected', 'complete');
@@ -415,14 +454,38 @@ function initPhoneInputAnimation() {
                 countryFlag.textContent = '';
                 countryCodeSpan.textContent = '+';
             }
+            // Still update input to remove any invalid characters
+            pairNumberInput.value = cleanedDigits;
         }
     });
 
     pairNumberInput.addEventListener('paste', (e) => {
+        // Handle paste events with a slight delay to process the pasted content
         setTimeout(() => {
             const event = new Event('input', { bubbles: true });
             e.target.dispatchEvent(event);
-        }, 0);
+        }, 10);
+    });
+
+    // Handle keydown for better UX - prevent non-numeric input
+    pairNumberInput.addEventListener('keydown', (e) => {
+        // Allow: backspace, delete, tab, escape, enter
+        if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
+            // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+            (e.keyCode === 65 && e.ctrlKey === true) || 
+            (e.keyCode === 67 && e.ctrlKey === true) || 
+            (e.keyCode === 86 && e.ctrlKey === true) ||
+            (e.keyCode === 88 && e.ctrlKey === true) ||
+            // Allow: home, end, left, right, down, up
+            (e.keyCode >= 35 && e.keyCode <= 40)) {
+            return;
+        }
+        // Ensure that it is a number or plus sign and stop the keypress
+        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && 
+            (e.keyCode < 96 || e.keyCode > 105) && 
+            e.keyCode !== 187) { // 187 is + key
+            e.preventDefault();
+        }
     });
 }
 
