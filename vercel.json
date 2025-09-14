@@ -1,58 +1,28 @@
 {
   "version": 2,
-  "name": "kaisen-md-dashboard",
-  "env": {
-    "ADMIN_PASSWORD": "sumon2008",
-    "JWT_SECRET": "vercel-jwt-secret-2025"
-  },
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "@vercel/node@3.1.0"
-    }
-  },
-  "rewrites": [
+  "builds": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
+      "src": "api/index.js",
+      "use": "@vercel/node"
     },
     {
-      "source": "/",
-      "destination": "/public/index.html"
-    },
-    {
-      "source": "/admin",
-      "destination": "/api/admin/auth-check"
-    },
-    {
-      "source": "/login",
-      "destination": "/public/login.html"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/public/$1"
+      "src": "public/**",
+      "use": "@vercel/static"
     }
   ],
-  "headers": [
+  "routes": [
     {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, PUT, DELETE, OPTIONS"
-        },
-        {
-          "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization, Cookie"
-        },
-        {
-          "key": "Access-Control-Allow-Credentials",
-          "value": "true"
-        }
-      ]
+      "src": "/api/(.*)",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
     }
-  ]
+  ],
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 30
+    }
+  }
 }
