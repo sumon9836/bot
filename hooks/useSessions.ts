@@ -70,7 +70,7 @@ export function useSessions(options: UseSessionsOptions = {}) {
         }
       }
     } catch (err) {
-      if ((err as Error).name !== 'AbortError') {
+      if (err && (err as Error).name !== 'AbortError') {
         const errorMessage = 'Failed to fetch sessions';
         setError(errorMessage);
         if (showLoadingState) {
@@ -99,8 +99,12 @@ export function useSessions(options: UseSessionsOptions = {}) {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
+      if (abortControllerRef.current && !abortControllerRef.current.signal.aborted) {
+        try {
+          abortControllerRef.current.abort();
+        } catch (error) {
+          // Ignore abort errors during cleanup
+        }
       }
     };
   }, [fetchSessions, autoRefresh, pollingInterval]);

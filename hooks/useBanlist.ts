@@ -84,7 +84,7 @@ export function useBanlist(options: UseBanlistOptions = {}) {
       setBannedUsers(userList);
       setError(null);
     } catch (err) {
-      if ((err as Error).name !== 'AbortError') {
+      if (err && (err as Error).name !== 'AbortError') {
         // If it's a JSON parse error, show empty state instead of error
         if ((err as Error).message.includes('Unexpected token') || (err as Error).message.includes('JSON')) {
           setBannedUsers([]);
@@ -118,8 +118,12 @@ export function useBanlist(options: UseBanlistOptions = {}) {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
+      if (abortControllerRef.current && !abortControllerRef.current.signal.aborted) {
+        try {
+          abortControllerRef.current.abort();
+        } catch (error) {
+          // Ignore abort errors during cleanup
+        }
       }
     };
   }, [fetchBanlist, autoRefresh, pollingInterval]);

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createProxy } from '../../../../lib/proxy';
+import { generateSecureToken, createSession } from '../../../../lib/admin-auth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,14 +24,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If password matches, set authentication cookie and return success
+    // Generate secure session token
+    const sessionToken = generateSecureToken();
+    createSession(sessionToken, 24); // 24 hours expiry
+
+    // If password matches, set secure authentication cookie and return success
     const response = NextResponse.json(
       { success: true, message: 'Login successful' },
       { status: 200 }
     );
 
-    // Set secure authentication cookie
-    response.cookies.set('admin_auth', 'authenticated', {
+    // Set secure session cookie
+    response.cookies.set('admin_session', sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
