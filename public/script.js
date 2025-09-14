@@ -224,15 +224,11 @@ const COUNTRY_CODES = {
     '998': { flag: '🇺🇿', name: 'Uzbekistan', maxLength: 9 }
 };
 
-// Enhanced auto-detect country from phone number with better validation
+// Enhanced auto-detect country from phone number
 function detectCountryFromPhoneNumber(phoneNumber) {
-    // Clean the phone number - remove all non-digits
     let cleanNumber = phoneNumber.replace(/\D/g, '');
-
-    // Handle empty input
     if (!cleanNumber) return null;
 
-    // Try to match country codes (longest first for better accuracy)
     const sortedCodes = Object.keys(COUNTRY_CODES).sort((a, b) => b.length - a.length);
 
     for (const code of sortedCodes) {
@@ -240,7 +236,6 @@ function detectCountryFromPhoneNumber(phoneNumber) {
             const country = COUNTRY_CODES[code];
             const nationalNumber = cleanNumber.substring(code.length);
 
-            // More flexible validation - allow shorter numbers during typing
             if (nationalNumber.length >= 3 && nationalNumber.length <= (country.maxLength || 15)) {
                 return {
                     countryCode: code,
@@ -248,31 +243,27 @@ function detectCountryFromPhoneNumber(phoneNumber) {
                     nationalNumber: nationalNumber,
                     fullNumber: cleanNumber,
                     e164: `+${cleanNumber}`,
-                    isComplete: nationalNumber.length >= 7 // Flag for complete numbers
+                    isComplete: nationalNumber.length >= 7
                 };
             }
         }
     }
-
     return null;
 }
 
-// E.164 Phone Number Validation and Normalization with Auto-Detection
+// Phone number validation and normalization
 function normalizeToE164(phoneNumber) {
     if (!phoneNumber) {
         return { valid: false, error: 'Phone number is required' };
     }
 
-    // Try to detect country from the phone number
     const detection = detectCountryFromPhoneNumber(phoneNumber);
-
     if (!detection) {
-        return { valid: false, error: 'Unable to detect country from phone number. Please include country code (e.g., +919876543210)' };
+        return { valid: false, error: 'Unable to detect country. Please include country code (e.g., 919876543210)' };
     }
 
     const { countryCode, countryInfo, nationalNumber, e164 } = detection;
 
-    // Validate the national number length
     if (nationalNumber.length < 6) {
         return { valid: false, error: 'Phone number too short' };
     }
@@ -281,9 +272,8 @@ function normalizeToE164(phoneNumber) {
         return { valid: false, error: 'Phone number too long' };
     }
 
-    // Check country-specific length if available
     if (countryInfo.maxLength && nationalNumber.length > countryInfo.maxLength) {
-        return { valid: false, error: `Phone number too long for ${countryInfo.name} (max ${countryInfo.maxLength} digits)` };
+        return { valid: false, error: `Phone number too long for ${countryInfo.name}` };
     }
 
     return { 
@@ -310,37 +300,14 @@ function hidePhoneError() {
     }
 }
 
-// 🎯 Smart Country Code Detection
-let currentCountryCode = null;
+// Global variables for country detection
 let detectedCountry = null;
 
-function detectCountryCode(value) {
-    // Remove any non-digits
-    const digits = value.replace(/\D/g, '');
-
-    // Try to match country codes (longest first for better accuracy)
-    const sortedCodes = Object.keys(COUNTRY_CODES).sort((a, b) => b.length - a.length);
-
-    for (const code of sortedCodes) {
-        if (digits.startsWith(code)) {
-            return {
-                code,
-                info: COUNTRY_CODES[code],
-                remainingNumber: digits.substring(code.length)
-            };
-        }
-    }
-
-    return null;
-}
-
-// 🌟 Professional Phone Input with Enhanced Country Detection
+// Phone input animation
 function initPhoneInputAnimation() {
     const inputWrapper = pairNumberInput.closest('.input-wrapper');
-
     if (!inputWrapper) return;
 
-    // Create simplified country code display element
     let countryDisplay = inputWrapper.querySelector('.country-code-display');
     if (!countryDisplay) {
         countryDisplay = document.createElement('div');
@@ -357,10 +324,6 @@ function initPhoneInputAnimation() {
     const countryFlag = countryDisplay.querySelector('.country-flag');
     const countryCodeSpan = countryDisplay.querySelector('.country-code');
 
-    let detectedCountry = null;
-    let isAnimating = false;
-
-    // Enhanced focus handling
     pairNumberInput.addEventListener('focus', () => {
         inputWrapper.classList.add('focused');
         if (detectedCountry) {
@@ -368,25 +331,15 @@ function initPhoneInputAnimation() {
         }
     });
 
-    // Enhanced blur handling
     pairNumberInput.addEventListener('blur', () => {
         inputWrapper.classList.remove('focused');
         countryDisplay.classList.remove('focused');
-        
+
         if (!pairNumberInput.value.trim()) {
             resetCountryDisplay();
         }
     });
 
-    // Click to reset country detection
-    countryDisplay.addEventListener('click', (e) => {
-        e.preventDefault();
-        resetCountryDisplay();
-        pairNumberInput.focus();
-        showToast('Reset', 'Country detection reset. Enter full number with country code.', 'success');
-    });
-
-    // Reset country display function
     function resetCountryDisplay() {
         detectedCountry = null;
         countryDisplay.classList.remove('show', 'detected', 'complete');
@@ -396,18 +349,12 @@ function initPhoneInputAnimation() {
         pairNumberInput.value = '';
     }
 
-    // Simplified animation for country detection
     function animateCountryDetection(detection) {
-        if (isAnimating) return;
-        
-        isAnimating = true;
         const { countryCode, countryInfo, isComplete } = detection;
 
-        // Set country information - only flag and code
         countryFlag.textContent = countryInfo.flag || '🌍';
         countryCodeSpan.textContent = `+${countryCode}`;
 
-        // Add detection animation classes
         countryDisplay.classList.add('show', 'detected');
         inputWrapper.classList.add('has-country-code');
 
@@ -416,20 +363,16 @@ function initPhoneInputAnimation() {
             inputWrapper.classList.add('number-complete');
         }
 
-        // Reset animation flag after animation completes
         setTimeout(() => {
-            isAnimating = false;
             countryDisplay.classList.remove('detected');
         }, 400);
 
         console.log(`🌍 Country detected: ${countryInfo.flag} (+${countryCode})`);
     }
 
-    // Enhanced input handling with smooth animations
     pairNumberInput.addEventListener('input', (e) => {
         let value = e.target.value.replace(/\D/g, '');
 
-        // Handle empty input
         if (!value) {
             resetCountryDisplay();
             return;
@@ -437,12 +380,10 @@ function initPhoneInputAnimation() {
 
         inputWrapper.classList.add('has-value');
 
-        // If country already detected, maintain the display
         if (detectedCountry && value.startsWith(detectedCountry.countryCode)) {
             const nationalPart = value.substring(detectedCountry.countryCode.length);
             e.target.value = nationalPart;
-            
-            // Update completion status
+
             if (nationalPart.length >= 7) {
                 countryDisplay.classList.add('complete');
                 inputWrapper.classList.add('number-complete');
@@ -453,27 +394,23 @@ function initPhoneInputAnimation() {
             return;
         }
 
-        // Try to detect country from current input
         const detection = detectCountryFromPhoneNumber(value);
 
         if (detection && !detectedCountry) {
             detectedCountry = detection;
             animateCountryDetection(detection);
-            
-            // Update input to show only national number
+
             const nationalPart = detection.nationalNumber;
             e.target.value = nationalPart;
-            
+
         } else if (!detection) {
-            // No country detected, keep original behavior
             e.target.value = value;
             if (detectedCountry) {
                 resetCountryDisplay();
             }
         }
-    });</old_str>
+    });
 
-    // Handle paste events
     pairNumberInput.addEventListener('paste', (e) => {
         setTimeout(() => {
             const event = new Event('input', { bubbles: true });
@@ -498,16 +435,14 @@ let bannedUsers = {};
 let isLoading = false;
 let isLoadingBanlist = false;
 
-// 🎨 Enhanced UI Animations and Micro-interactions
+// Enhanced UI Animations
 function initEnhancedAnimations() {
-    // Add stagger animation to cards
     const cards = document.querySelectorAll('.card, .session-card');
     cards.forEach((card, index) => {
         card.style.animationDelay = `${index * 0.1}s`;
         card.classList.add('fade-in-up');
     });
 
-    // Add button ripple effect
     const buttons = document.querySelectorAll('.btn');
     buttons.forEach(button => {
         button.addEventListener('click', function(e) {
@@ -531,47 +466,23 @@ function initEnhancedAnimations() {
             `;
 
             this.appendChild(ripple);
-
-            setTimeout(() => {
-                ripple.remove();
-            }, 600);
-        });
-    });
-
-    // Add hover sound effect simulation (visual feedback)
-    const interactiveElements = document.querySelectorAll('.btn, .card, .session-card, .input-wrapper');
-    interactiveElements.forEach(element => {
-        element.addEventListener('mouseenter', function() {
-            this.style.transform = this.style.transform || '';
-            this.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            setTimeout(() => ripple.remove(), 600);
         });
     });
 }
 
 // Utility Functions
-function validatePhoneNumber(number) {
-    const phoneRegex = /^[0-9]{10,15}$/;
-    return phoneRegex.test(number.trim());
-}
-
-function formatPhoneNumber(number) {
-    return number.trim().replace(/\D/g, '');
-}
-
 function showToast(title, message, type = 'success') {
     const toastIcon = toast.querySelector('.toast-icon');
     const toastTitle = toast.querySelector('.toast-title');
     const toastText = toast.querySelector('.toast-text');
 
-    // Reset classes
     toastIcon.className = `toast-icon ${type}`;
     toast.className = `toast ${type}`;
 
-    // Set content
     toastTitle.textContent = title;
     toastText.textContent = message;
 
-    // Set appropriate icon
     const icon = toastIcon.querySelector('i');
     if (type === 'success') {
         icon.className = 'fas fa-check-circle';
@@ -579,23 +490,19 @@ function showToast(title, message, type = 'success') {
         icon.className = 'fas fa-exclamation-circle';
     }
 
-    // Show toast
     toast.classList.add('show');
 
-    // Hide after 4 seconds
     setTimeout(() => {
         toast.classList.remove('show');
     }, 4000);
 }
 
 function showPairingCodeModal(number, code) {
-    // Remove any existing modal
     const existingModal = document.getElementById('pairingModal');
     if (existingModal) {
         existingModal.remove();
     }
 
-    // Create modal HTML
     const modal = document.createElement('div');
     modal.id = 'pairingModal';
     modal.className = 'pairing-modal-overlay';
@@ -614,7 +521,7 @@ function showPairingCodeModal(number, code) {
                     </div>
                     <div class="number-text">
                         <span class="label">Phone Number</span>
-                        <span class="number">+${number}</span>
+                        <span class="number">${detectedCountry ? detectedCountry.countryInfo.flag : '🌍'}+${number}</span>
                     </div>
                 </div>
 
@@ -631,7 +538,7 @@ function showPairingCodeModal(number, code) {
                             <div class="pairing-code-enhanced" id="pairingCode">${code}</div>
                             <div class="code-animation-bg"></div>
                         </div>
-                        <button class="copy-btn-enhanced" onclick="copyPairingCodeEnhanced('${code}')">
+                        <button class="copy-btn-enhanced" onclick="copyPairingCode('${code}')">
                             <span class="copy-icon">
                                 <i class="fas fa-copy"></i>
                             </span>
@@ -694,187 +601,38 @@ function showPairingCodeModal(number, code) {
     `;
 
     document.body.appendChild(modal);
+    setTimeout(() => modal.classList.add('show'), 10);
 
-    // Show modal with animation
-    setTimeout(() => {
-        modal.classList.add('show');
-    }, 10);
-
-    // Auto refresh sessions after pairing attempt
     setTimeout(async () => {
         await loadSessions();
     }, 5000);
 }
 
-function showBanWarningModal(number) {
-    // Remove any existing modal
-    const existingModal = document.getElementById('banModal');
-    if (existingModal) {
-        existingModal.remove();
-    }
-
-    // Create modal HTML
-    const modal = document.createElement('div');
-    modal.id = 'banModal';
-    modal.className = 'pairing-modal-overlay';
-    modal.innerHTML = `
-        <div class="pairing-modal">
-            <div class="pairing-modal-header">
-                <h2><i class="fas fa-ban"></i> Account Banned</h2>
-                <button class="modal-close" onclick="closeBanModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="pairing-modal-content">
-                <div class="ban-warning">
-                    <div class="ban-icon">
-                        <i class="fas fa-user-slash"></i>
-                    </div>
-                    <h3>You Are Banned</h3>
-                    <p>The number <strong>+${number}</strong> has been blocked from using this bot.</p>
-                    <p>If you believe this is an error, please contact the developer.</p>
-
-                    <div class="contact-info">
-                        <h4><i class="fas fa-phone"></i> Need Help?</h4>
-                        <p>Contact the developer to resolve this issue or register a new number.</p>
-                        <div class="contact-actions">
-                            <button class="btn btn-primary" onclick="contactDeveloper()">
-                                <i class="fas fa-envelope"></i>
-                                Contact Developer
-                            </button>
-                            <button class="btn btn-secondary" onclick="registerNewNumber()">
-                                <i class="fas fa-plus"></i>
-                                Register New Number
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="pairing-modal-footer">
-                <button class="btn btn-secondary" onclick="closeBanModal()">
-                    <i class="fas fa-times"></i>
-                    Close
-                </button>
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(modal);
-
-    // Show modal with animation
-    setTimeout(() => {
-        modal.classList.add('show');
-    }, 10);
-}
-
-// Global functions for modal
+// Global functions for modals
 window.closePairingModal = function() {
     const modal = document.getElementById('pairingModal');
     if (modal) {
         modal.classList.remove('show');
-        setTimeout(() => {
-            modal.remove();
-        }, 300);
+        setTimeout(() => modal.remove(), 300);
     }
-    // Reload sessions when modal is closed
     loadSessions();
 };
 
-window.closeBanModal = function() {
-    const modal = document.getElementById('banModal');
-    if (modal) {
-        modal.classList.remove('show');
-        setTimeout(() => {
-            modal.remove();
-        }, 300);
-    }
-};
-
-window.contactDeveloper = function() {
-    showToast('Contact Info', 'Please contact the developer through the official support channels', 'success');
-    // You can modify this to open a contact form, email, or redirect to support
-};
-
-window.registerNewNumber = function() {
-    closeBanModal();
-    // Clear the input field and focus it for new number entry
-    pairNumberInput.value = '';
-    pairNumberInput.focus();
-    showToast('New Number', 'Please enter a different phone number to register', 'success');
-};
-
-window.copyPairingCodeEnhanced = function(code) {
+window.copyPairingCode = function(code) {
     const copyBtn = document.querySelector('.copy-btn-enhanced');
-    const copyIcon = copyBtn.querySelector('.copy-icon');
-    const copyText = copyBtn.querySelector('.copy-text');
-    const copiedText = copyBtn.querySelector('.copied-text');
 
-    // Add beautiful copying animation
     copyBtn.classList.add('copying');
-    copyIcon.style.transform = 'scale(0.7) rotate(360deg)';
-    copyIcon.style.transition = 'all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
-
-    // Add sparkle effect to button
-    const sparkle = document.createElement('div');
-    sparkle.style.cssText = `
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 4px;
-        height: 4px;
-        background: white;
-        border-radius: 50%;
-        transform: translate(-50%, -50%);
-        animation: sparkleEffect 0.6s ease-out;
-        pointer-events: none;
-    `;
-    copyBtn.appendChild(sparkle);
 
     navigator.clipboard.writeText(code).then(() => {
-        // Beautiful success animation
         setTimeout(() => {
             copyBtn.classList.remove('copying');
             copyBtn.classList.add('copied');
-            copyIcon.innerHTML = '<i class="fas fa-check"></i>';
-            copyIcon.style.transform = 'scale(1.3) rotate(0deg)';
 
-            // Add bounce effect to the code
-            const codeElement = document.getElementById('pairingCode');
-            codeElement.classList.add('code-copied');
-            codeElement.style.animation = 'bounceSuccess 0.8s ease-out';
-
-            // Create floating success particles
-            for (let i = 0; i < 3; i++) {
-                const particle = document.createElement('div');
-                particle.style.cssText = `
-                    position: absolute;
-                    top: ${20 + i * 10}%;
-                    left: ${40 + i * 20}%;
-                    width: 6px;
-                    height: 6px;
-                    background: #FF69B4;
-                    border-radius: 50%;
-                    animation: floatUp 1s ease-out ${i * 0.1}s;
-                    pointer-events: none;
-                `;
-                copyBtn.appendChild(particle);
-                setTimeout(() => particle.remove(), 1000);
-            }
-
-            // Reset after animation
             setTimeout(() => {
                 copyBtn.classList.remove('copied');
-                copyIcon.innerHTML = '<i class="fas fa-copy"></i>';
-                copyIcon.style.transform = 'scale(1)';
-                codeElement.classList.remove('code-copied');
-                codeElement.style.animation = '';
             }, 2500);
         }, 400);
-
-        // Remove sparkle
-        setTimeout(() => sparkle.remove(), 600);
     }).catch(() => {
-        // Fallback with same beautiful animation
         const textArea = document.createElement('textarea');
         textArea.value = code;
         document.body.appendChild(textArea);
@@ -885,22 +643,13 @@ window.copyPairingCodeEnhanced = function(code) {
         setTimeout(() => {
             copyBtn.classList.remove('copying');
             copyBtn.classList.add('copied');
-            copyIcon.innerHTML = '<i class="fas fa-check"></i>';
-            copyIcon.style.transform = 'scale(1.3)';
 
             setTimeout(() => {
                 copyBtn.classList.remove('copied');
-                copyIcon.innerHTML = '<i class="fas fa-copy"></i>';
-                copyIcon.style.transform = 'scale(1)';
             }, 2500);
         }, 400);
-
-        setTimeout(() => sparkle.remove(), 600);
     });
 };
-
-// Keep the old function for compatibility
-window.copyPairingCode = window.copyPairingCodeEnhanced;
 
 function setButtonLoading(button, loading) {
     const btnText = button.querySelector('.btn-text');
@@ -917,7 +666,7 @@ function setButtonLoading(button, loading) {
     }
 }
 
-// API Functions
+// API Functions with proper error handling
 async function makeApiRequest(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
 
@@ -930,45 +679,34 @@ async function makeApiRequest(endpoint, options = {}) {
             ...options
         });
 
-        // Handle unauthorized access gracefully for banlist/blocklist
-        if (response.status === 401 && (endpoint.includes('blocklist') || endpoint.includes('banlist'))) {
-            console.log('Unauthorized access to banlist - requires admin login');
-            return {};
-        }
-
-        // Get response data first
         const contentType = response.headers.get('content-type');
         let responseData;
 
         if (contentType && contentType.includes('application/json')) {
             responseData = await response.json();
         } else {
-            responseData = await response.text();
+            const textData = await response.text();
+            try {
+                responseData = JSON.parse(textData);
+            } catch {
+                responseData = textData;
+            }
         }
 
-        // Handle error responses
         if (!response.ok) {
             let errorMessage = 'Unknown error';
             if (responseData && typeof responseData === 'object') {
                 errorMessage = responseData.message || responseData.error || response.statusText;
             } else if (typeof responseData === 'string') {
                 errorMessage = responseData;
-            } else {
-                errorMessage = response.statusText;
             }
-            throw new Error(`HTTP ${response.status}: ${errorMessage}`);
+            throw new Error(errorMessage);
         }
 
         return responseData;
 
     } catch (error) {
-        console.error('API Request failed:', error.message || error);
-
-        // For banlist/blocklist requests, return empty object instead of throwing
-        if (endpoint.includes('blocklist') || endpoint.includes('banlist')) {
-            return {};
-        }
-
+        console.error('API Request failed:', error);
         throw error;
     }
 }
@@ -977,7 +715,6 @@ async function pairNumber(number) {
     return await makeApiRequest(`/pair?number=${encodeURIComponent(number)}`);
 }
 
-
 async function getSessions() {
     return await makeApiRequest('/sessions');
 }
@@ -985,24 +722,20 @@ async function getSessions() {
 async function getBanlist() {
     try {
         const response = await makeApiRequest('/banlist');
-        // Ensure we always return an object
         return response && typeof response === 'object' ? response : {};
     } catch (error) {
         console.error('Banlist API error:', error);
-        // Return empty object to handle gracefully
         return {};
     }
 }
 
 // UI Functions
 function showSessionsState(state) {
-    // Hide all states first
     sessionsLoader.style.display = 'none';
     sessionsError.style.display = 'none';
     sessionsEmpty.style.display = 'none';
     sessionsGrid.style.display = 'none';
 
-    // Show the requested state
     switch (state) {
         case 'loading':
             sessionsLoader.style.display = 'flex';
@@ -1020,17 +753,14 @@ function showSessionsState(state) {
 }
 
 function createSessionCard(session, index) {
-    // Handle different possible session data structures
     let number, status, connectedAt, deviceInfo;
 
     if (typeof session === 'object') {
-        // If session is an object, extract properties
         number = session.number || session.phone || session.id || `Session ${index + 1}`;
         status = session.status || session.state || 'active';
         connectedAt = session.connectedAt || session.created || session.timestamp;
         deviceInfo = session.device || session.client || session.browser;
     } else {
-        // If session is a string or number
         number = session.toString();
         status = 'active';
     }
@@ -1038,7 +768,6 @@ function createSessionCard(session, index) {
     const card = document.createElement('div');
     card.className = 'session-card';
 
-    // Format the connected time
     let timeText = 'Unknown';
     if (connectedAt) {
         try {
@@ -1072,14 +801,13 @@ function createSessionCard(session, index) {
                     <span>Device: ${deviceInfo}</span>
                 </div>
             ` : ''}
-
+        </div>
     `;
 
     return card;
 }
 
 function renderSessions() {
-    // Update session count
     sessionCount.textContent = sessions.length;
 
     if (sessions.length === 0) {
@@ -1087,10 +815,8 @@ function renderSessions() {
         return;
     }
 
-    // Clear existing sessions
     sessionsGrid.innerHTML = '';
 
-    // Create session cards
     sessions.forEach((session, index) => {
         const card = createSessionCard(session, index);
         sessionsGrid.appendChild(card);
@@ -1108,14 +834,11 @@ async function loadSessions() {
     try {
         const response = await getSessions();
 
-        // Handle different response formats
         if (Array.isArray(response)) {
             sessions = response;
         } else if (response && typeof response === 'object') {
-            // Your API returns { active: [...], status: {...} }
             sessions = response.active || response.sessions || response.data || response.results || [];
         } else {
-            // If response is not what we expect, create empty array
             sessions = [];
         }
 
@@ -1138,15 +861,8 @@ async function loadBanlist() {
 
     try {
         const response = await getBanlist();
-
-        if (response && typeof response === 'object') {
-            bannedUsers = response;
-        } else {
-            bannedUsers = {};
-        }
-
+        bannedUsers = response || {};
         renderBanlist();
-
     } catch (error) {
         console.error('Failed to load banlist:', error);
         banlistErrorMessage.textContent = `Unable to load banned users.`;
@@ -1157,13 +873,11 @@ async function loadBanlist() {
 }
 
 function showBanlistState(state) {
-    // Hide all states first
     banlistLoader.style.display = 'none';
     banlistError.style.display = 'none';
     banlistEmpty.style.display = 'none';
     banlistGrid.style.display = 'none';
 
-    // Show the requested state
     switch (state) {
         case 'loading':
             banlistLoader.style.display = 'flex';
@@ -1181,14 +895,12 @@ function showBanlistState(state) {
 }
 
 function renderBanlist() {
-    // Handle case where bannedUsers might be null or undefined
     if (!bannedUsers || typeof bannedUsers !== 'object') {
         bannedUsers = {};
     }
 
     const userNumbers = Object.keys(bannedUsers);
 
-    // Update banned user count
     if (bannedUserCount) {
         bannedUserCount.textContent = userNumbers.length;
     }
@@ -1198,11 +910,9 @@ function renderBanlist() {
         return;
     }
 
-    // Clear existing content
     if (banlistGrid) {
         banlistGrid.innerHTML = '';
 
-        // Create cards for each banned user
         userNumbers.forEach(number => {
             const card = createBannedUserCard(number);
             banlistGrid.appendChild(card);
@@ -1235,10 +945,8 @@ function createBannedUserCard(number) {
             </span>
         </div>
     `;
-
     return card;
 }
-
 
 // Event Handlers
 pairForm.addEventListener('submit', async (e) => {
@@ -1247,7 +955,6 @@ pairForm.addEventListener('submit', async (e) => {
 
     const phoneNumber = pairNumberInput.value.trim();
 
-    // Validate input
     if (!phoneNumber) {
         showPhoneError('Please enter a phone number');
         pairNumberInput.focus();
@@ -1255,16 +962,14 @@ pairForm.addEventListener('submit', async (e) => {
     }
 
     let fullNumber;
-    
-    // If country is detected, construct full number
+
     if (detectedCountry) {
         fullNumber = detectedCountry.countryCode + phoneNumber;
-        console.log(`🔗 Constructing full number: ${detectedCountry.countryCode} + ${phoneNumber} = ${fullNumber}`);
+        console.log(`🔗 Full number: ${detectedCountry.countryCode} + ${phoneNumber} = ${fullNumber}`);
     } else {
         fullNumber = phoneNumber;
     }
 
-    // Normalize to E.164 format with auto-detection
     const validation = normalizeToE164(fullNumber);
     if (!validation.valid) {
         showPhoneError(validation.error);
@@ -1272,16 +977,13 @@ pairForm.addEventListener('submit', async (e) => {
         return;
     }
 
-    const number = validation.e164;</old_str>
-    console.log('Pairing number:', number, 'for', validation.country, '- Auto-detected:', validation.detectedCountry);
+    const number = validation.e164.replace('+', '');
+    console.log('Pairing number:', number, 'for', validation.country);
 
-    // Validate final number format
     if (!number || number.length < 10 || number.length > 15) {
         showToast('Invalid Number', 'Please enter a valid phone number (10-15 digits)', 'error');
         return;
     }
-
-    // Validation is now handled by E.164 normalization above
 
     const submitBtn = pairForm.querySelector('.btn');
     setButtonLoading(submitBtn, true);
@@ -1289,30 +991,21 @@ pairForm.addEventListener('submit', async (e) => {
     try {
         const result = await pairNumber(number);
 
-        // Handle different response types
         if (result && result.error) {
-            // Check if user is banned
             if (result.error.includes('ban') || result.error.includes('blocked')) {
-                showBanWarningModal(number);
+                showToast('Number Banned', 'This number is blocked from using the bot', 'error');
             } else {
-                // Show the specific error message
                 showToast('Error', result.message || result.error, 'error');
             }
-        }
-        // Check if we got a pairing code
-        else if (result && result.code) {
+        } else if (result && result.code) {
             showPairingCodeModal(number, result.code);
-        } 
-        // Handle different status responses
-        else if (result && result.status === 'already paired') {
+        } else if (result && result.status === 'already paired') {
             showToast('Already Paired', `Number +${number} is already paired`, 'success');
             await loadSessions();
-        } 
-        else if (result && result.message) {
+        } else if (result && result.message) {
             showToast('Success', result.message, 'success');
             await loadSessions();
-        } 
-        else {
+        } else {
             showToast('Request Sent', 'Pairing request has been sent successfully', 'success');
             await loadSessions();
         }
@@ -1324,27 +1017,24 @@ pairForm.addEventListener('submit', async (e) => {
             inputWrapper.classList.remove('has-country-code', 'has-value', 'focused');
             const countryDisplay = inputWrapper.querySelector('.country-code-display');
             if (countryDisplay) {
-                countryDisplay.style.display = 'none';
                 countryDisplay.classList.remove('show');
             }
         }
+        detectedCountry = null;
 
     } catch (error) {
         console.error('Failed to pair number:', error);
 
-        // Extract meaningful error message
         let errorMessage = 'Network error occurred';
         if (error.message) {
             if (error.message.includes('400')) {
-                errorMessage = 'Please enter a valid phone number (10-15 digits)';
+                errorMessage = 'Please enter a valid phone number';
             } else if (error.message.includes('404')) {
                 errorMessage = 'WhatsApp service is temporarily unavailable';
             } else if (error.message.includes('500')) {
                 errorMessage = 'Server error. Please try again later';
-            } else if (error.message.includes('required')) {
-                errorMessage = 'Phone number is required';
             } else {
-                errorMessage = error.message.replace('HTTP 400: ', '').replace('HTTP 500: ', '');
+                errorMessage = error.message;
             }
         }
 
@@ -1354,216 +1044,31 @@ pairForm.addEventListener('submit', async (e) => {
     }
 });
 
-
-// Event listeners for sessions
-if (refreshBtn) {
-    refreshBtn.addEventListener('click', loadSessions);
-}
-if (headerRefreshBtn) {
-    headerRefreshBtn.addEventListener('click', loadSessions);
-}
-if (retrySessionsBtn) {
-    retrySessionsBtn.addEventListener('click', loadSessions);
-}
-
-// Banlist event listeners
-if (refreshBanlistBtn) {
-    refreshBanlistBtn.addEventListener('click', loadBanlist);
-}
-if (retryBanlistBtn) {
-    retryBanlistBtn.addEventListener('click', loadBanlist);
-}
-
-// Input Formatting (removed duplicate handler)
-
-pairNumberInput.addEventListener('paste', (e) => {
-    // Handle paste events to clean up pasted content
-    setTimeout(() => {
-        e.target.value = e.target.value.replace(/\D/g, '');
-    }, 0);
-});
-
-// Optimized smooth scroll and entrance animations
-function addEntranceAnimations() {
-    const cards = document.querySelectorAll('.card');
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry, index) => {
-            if (entry.isIntersecting) {
-                // Use requestAnimationFrame for smoother animations
-                requestAnimationFrame(() => {
-                    setTimeout(() => {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0) translateZ(0)';
-                    }, index * 80);
-                });
-                observer.unobserve(entry.target); // Stop observing once animated
-            }
-        });
-    }, {
-        threshold: 0.1,
-        rootMargin: '0px 0px -30px 0px'
-    });
-
-    cards.forEach(card => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(30px) translateZ(0)';
-        card.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
-        card.style.willChange = 'transform, opacity';
-        observer.observe(card);
-    });
-}
-
-// Enhanced toast with better animations
-function showToast(title, message, type = 'success') {
-    const toastIcon = toast.querySelector('.toast-icon');
-    const toastTitle = toast.querySelector('.toast-title');
-    const toastText = toast.querySelector('.toast-text');
-
-    // Reset classes
-    toastIcon.className = `toast-icon ${type}`;
-    toast.className = `toast ${type}`;
-
-    // Set content
-    toastTitle.textContent = title;
-    toastText.textContent = message;
-
-    // Set appropriate icon with animation
-    const icon = toastIcon.querySelector('i');
-    if (type === 'success') {
-        icon.className = 'fas fa-check-circle';
-    } else if (type === 'error') {
-        icon.className = 'fas fa-exclamation-circle';
-    }
-
-    // Show toast with bounce effect
-    toast.classList.add('show');
-
-    // Add a subtle shake effect for errors
-    if (type === 'error') {
-        toast.style.animation = 'shake 0.5s ease-in-out';
-        setTimeout(() => {
-            toast.style.animation = '';
-        }, 500);
-    }
-
-    // Hide after 4 seconds with smooth transition
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 4000);
-}
-
-// Add animations for country code detection and errors
-const animationKeyframes = `
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-5px); }
-        75% { transform: translateX(5px); }
-    }
-
-    @keyframes flagBounce {
-        0% { 
-            transform: scale(0.3) translateY(20px);
-            opacity: 0;
-        }
-        50% { 
-            transform: scale(1.1) translateY(-5px);
-            opacity: 0.8;
-        }
-        100% { 
-            transform: scale(1) translateY(0);
-            opacity: 1;
-        }
-    }
-
-    .country-code-display {
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: linear-gradient(135deg, #25D366, #128C7E);
-        color: white;
-        padding: 4px 8px;
-        border-radius: 6px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        white-space: nowrap;
-        z-index: 10;
-        box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
-        opacity: 0;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .country-code-display.show {
-        opacity: 1;
-    }
-
-    .input-wrapper.has-country-code input {
-        padding-left: 100px;
-    }
-
-    .input-wrapper.has-country-code .input-icon {
-        opacity: 0.3;
-    }
-`;
-
-// Inject animations
-if (!document.getElementById('country-animations')) {
-    const style = document.createElement('style');
-    style.id = 'country-animations';
-    style.textContent = animationKeyframes;
-    document.head.appendChild(style);
-}
-
-// Smooth scroll to sections
-function smoothScrollTo(elementId) {
-    const element = document.getElementById(elementId);
-    if (element) {
-        element.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-        });
-    }
-}
+// Event listeners
+if (refreshBtn) refreshBtn.addEventListener('click', loadSessions);
+if (headerRefreshBtn) headerRefreshBtn.addEventListener('click', loadSessions);
+if (retrySessionsBtn) retrySessionsBtn.addEventListener('click', loadSessions);
+if (refreshBanlistBtn) refreshBanlistBtn.addEventListener('click', loadBanlist);
+if (retryBanlistBtn) retryBanlistBtn.addEventListener('click', loadBanlist);
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 WhatsApp Bot Management Dashboard - High-DPI Optimized');
 
-    // Initialize enhanced animations and phone input
     initEnhancedAnimations();
     initPhoneInputAnimation();
 
-    // Add entrance animations
-    setTimeout(addEntranceAnimations, 100);
-
-    // Load sessions and banlist
     loadSessions();
     loadBanlist();
-
-    // Add smooth scrolling to refresh button
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', () => {
-            smoothScrollTo('sessions-section');
-        });
-    }
 });
 
-// Optimized auto-refresh with better performance
-let refreshInterval;
+// Auto-refresh
+let refreshInterval = setInterval(() => {
+    if (!isLoading && !document.hidden) {
+        loadSessions();
+    }
+}, 30000);
 
-function startAutoRefresh() {
-    clearInterval(refreshInterval);
-    refreshInterval = setInterval(() => {
-        if (!isLoading && !document.hidden) {
-            loadSessions();
-        }
-    }, 30000);
-}
-
-// Start auto-refresh
-startAutoRefresh();
-
-// Handle visibility change to refresh when tab becomes active
 document.addEventListener('visibilitychange', () => {
     if (!document.hidden && !isLoading) {
         loadSessions();
