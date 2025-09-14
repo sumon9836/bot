@@ -36,6 +36,10 @@
       "destination": "/public/login.html"
     },
     {
+      "source": "/admin-panel",
+      "destination": "/public/admin.html"
+    },
+    {
       "source": "/((?!api/).*)",
       "destination": "/public/$1"
     }
