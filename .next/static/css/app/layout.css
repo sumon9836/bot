@@ -165,7 +165,7 @@
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
-    
+
     body::before {
         animation: none;
     }
@@ -230,7 +230,7 @@ body::before {
         radial-gradient(circle at 50% 50%, rgba(255, 27, 107, 0.1) 0%, transparent 70%),
         linear-gradient(135deg, var(--black-deep) 0%, var(--black-primary) 50%, var(--black-secondary) 100%);
     z-index: -2;
-    /* animation: backgroundPulse 8s ease-in-out infinite; */
+    /* Removed animation: backgroundPulse 8s ease-in-out infinite; */
 }
 
 body::after {
@@ -246,7 +246,7 @@ body::after {
     background-size: 50px 50px, 80px 80px;
     z-index: -1;
     opacity: 0.2;
-    /* animation: particleFloat 20s linear infinite; */
+    /* Removed animation: particleFloat 20s linear infinite; */
 }
 
 @keyframes backgroundPulse {
@@ -968,6 +968,8 @@ input[type="tel"]:focus::placeholder {
     color: var(--white-pure);
 }
 
+/* Removed the WhatsApp Link Button */
+
 .btn-support {
     background: linear-gradient(135deg, #25D366, #128C7E);
     color: var(--white-pure);
@@ -1588,17 +1590,12 @@ input[type="tel"]:focus::placeholder {
     animation: keyBounce 2s ease-in-out infinite;
 }
 
-/* Spectacular Pairing Code Display */
-.code-display-container {
-    position: relative;
-    margin-bottom: 25px;
-}
-
+/* Spectacular Pairing Code Display - Mobile Optimized */
 .pairing-code-display {
-    padding: 20px 15px;
+    padding: 15px 12px;
     background: rgba(0, 0, 0, 0.4);
     border: 2px solid rgba(0, 212, 255, 0.3);
-    border-radius: 15px;
+    border-radius: 12px;
     -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
     cursor: pointer;
@@ -1607,22 +1604,13 @@ input[type="tel"]:focus::placeholder {
     overflow: hidden;
     display: flex;
     justify-content: center;
-    gap: 4px;
+    gap: 3px;
     animation: codeDisplayPulse 2s ease-in-out infinite;
-}
-
-.pairing-code-display:hover {
-    transform: scale(1.02);
-    border-color: var(--pink-primary);
-    box-shadow: 
-        0 0 30px rgba(255, 27, 107, 0.4),
-        inset 0 0 15px rgba(0, 212, 255, 0.1);
-    animation: codeDisplayHover 0.3s ease-out forwards;
 }
 
 .code-char {
     font-family: 'Fira Code', 'SF Mono', monospace;
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 900;
     background: linear-gradient(135deg, var(--blue-primary), var(--pink-primary));
     -webkit-background-clip: text;
@@ -2382,8 +2370,6 @@ input[type="tel"]:focus::placeholder {
         font-size: 0.75rem;
     }
 }
-
-
 /*!***********************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[12].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[12].use[3]!./app/fonts.css ***!
   \***********************************************************************************************************************************************************************************************************************************************************/
