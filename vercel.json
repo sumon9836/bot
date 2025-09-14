@@ -1,11 +1,5 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
   "env": {
     "BACKEND_URL": "http://tramway.proxy.rlwy.net:12332"
   },
