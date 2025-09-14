@@ -1,8 +1,0 @@
-services:
-  - type: web
-    name: node-api
-    env: node
-    plan: free
-    buildCommand: "npm install --production"
-    startCommand: "node api/index.js"
-    autoDeploy: true
