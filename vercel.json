@@ -21,26 +21,14 @@
     },
     {
       "source": "/admin",
-      "destination": "/public/admin.html"
-    },
-    {
-      "source": "/admin/",
-      "destination": "/public/admin.html"
+      "destination": "/api/admin/auth-check"
     },
     {
       "source": "/login",
       "destination": "/public/login.html"
     },
     {
-      "source": "/login.html",
-      "destination": "/public/login.html"
-    },
-    {
-      "source": "/admin.html",
-      "destination": "/public/admin.html"
-    },
-    {
-      "source": "/((?!api/).*)",
+      "source": "/(.*)",
       "destination": "/public/$1"
     }
   ],
@@ -63,15 +51,6 @@
         {
           "key": "Access-Control-Allow-Credentials",
           "value": "true"
-        }
-      ]
-    },
-    {
-      "source": "/public/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
         }
       ]
     }

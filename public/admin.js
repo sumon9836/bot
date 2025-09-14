@@ -121,7 +121,7 @@ async function blockUser(number) {
                 'Content-Type': 'application/json'
             },
             credentials: 'include',
-            body: JSON.JSON.stringify({ number })
+            body: JSON.stringify({ number })
         });
         const blockData = await blockResponse.json();
 
@@ -374,7 +374,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             credentials: 'include'
         });
 
-        if (!authResponse.ok) {
+        if (authResponse.status === 401 || authResponse.status === 403) {
             // Not authenticated, redirect to login
             window.location.href = '/login';
             return;

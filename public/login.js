@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Login successful! Redirecting...', 'success');
                 // Redirect to admin panel after short delay
                 setTimeout(() => {
-                    window.location.href = '/admin';
+                    window.location.href = '/admin.html';
                 }, 1000);
             } else {
                 showToast(data.error || 'Invalid password', 'error');
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (response.ok) {
                 // Already authenticated, redirect to admin panel
-                window.location.href = '/admin';
+                window.location.href = '/admin.html';
             }
         } catch (error) {
             // Not authenticated, stay on login page
