@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useCountryDetection } from '../hooks/useCountryDetection';
 import { useApi } from '../hooks/useApi';
 import { useRouter } from 'next/navigation';
+import { PairingResponse } from '../lib/types';
 
 interface PairFormProps {
   onSuccess?: (number: string, pairCode?: string) => void;
@@ -70,7 +71,8 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
 
       if (response.success) {
         // Show pairing code or WhatsApp link
-        const pairCode = response.data?.code || response.code || response.pairCode;
+        const pairingData = response.data as PairingResponse;
+        const pairCode = pairingData?.code || pairingData?.pairCode;
         
         console.log('API Response:', response);
         console.log('Extracted pairing code:', pairCode);
@@ -78,8 +80,8 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
         // Always show the modal for successful pairing - even if no code
         setPairCodeData({
           code: pairCode,
-          qr: response.data?.qr || response.qr,
-          link: response.data?.link || response.link
+          qr: pairingData?.qr,
+          link: pairingData?.link
         });
         setShowPairCode(true);
         

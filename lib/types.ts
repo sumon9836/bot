@@ -52,4 +52,12 @@ export interface BannedUser {
   blockedAt?: string;
 }
 
+export interface PairingResponse {
+  code?: string;
+  pairCode?: string;
+  qr?: string;
+  link?: string;
+  message?: string;
+}
+
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
