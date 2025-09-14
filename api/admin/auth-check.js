@@ -4,7 +4,7 @@ const { handleOptions } = require('../../lib/http');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'vercel-jwt-secret-2025';
 
-module.exports = async function handler(req, res) {
+module.exports = async function authcheck(req, res) {
     if (handleOptions(req, res)) return;
     
     // Check if user is authenticated

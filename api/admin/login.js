@@ -1,7 +1,7 @@
 const { checkAdminPassword, signJWT } = require('../../lib/auth');
 const { handleOptions, json, error, parseBody, setSecureCookie } = require('../../lib/http');
 
-module.exports = async function handler(req, res) {
+module.exports = async function login(req, res) {
     if (handleOptions(req, res)) return;
     
     if (req.method !== 'POST') {

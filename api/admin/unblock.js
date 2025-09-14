@@ -2,7 +2,7 @@ const { requireAdmin } = require('../../lib/auth');
 const { fetchProxy } = require('../../lib/proxy');
 const { handleOptions, json, error, parseBody } = require('../../lib/http');
 
-module.exports = async function handler(req, res) {
+module.exports = async function unblock(req, res) {
     if (handleOptions(req, res)) return;
     
     if (req.method !== 'POST') {
