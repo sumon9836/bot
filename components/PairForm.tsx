@@ -49,6 +49,16 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
+      
+      // Add visual feedback to copy button
+      const copyButton = document.querySelector('.copy-button');
+      if (copyButton) {
+        copyButton.classList.add('copied');
+        setTimeout(() => {
+          copyButton.classList.remove('copied');
+        }, 600);
+      }
+      
       showToast?.('Copied!', 'Pairing code copied to clipboard', 'success');
     } catch (err) {
       showToast?.('Failed to copy', 'Please copy the code manually', 'error');

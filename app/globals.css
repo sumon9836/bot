@@ -1300,20 +1300,20 @@ input[type="tel"]:focus::placeholder {
     align-items: center;
     justify-content: center;
     background: 
-        radial-gradient(circle at 20% 30%, rgba(37, 211, 102, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
-        rgba(0, 0, 0, 0.95);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+        radial-gradient(circle at 20% 30%, rgba(0, 212, 255, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(255, 27, 107, 0.06) 0%, transparent 50%),
+        rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
     animation: modalFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     overflow-y: auto;
-    padding: 20px;
+    padding: 10px;
 }
 
 /* Modal Container */
 .pairing-modal-container {
     width: 100%;
-    max-width: 900px;
+    max-width: 700px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -1322,7 +1322,11 @@ input[type="tel"]:focus::placeholder {
     color: white;
     position: relative;
     animation: modalSlideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-    padding: 40px 20px;
+    padding: 20px 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 25px;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Floating particles animation */
@@ -1347,17 +1351,17 @@ input[type="tel"]:focus::placeholder {
 
 /* Success Banner */
 .success-banner {
-    margin-bottom: 40px;
-    padding: 24px 32px;
+    margin-bottom: 25px;
+    padding: 16px 20px;
     background: linear-gradient(135deg, 
-        rgba(16, 185, 129, 0.15), 
-        rgba(34, 197, 94, 0.10));
-    border: 2px solid rgba(34, 197, 94, 0.3);
-    border-radius: 20px;
+        rgba(0, 212, 255, 0.15), 
+        rgba(255, 27, 107, 0.10));
+    border: 2px solid rgba(0, 212, 255, 0.3);
+    border-radius: 15px;
     backdrop-filter: blur(15px);
     animation: successBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     box-shadow: 
-        0 20px 40px rgba(16, 185, 129, 0.2),
+        0 15px 30px rgba(0, 212, 255, 0.2),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
@@ -1369,15 +1373,15 @@ input[type="tel"]:focus::placeholder {
 }
 
 .success-icon {
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #10b981, #059669);
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--blue-primary), var(--pink-primary));
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     animation: iconPulse 2s ease-in-out infinite;
-    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 8px 25px rgba(0, 212, 255, 0.4);
 }
 
 .success-icon i {
@@ -1386,38 +1390,38 @@ input[type="tel"]:focus::placeholder {
 }
 
 .success-text h2 {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     font-weight: 700;
-    color: #10b981;
-    margin: 0 0 8px 0;
+    color: var(--blue-primary);
+    margin: 0 0 6px 0;
 }
 
 .success-number {
-    font-size: 1.1rem;
-    color: rgba(16, 185, 129, 0.8);
+    font-size: 1rem;
+    color: var(--pink-primary);
     font-weight: 600;
     margin: 0;
 }
 
 /* WhatsApp Header */
 .whatsapp-header {
-    margin-bottom: 50px;
+    margin-bottom: 30px;
     animation: headerSlideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
 }
 
 .whatsapp-logo {
-    width: 120px;
-    height: 120px;
-    margin: 0 auto 30px;
-    background: linear-gradient(135deg, #25d366, #128c7e);
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, var(--blue-primary), var(--pink-primary));
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     animation: logoPulse 3s ease-in-out infinite;
     box-shadow: 
-        0 20px 40px rgba(37, 211, 102, 0.3),
-        0 0 60px rgba(37, 211, 102, 0.2);
+        0 15px 30px rgba(0, 212, 255, 0.3),
+        0 0 40px rgba(255, 27, 107, 0.2);
     position: relative;
 }
 
@@ -1437,39 +1441,39 @@ input[type="tel"]:focus::placeholder {
 }
 
 .modal-title {
-    font-size: 3rem;
+    font-size: 2rem;
     font-weight: 800;
-    background: linear-gradient(135deg, #ffffff, #25d366);
+    background: linear-gradient(135deg, var(--blue-primary), var(--pink-primary));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin: 0 0 16px 0;
+    margin: 0 0 12px 0;
     letter-spacing: -0.02em;
 }
 
 .modal-subtitle {
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: rgba(255, 255, 255, 0.8);
     margin: 0;
 }
 
 /* Enhanced Pairing Code Section */
 .pairing-code-section {
-    margin-bottom: 50px;
-    padding: 40px;
+    margin-bottom: 30px;
+    padding: 25px 20px;
     background: linear-gradient(135deg, 
-        rgba(16, 185, 129, 0.08), 
-        rgba(6, 182, 212, 0.06));
-    border: 2px solid rgba(16, 185, 129, 0.2);
-    border-radius: 30px;
+        rgba(0, 212, 255, 0.08), 
+        rgba(255, 27, 107, 0.06));
+    border: 2px solid rgba(0, 212, 255, 0.2);
+    border-radius: 20px;
     backdrop-filter: blur(25px);
     animation: codeSectonSlideIn 1s cubic-bezier(0.4, 0, 0.2, 1) 0.4s both;
     width: 100%;
-    max-width: 600px;
+    max-width: 450px;
     position: relative;
     overflow: hidden;
     box-shadow: 
-        0 25px 50px rgba(16, 185, 129, 0.15),
+        0 20px 40px rgba(0, 212, 255, 0.15),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
@@ -1491,10 +1495,10 @@ input[type="tel"]:focus::placeholder {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 15px;
-    margin-bottom: 30px;
-    color: #10b981;
-    font-size: 1.4rem;
+    gap: 12px;
+    margin-bottom: 20px;
+    color: var(--blue-primary);
+    font-size: 1.1rem;
     font-weight: 700;
 }
 
@@ -1506,14 +1510,14 @@ input[type="tel"]:focus::placeholder {
 /* Spectacular Pairing Code Display */
 .code-display-container {
     position: relative;
-    margin-bottom: 40px;
+    margin-bottom: 25px;
 }
 
 .pairing-code-display {
-    padding: 30px;
+    padding: 20px 15px;
     background: rgba(0, 0, 0, 0.4);
-    border: 2px solid rgba(16, 185, 129, 0.3);
-    border-radius: 20px;
+    border: 2px solid rgba(0, 212, 255, 0.3);
+    border-radius: 15px;
     backdrop-filter: blur(10px);
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1521,26 +1525,28 @@ input[type="tel"]:focus::placeholder {
     overflow: hidden;
     display: flex;
     justify-content: center;
-    gap: 8px;
+    gap: 4px;
+    animation: codeDisplayPulse 2s ease-in-out infinite;
 }
 
 .pairing-code-display:hover {
     transform: scale(1.02);
-    border-color: #10b981;
+    border-color: var(--pink-primary);
     box-shadow: 
-        0 0 40px rgba(16, 185, 129, 0.4),
-        inset 0 0 20px rgba(16, 185, 129, 0.1);
+        0 0 30px rgba(255, 27, 107, 0.4),
+        inset 0 0 15px rgba(0, 212, 255, 0.1);
+    animation: codeDisplayHover 0.3s ease-out forwards;
 }
 
 .code-char {
     font-family: 'Fira Code', 'SF Mono', monospace;
-    font-size: 4rem;
+    font-size: 2.5rem;
     font-weight: 900;
-    background: linear-gradient(135deg, #10b981, #06b6d4);
+    background: linear-gradient(135deg, var(--blue-primary), var(--pink-primary));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
     animation: codeCharSlideIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
     transition: all 0.3s ease;
     position: relative;
@@ -1554,42 +1560,79 @@ input[type="tel"]:focus::placeholder {
 .code-glow {
     position: absolute;
     inset: -10px;
-    background: radial-gradient(circle, rgba(16, 185, 129, 0.2), transparent 70%);
-    border-radius: 30px;
+    background: radial-gradient(circle, rgba(0, 212, 255, 0.2), transparent 70%);
+    border-radius: 25px;
     opacity: 0;
     animation: glowPulse 3s ease-in-out infinite;
+}
+
+/* New animations for enhanced copy functionality */
+@keyframes codeDisplayPulse {
+    0%, 100% { 
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+    }
+    50% { 
+        box-shadow: 0 0 30px rgba(255, 27, 107, 0.3);
+    }
+}
+
+@keyframes codeDisplayHover {
+    0% { transform: scale(1.02); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1.02); }
+}
+
+@keyframes copyButtonSuccess {
+    0% { 
+        background: linear-gradient(135deg, var(--blue-primary), var(--pink-primary));
+        transform: scale(1);
+    }
+    50% { 
+        background: linear-gradient(135deg, #10b981, #059669);
+        transform: scale(1.05);
+    }
+    100% { 
+        background: linear-gradient(135deg, var(--blue-primary), var(--pink-primary));
+        transform: scale(1);
+    }
 }
 
 /* Copy Actions */
 .copy-actions {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
     align-items: center;
 }
 
 .copy-button {
-    background: linear-gradient(135deg, #10b981, #059669);
+    background: linear-gradient(135deg, var(--blue-primary), var(--pink-primary));
     border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 16px;
-    padding: 16px 32px;
+    border-radius: 12px;
+    padding: 12px 24px;
     color: white;
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     cursor: pointer;
     position: relative;
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 
-        0 8px 25px rgba(16, 185, 129, 0.3),
+        0 6px 20px rgba(0, 212, 255, 0.3),
         inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    animation: buttonGlow 2s ease-in-out infinite;
 }
 
 .copy-button:hover {
     transform: translateY(-2px) scale(1.05);
     box-shadow: 
-        0 12px 35px rgba(16, 185, 129, 0.4),
+        0 10px 30px rgba(255, 27, 107, 0.4),
         inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    animation: buttonHoverGlow 0.3s ease-out forwards;
+}
+
+.copy-button.copied {
+    animation: copyButtonSuccess 0.6s ease-out forwards;
 }
 
 .copy-button:active {
@@ -1619,9 +1662,33 @@ input[type="tel"]:focus::placeholder {
 }
 
 .copy-hint {
-    color: rgba(16, 185, 129, 0.7);
-    font-size: 0.9rem;
+    color: rgba(0, 212, 255, 0.7);
+    font-size: 0.85rem;
     margin: 0;
+    animation: hintFade 2s ease-in-out infinite;
+}
+
+@keyframes buttonGlow {
+    0%, 100% { 
+        box-shadow: 0 6px 20px rgba(0, 212, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    50% { 
+        box-shadow: 0 8px 25px rgba(255, 27, 107, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+}
+
+@keyframes buttonHoverGlow {
+    0% { 
+        box-shadow: 0 6px 20px rgba(0, 212, 255, 0.3);
+    }
+    100% { 
+        box-shadow: 0 10px 30px rgba(255, 27, 107, 0.4);
+    }
+}
+
+@keyframes hintFade {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
 }
 
 /* Error Section */
@@ -1723,26 +1790,26 @@ input[type="tel"]:focus::placeholder {
 
 /* Enhanced Instructions */
 .instructions-section {
-    margin-bottom: 40px;
-    padding: 40px;
+    margin-bottom: 25px;
+    padding: 20px 15px;
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 25px;
+    border-radius: 15px;
     backdrop-filter: blur(20px);
     width: 100%;
-    max-width: 700px;
+    max-width: 500px;
     animation: instructionsSlideIn 1s cubic-bezier(0.4, 0, 0.2, 1) 0.6s both;
 }
 
 .instructions-title {
-    font-size: 2rem;
+    font-size: 1.3rem;
     font-weight: 700;
     color: white;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 15px;
+    gap: 10px;
 }
 
 .instructions-title i {
@@ -1759,11 +1826,11 @@ input[type="tel"]:focus::placeholder {
 .step-item {
     display: flex;
     align-items: flex-start;
-    gap: 20px;
-    padding: 20px;
+    gap: 15px;
+    padding: 15px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
+    border-radius: 12px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
@@ -1805,18 +1872,18 @@ input[type="tel"]:focus::placeholder {
 }
 
 .step-number {
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(135deg, #10b981, #059669);
+    width: 35px;
+    height: 35px;
+    background: linear-gradient(135deg, var(--blue-primary), var(--pink-primary));
     color: white;
-    border-radius: 12px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.9rem;
     flex-shrink: 0;
-    box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 6px 15px rgba(0, 212, 255, 0.3);
     animation: numberPulse 3s ease-in-out infinite;
 }
 
@@ -1828,9 +1895,9 @@ input[type="tel"]:focus::placeholder {
 }
 
 .step-content i {
-    color: #10b981;
-    font-size: 1.2rem;
-    width: 24px;
+    color: var(--pink-primary);
+    font-size: 1.1rem;
+    width: 20px;
     text-align: center;
     margin-top: 2px;
 }
@@ -2096,63 +2163,137 @@ input[type="tel"]:focus::placeholder {
 /* ========== RESPONSIVE DESIGN ========== */
 
 @media (max-width: 768px) {
+    .pairing-modal-overlay {
+        padding: 5px;
+    }
+
     .pairing-modal-container {
-        padding: 20px 15px;
+        padding: 15px 10px;
+        max-width: 95%;
+        margin: 5px auto;
     }
 
     .modal-title {
-        font-size: 2.2rem;
+        font-size: 1.6rem;
+    }
+
+    .whatsapp-logo {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 15px;
+    }
+
+    .whatsapp-logo i {
+        font-size: 30px;
     }
 
     .code-char {
-        font-size: 2.8rem;
-        gap: 4px;
+        font-size: 2rem;
+        gap: 2px;
     }
 
     .pairing-code-section {
-        padding: 25px;
-        margin-bottom: 30px;
+        padding: 15px 12px;
+        margin-bottom: 20px;
+        max-width: 100%;
+    }
+
+    .code-header {
+        font-size: 1rem;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+
+    .copy-button {
+        padding: 10px 20px;
+        font-size: 0.85rem;
     }
 
     .instructions-section {
-        padding: 25px;
+        padding: 15px 10px;
+        max-width: 100%;
+    }
+
+    .instructions-title {
+        font-size: 1.1rem;
+        gap: 8px;
+        margin-bottom: 15px;
     }
 
     .step-item {
-        flex-direction: column;
-        text-align: center;
-        gap: 15px;
+        padding: 12px;
+        gap: 12px;
     }
 
-    .step-content {
-        flex-direction: column;
-        gap: 10px;
+    .step-number {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+
+    .step-text h4 {
+        font-size: 0.9rem;
+    }
+
+    .step-text p {
+        font-size: 0.8rem;
     }
 
     .floating-close-button {
-        top: 20px;
-        right: 20px;
-        width: 45px;
-        height: 45px;
+        top: 15px;
+        right: 15px;
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+
+    .success-banner {
+        padding: 12px 15px;
+        margin-bottom: 20px;
+    }
+
+    .success-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .success-text h2 {
+        font-size: 1rem;
+    }
+
+    .success-number {
+        font-size: 0.9rem;
     }
 }
 
 @media (max-width: 480px) {
     .code-char {
-        font-size: 2.2rem;
-    }
-
-    .modal-title {
         font-size: 1.8rem;
     }
 
+    .modal-title {
+        font-size: 1.4rem;
+    }
+
+    .modal-subtitle {
+        font-size: 0.9rem;
+    }
+
     .whatsapp-logo {
-        width: 90px;
-        height: 90px;
+        width: 50px;
+        height: 50px;
     }
 
     .whatsapp-logo i {
-        font-size: 45px;
+        font-size: 25px;
+    }
+
+    .pairing-code-display {
+        padding: 15px 10px;
+    }
+
+    .copy-hint {
+        font-size: 0.75rem;
     }
 }
 
