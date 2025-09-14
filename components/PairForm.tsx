@@ -14,11 +14,8 @@ interface PairFormProps {
 export function PairForm({ onSuccess, showToast }: PairFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPairCode, setShowPairCode] = useState(false);
-  const [showCodeInput, setShowCodeInput] = useState(false);
   const [pairCodeData, setPairCodeData] = useState<{ code?: string, qr?: string, link?: string } | null>(null);
   const [currentNumber, setCurrentNumber] = useState('');
-  const [userCode, setUserCode] = useState('');
-  const [isSubmittingCode, setIsSubmittingCode] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { post } = useApi();
@@ -73,7 +70,7 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
 
       if (response.success) {
         // Show pairing code or WhatsApp link
-        const pairCode = response.code || response.pairCode;
+        const pairCode = response.data?.code || response.code || response.pairCode;
         
         console.log('API Response:', response);
         console.log('Extracted pairing code:', pairCode);
@@ -81,8 +78,8 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
         // Always show the modal for successful pairing - even if no code
         setPairCodeData({
           code: pairCode,
-          qr: response.qr,
-          link: response.link
+          qr: response.data?.qr || response.qr,
+          link: response.data?.link || response.link
         });
         setShowPairCode(true);
         
@@ -116,38 +113,7 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
     }
   };
 
-  const handleCodeSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!userCode || userCode.length < 6) {
-      showToast?.('Invalid Code', 'Please enter a valid 8-character pairing code', 'error');
-      return;
-    }
-
-    setIsSubmittingCode(true);
-
-    try {
-      const response = await post('/api/pair-with-code', { 
-        number: currentNumber, 
-        code: userCode.toUpperCase() 
-      });
-
-      if (response.success) {
-        showToast?.('Success', 'Device paired successfully!', 'success');
-        setShowPairCode(false);
-        setShowCodeInput(false);
-        setPairCodeData(null);
-        setUserCode('');
-        onSuccess?.(currentNumber, userCode);
-      } else {
-        showToast?.('Pairing Failed', response.error || 'Failed to pair device with code', 'error');
-      }
-    } catch (error: any) {
-      showToast?.('Network Error', 'Failed to connect to server', 'error');
-    } finally {
-      setIsSubmittingCode(false);
-    }
-  };
+  
 
   return (
     <>
@@ -357,16 +323,7 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap gap-6 justify-center">
-              <button
-                onClick={() => setShowCodeInput(true)}
-                className="px-12 py-5 bg-gradient-to-r from-emerald-500/40 to-cyan-500/40 border-2 border-emerald-400/50 text-emerald-200 rounded-2xl hover:from-emerald-500/50 hover:to-cyan-500/50 hover:border-emerald-300/70 transition-all duration-300 font-bold text-lg transform hover:scale-105 shadow-lg"
-                style={{ backdropFilter: 'blur(10px)' }}
-              >
-                <i className="fas fa-check mr-3 text-xl"></i>
-                I've Entered the Code
-              </button>
-              
+            <div className="flex justify-center">
               <button
                 onClick={() => {
                   setShowPairCode(false);
@@ -377,7 +334,7 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
                 style={{ backdropFilter: 'blur(10px)' }}
               >
                 <i className="fas fa-times mr-3 text-xl"></i>
-                Cancel
+                Close
               </button>
             </div>
 
@@ -397,64 +354,7 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
         </div>
       )}
 
-      {/* Code Input Modal */}
-      {showCodeInput && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center backdrop-blur-lg" style={{ backgroundColor: 'rgba(0, 0, 0, 0.95)' }}>
-          <div className="w-full h-full max-w-xl mx-auto flex flex-col justify-center items-center p-8 text-center text-white">
-            
-            <div className="mb-8">
-              <div className="w-16 h-16 mx-auto mb-4 bg-blue-500/20 rounded-full flex items-center justify-center border-2 border-blue-500/30">
-                <i className="fas fa-mobile-alt text-2xl text-blue-400"></i>
-              </div>
-              <h2 className="text-3xl font-bold text-white mb-2">Confirm Pairing</h2>
-              <p className="text-gray-300">Enter the same code you used in WhatsApp</p>
-            </div>
-
-            <form onSubmit={handleCodeSubmit} className="w-full max-w-sm">
-              <div className="mb-6">
-                <input
-                  type="text"
-                  value={userCode}
-                  onChange={(e) => setUserCode(e.target.value.toUpperCase())}
-                  placeholder="Enter 8-character code"
-                  className="w-full px-6 py-4 text-2xl font-mono text-center bg-transparent border-2 border-gray-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 tracking-widest"
-                  maxLength={8}
-                  required
-                  autoFocus
-                />
-              </div>
-
-              <div className="flex gap-4">
-                <button
-                  type="submit"
-                  disabled={isSubmittingCode || userCode.length < 6}
-                  className="flex-1 px-6 py-3 bg-blue-500/20 border border-blue-500/30 text-blue-300 rounded-lg hover:bg-blue-500/30 transition-all duration-200 font-medium disabled:opacity-50"
-                >
-                  {isSubmittingCode ? (
-                    <>
-                      <i className="fas fa-spinner fa-spin mr-2"></i>
-                      Pairing...
-                    </>
-                  ) : (
-                    'Complete Pairing'
-                  )}
-                </button>
-                
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowCodeInput(false);
-                    setUserCode('');
-                  }}
-                  className="px-6 py-3 bg-gray-500/20 border border-gray-500/30 text-gray-300 rounded-lg hover:bg-gray-500/30 transition-all duration-200"
-                >
-                  Back
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      
     </>
   );
 }
