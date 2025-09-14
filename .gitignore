@@ -34,6 +34,9 @@ dist/
 # Vercel
 .vercel
 
+# next
+.next
+
 # IDE
 .vscode/
 .idea/
