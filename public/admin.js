@@ -24,11 +24,11 @@ async function checkAuthentication() {
         const response = await fetch('/api/admin/banlist', {
             credentials: 'include'
         });
-        
+
         if (response.status === 401 || response.status === 403) {
             return false;
         }
-        
+
         return response.ok;
     } catch (error) {
         console.error('Auth check error:', error);
@@ -50,15 +50,15 @@ function showToast(title, message, type = 'success') {
     const toastIcon = toast.querySelector('.toast-icon');
     const toastTitle = toast.querySelector('.toast-title');
     const toastMessage = toast.querySelector('.toast-message');
-    
+
     // Reset classes
     toastIcon.className = `toast-icon ${type}`;
     toast.className = `toast ${type}`;
-    
+
     // Set content
     toastTitle.textContent = title;
     toastMessage.textContent = message;
-    
+
     // Set appropriate icon
     const icon = toastIcon.querySelector('i');
     if (type === 'success') {
@@ -68,10 +68,10 @@ function showToast(title, message, type = 'success') {
     } else if (type === 'warning') {
         icon.className = 'fas fa-exclamation-triangle';
     }
-    
+
     // Show toast
     toast.classList.add('show');
-    
+
     // Hide after 4 seconds
     setTimeout(() => {
         toast.classList.remove('show');
@@ -82,11 +82,11 @@ function showToast(title, message, type = 'success') {
 async function blockUser(number) {
     let deleteSuccess = false;
     let deleteMessage = '';
-    
+
     try {
         // First attempt to delete/logout the user
         showToast('Processing', 'Attempting to delete/logout user first...', 'warning');
-        
+
         try {
             const deleteResponse = await fetch(`${API_BASE_URL}/delete`, {
                 method: 'POST',
@@ -97,7 +97,7 @@ async function blockUser(number) {
                 body: JSON.stringify({ number })
             });
             const deleteData = await deleteResponse.json();
-            
+
             if (deleteData.success) {
                 deleteSuccess = true;
                 deleteMessage = 'User was deleted/logged out and then blocked successfully';
@@ -111,20 +111,20 @@ async function blockUser(number) {
             console.warn('Delete request failed, proceeding to block:', deleteError.message);
             deleteMessage = `User blocked (delete/logout failed: ${deleteError.message})`;
         }
-        
+
         // Always proceed to block the user regardless of delete success
         showToast('Processing', 'Now blocking the user...', 'warning');
-        
+
         const blockResponse = await fetch(`${API_BASE_URL}/block`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             credentials: 'include',
-            body: JSON.stringify({ number })
+            body: JSON.JSON.stringify({ number })
         });
         const blockData = await blockResponse.json();
-        
+
         if (blockData.success) {
             showToast('User Blocked', deleteMessage, 'success');
             loadBlockedUsers(); // Refresh the list
@@ -155,7 +155,7 @@ async function unblockUser(number) {
             body: JSON.stringify({ number })
         });
         const data = await response.json();
-        
+
         if (data.success) {
             showToast('User Unblocked', data.message, 'success');
             loadBlockedUsers(); // Refresh the list
@@ -183,7 +183,7 @@ async function deleteUser(number) {
             body: JSON.stringify({ number })
         });
         const data = await response.json();
-        
+
         if (data.success) {
             showToast('User Deleted/Logged Out', data.message, 'success');
             blockNumberInput.value = ''; // Clear input
@@ -201,20 +201,20 @@ async function deleteUser(number) {
 
 async function loadBlockedUsers() {
     if (isLoading) return;
-    
+
     isLoading = true;
-    
+
     // Show loading state
     blocklistLoader.style.display = 'block';
     blocklistError.style.display = 'none';
     blocklistEmpty.style.display = 'none';
     blocklistGrid.style.display = 'none';
-    
+
     try {
         const response = await fetch(`${API_BASE_URL}/banlist`, {
             credentials: 'include'
         });
-        
+
         const contentType = response.headers.get('content-type');
         if (!response.ok || !contentType || !contentType.includes('application/json')) {
             console.log('Non-JSON response or error received, using empty banlist');
@@ -222,9 +222,9 @@ async function loadBlockedUsers() {
             renderBlockedUsers();
             return;
         }
-        
+
         const responseText = await response.text();
-        
+
         // Check if response starts with HTML
         if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<html')) {
             console.log('HTML response received, using empty banlist');
@@ -232,20 +232,20 @@ async function loadBlockedUsers() {
             renderBlockedUsers();
             return;
         }
-        
+
         const data = JSON.parse(responseText);
-        
+
         if (data.error) {
             throw new Error(data.error);
         }
-        
+
         // Ensure data is an object
         blockedUsers = data && typeof data === 'object' ? data : {};
         renderBlockedUsers();
-        
+
     } catch (error) {
         console.error('Load banlist error:', error);
-        
+
         // If it's a JSON parse error, show empty state instead of error
         if (error.message.includes('Unexpected token') || error.message.includes('JSON')) {
             console.log('JSON parse error, showing empty banlist');
@@ -263,23 +263,23 @@ async function loadBlockedUsers() {
 
 function renderBlockedUsers() {
     const userNumbers = Object.keys(blockedUsers);
-    
+
     if (userNumbers.length === 0) {
         blocklistEmpty.style.display = 'block';
         blocklistGrid.style.display = 'none';
         blockedCount.textContent = '0';
         return;
     }
-    
+
     blocklistEmpty.style.display = 'none';
     blocklistGrid.style.display = 'grid';
-    
+
     // Update count
     blockedCount.textContent = userNumbers.length;
-    
+
     // Clear existing content
     blocklistGrid.innerHTML = '';
-    
+
     // Create cards for each blocked user
     userNumbers.forEach(number => {
         const userCard = createBlockedUserCard(number);
@@ -310,41 +310,41 @@ function createBlockedUserCard(number) {
             </button>
         </div>
     `;
-    
+
     // Add unblock event listener
     const unblockBtn = card.querySelector('.unblock-btn');
     unblockBtn.addEventListener('click', async () => {
         unblockBtn.disabled = true;
         unblockBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Unblocking...';
-        
+
         const success = await unblockUser(number);
-        
+
         if (!success) {
             unblockBtn.disabled = false;
             unblockBtn.innerHTML = '<i class="fas fa-unlock"></i> Unblock';
         }
     });
-    
+
     return card;
 }
 
 // Event Handlers
 function handleBlockForm(event) {
     event.preventDefault();
-    
+
     const number = formatPhoneNumber(blockNumberInput.value);
     const actionButton = event.submitter;
     const action = actionButton.dataset.action;
-    
+
     if (!validatePhoneNumber(number)) {
         showToast('Invalid Number', 'Please enter a valid phone number (10-15 digits)', 'error');
         return;
     }
-    
+
     // Disable buttons and show loading
     const buttons = blockForm.querySelectorAll('button');
     buttons.forEach(btn => btn.disabled = true);
-    
+
     if (action === 'block') {
         actionButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Delete & Block...';
         blockUser(number).finally(() => {
@@ -367,31 +367,42 @@ function handleBlockForm(event) {
 }
 
 // Initialize page
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Check authentication first
-    checkAuthentication().then(isAuthenticated => {
-        if (!isAuthenticated) {
-            window.location.href = '/admin';
+    try {
+        const authResponse = await fetch('/api/admin/banlist', {
+            credentials: 'include'
+        });
+
+        if (!authResponse.ok) {
+            // Not authenticated, redirect to login
+            window.location.href = '/login';
             return;
         }
-        
-        // Load blocked users on page load
-        loadBlockedUsers();
-    
+    } catch (error) {
+        // Authentication failed, redirect to login
+        console.log('Authentication check failed:', error);
+        window.location.href = '/login';
+        return;
+    }
+
+    // Load blocked users on page load
+    loadBlockedUsers();
+
     // Set up event listeners
     blockForm.addEventListener('submit', handleBlockForm);
-    
+
     // Handle delete button in form
     const deleteButton = blockForm.querySelector('[data-action="delete"]');
     deleteButton.addEventListener('click', (e) => {
         e.preventDefault();
         const number = formatPhoneNumber(blockNumberInput.value);
-        
+
         if (!validatePhoneNumber(number)) {
             showToast('Invalid Number', 'Please enter a valid phone number (10-15 digits)', 'error');
             return;
         }
-        
+
         // Create a fake event with the delete button as submitter
         const fakeEvent = new Event('submit');
         fakeEvent.submitter = deleteButton;
@@ -403,27 +414,27 @@ document.addEventListener('DOMContentLoaded', () => {
     unblockButton.addEventListener('click', (e) => {
         e.preventDefault();
         const number = formatPhoneNumber(blockNumberInput.value);
-        
+
         if (!validatePhoneNumber(number)) {
             showToast('Invalid Number', 'Please enter a valid phone number (10-15 digits)', 'error');
             return;
         }
-        
+
         // Create a fake event with the unblock button as submitter
         const fakeEvent = new Event('submit');
         fakeEvent.submitter = unblockButton;
         handleBlockForm(fakeEvent);
     });
-    
+
     refreshBlocklistBtn.addEventListener('click', loadBlockedUsers);
     retryBlocklistBtn.addEventListener('click', loadBlockedUsers);
-    
+
     // Toast close button
     const toastClose = toast.querySelector('.toast-close');
     toastClose.addEventListener('click', () => {
         toast.classList.remove('show');
     });
-    
+
     // Phone number input formatting
     blockNumberInput.addEventListener('input', (e) => {
         e.target.value = e.target.value.replace(/\D/g, '');

@@ -21,15 +21,15 @@
     },
     {
       "source": "/admin",
-      "destination": "/public/login.html"
+      "destination": "/public/admin.html"
     },
     {
       "source": "/admin/",
-      "destination": "/public/login.html"
+      "destination": "/public/admin.html"
     },
     {
-      "source": "/admin.html",
-      "destination": "/public/admin.html"
+      "source": "/login",
+      "destination": "/public/login.html"
     },
     {
       "source": "/login.html",
@@ -37,10 +37,6 @@
     },
     {
       "source": "/admin.html",
-      "destination": "/public/admin.html"
-    },
-    {
-      "source": "/admin-panel",
       "destination": "/public/admin.html"
     },
     {
