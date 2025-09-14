@@ -2,6 +2,5 @@
   "/page": "app/page.js",
   "/api/blocklist/route": "app/api/blocklist/route.js",
   "/api/sessions/route": "app/api/sessions/route.js",
-  "/api/pair/route": "app/api/pair/route.js",
-  "/blocked/page": "app/blocked/page.js"
+  "/api/pair/route": "app/api/pair/route.js"
 }
