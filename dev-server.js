@@ -113,8 +113,8 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Development Server running on port ${PORT}`);
-    console.log(`📱 Dashboard: http://localhost:${PORT}`);
-    console.log(`🔧 Admin: http://localhost:${PORT}/admin`);
+    console.log(`📱 Dashboard: http://0.0.0.0:${PORT}`);
+    console.log(`🔧 Admin: http://0.0.0.0:${PORT}/admin`);
     console.log('Press Ctrl+C to stop the server');
 });
 
