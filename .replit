@@ -7,7 +7,7 @@ expertMode = true
 channel = "stable-25_05"
 
 [workflows]
-runButton = "Project"
+runButton = "Development Server Fixed"
 
 [[workflows.workflow]]
 name = "Project"
@@ -29,6 +29,15 @@ waitForPort = 5000
 
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow]]
+name = "Development Server Fixed"
+author = 47567573
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node dev-server.js"
 
 [[ports]]
 localPort = 5000

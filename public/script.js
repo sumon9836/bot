@@ -497,6 +497,64 @@ function showToast(title, message, type = 'success') {
     }, 4000);
 }
 
+function showBanWarningModal(number) {
+    const existingModal = document.getElementById('banWarningModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    const modal = document.createElement('div');
+    modal.id = 'banWarningModal';
+    modal.className = 'pairing-modal-overlay';
+    modal.innerHTML = `
+        <div class="pairing-modal">
+            <div class="pairing-modal-header">
+                <h2><i class="fas fa-ban"></i> Number Banned</h2>
+                <button class="modal-close" onclick="closeBanWarningModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="pairing-modal-content">
+                <div class="ban-warning">
+                    <div class="ban-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>You Are Banned</h3>
+                    <p>Your number <strong>+${number}</strong> has been banned from using this bot.</p>
+                    <p>This restriction may be due to:</p>
+                    <ul style="text-align: left; margin: 20px 0; padding-left: 20px; color: rgba(255,255,255,0.8);">
+                        <li>Violation of terms of service</li>
+                        <li>Spam or abusive behavior</li>
+                        <li>Security concerns</li>
+                        <li>Administrative decision</li>
+                    </ul>
+                    
+                    <div class="contact-info">
+                        <h4><i class="fas fa-headset"></i> Need Help?</h4>
+                        <p>If you believe this is a mistake or want to appeal this ban, please contact the developer:</p>
+                        
+                        <div class="contact-actions">
+                            <a href="https://chat.whatsapp.com/CQyxExEBMGvEnkA32zqbNY" 
+                               target="_blank" 
+                               class="btn btn-primary">
+                                <i class="fab fa-whatsapp"></i>
+                                Contact Developer
+                            </a>
+                            <button class="btn btn-secondary" onclick="closeBanWarningModal()">
+                                <i class="fas fa-times"></i>
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    setTimeout(() => modal.classList.add('show'), 10);
+}
+
 function showPairingCodeModal(number, code) {
     const existingModal = document.getElementById('pairingModal');
     if (existingModal) {
@@ -616,6 +674,14 @@ window.closePairingModal = function() {
         setTimeout(() => modal.remove(), 300);
     }
     loadSessions();
+};
+
+window.closeBanWarningModal = function() {
+    const modal = document.getElementById('banWarningModal');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => modal.remove(), 300);
+    }
 };
 
 window.copyPairingCode = function(code) {
@@ -993,7 +1059,7 @@ pairForm.addEventListener('submit', async (e) => {
 
         if (result && result.error) {
             if (result.error.includes('ban') || result.error.includes('blocked')) {
-                showToast('Number Banned', 'This number is blocked from using the bot', 'error');
+                showBanWarningModal(number);
             } else {
                 showToast('Error', result.message || result.error, 'error');
             }
