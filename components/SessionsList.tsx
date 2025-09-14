@@ -59,10 +59,6 @@ export function SessionsList({ showToast }: SessionsListProps) {
           <h2><i className="fas fa-users"></i> Active Sessions</h2>
           <div className="card-actions">
             <div className="session-count">0 sessions</div>
-            <button onClick={refreshSessions} className="btn btn-primary">
-              <i className="fas fa-sync-alt"></i>
-              Refresh
-            </button>
           </div>
         </div>
         <div className="card-content">
@@ -90,10 +86,6 @@ export function SessionsList({ showToast }: SessionsListProps) {
           <div className="session-count">
             {sessionsCount} session{sessionsCount !== 1 ? 's' : ''}
           </div>
-          <button onClick={refreshSessions} className="btn btn-primary">
-            <i className="fas fa-sync-alt"></i>
-            Refresh
-          </button>
         </div>
       </div>
       <div className="card-content">
