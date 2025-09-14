@@ -48,7 +48,25 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
 
   const copyToClipboard = async (text: string) => {
     try {
-      await navigator.clipboard.writeText(text);
+      if (!text) {
+        showToast?.('No code to copy', 'Pairing code is not available', 'error');
+        return;
+      }
+
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        // Fallback for non-secure contexts
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.opacity = '0';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      }
       
       // Add visual feedback to copy button
       const copyButton = document.querySelector('.copy-button');
@@ -61,7 +79,8 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
       
       showToast?.('Copied!', 'Pairing code copied to clipboard', 'success');
     } catch (err) {
-      showToast?.('Failed to copy', 'Please copy the code manually', 'error');
+      console.error('Copy failed:', err);
+      showToast?.('Failed to copy', 'Please copy the code manually: ' + text, 'error');
     }
   };
 
