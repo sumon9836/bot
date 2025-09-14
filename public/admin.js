@@ -18,6 +18,24 @@ const toast = document.getElementById('toast');
 let blockedUsers = {};
 let isLoading = false;
 
+// Authentication check
+async function checkAuthentication() {
+    try {
+        const response = await fetch('/api/admin/banlist', {
+            credentials: 'include'
+        });
+        
+        if (response.status === 401 || response.status === 403) {
+            return false;
+        }
+        
+        return response.ok;
+    } catch (error) {
+        console.error('Auth check error:', error);
+        return false;
+    }
+}
+
 // Utility Functions
 function validatePhoneNumber(number) {
     const phoneRegex = /^[0-9]{10,15}$/;
@@ -350,8 +368,15 @@ function handleBlockForm(event) {
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', () => {
-    // Load blocked users on page load
-    loadBlockedUsers();
+    // Check authentication first
+    checkAuthentication().then(isAuthenticated => {
+        if (!isAuthenticated) {
+            window.location.href = '/admin';
+            return;
+        }
+        
+        // Load blocked users on page load
+        loadBlockedUsers();
     
     // Set up event listeners
     blockForm.addEventListener('submit', handleBlockForm);
