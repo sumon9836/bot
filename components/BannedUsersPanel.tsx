@@ -16,30 +16,10 @@ interface BannedUserCardProps {
 
 function BannedUserCard({ user }: BannedUserCardProps) {
   return (
-    <div className="banned-user-card">
-      <div className="user-info">
-        <div className="user-avatar">
-          <i className="fas fa-user-slash"></i>
-        </div>
-        <div className="user-details">
-          <h3 className="user-number">+{user.number}</h3>
-          <span className="user-status">
-            <i className="fas fa-ban"></i>
-            Blocked
-          </span>
-          {user.blockedAt && (
-            <small style={{ color: 'var(--gray-light)', fontSize: '0.7rem' }}>
-              Blocked: {new Date(user.blockedAt).toLocaleString()}
-            </small>
-          )}
-        </div>
-      </div>
-      <div className="user-actions">
-        <div className="contact-admin">
-          <small style={{ color: 'var(--gray-light)', fontSize: '0.7rem' }}>
-            Contact admin to unblock
-          </small>
-        </div>
+    <div className="banned-user-card-compact">
+      <div className="user-number">+{user.number}</div>
+      <div className="blocked-date">
+        {user.blockedAt ? new Date(user.blockedAt).toLocaleString() : 'Unknown date'}
       </div>
     </div>
   );
@@ -55,12 +35,6 @@ export function BannedUsersPanel({ showToast }: BannedUsersPanelProps) {
       <section className="card" id="banned-users-section">
         <div className="card-header">
           <h2><i className="fas fa-user-slash"></i> Banned Users</h2>
-          <div className="card-actions">
-            <button className="btn btn-secondary" disabled>
-              <i className="fas fa-sync-alt"></i>
-              Refresh
-            </button>
-          </div>
         </div>
         <div className="card-content">
           <Loader message="Loading banned users..." />
@@ -74,12 +48,6 @@ export function BannedUsersPanel({ showToast }: BannedUsersPanelProps) {
       <section className="card" id="banned-users-section">
         <div className="card-header">
           <h2><i className="fas fa-user-slash"></i> Banned Users</h2>
-          <div className="card-actions">
-            <button onClick={refreshBanlist} className="btn btn-secondary">
-              <i className="fas fa-sync-alt"></i>
-              Refresh
-            </button>
-          </div>
         </div>
         <div className="card-content">
           <div className="error-state">
@@ -102,12 +70,6 @@ export function BannedUsersPanel({ showToast }: BannedUsersPanelProps) {
     <section className="card" id="banned-users-section">
       <div className="card-header">
         <h2><i className="fas fa-user-slash"></i> Banned Users</h2>
-        <div className="card-actions">
-          <button onClick={refreshBanlist} className="btn btn-secondary">
-            <i className="fas fa-sync-alt"></i>
-            Refresh
-          </button>
-        </div>
       </div>
       <div className="card-content">
         {bannedCount === 0 ? (
