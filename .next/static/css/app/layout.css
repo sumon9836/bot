@@ -1371,7 +1371,7 @@ input[type="tel"]:focus::placeholder {
 
 /* ========== ENHANCED PAIRING CODE MODAL STYLES ========== */
 
-/* Modal Overlay with glass morphism */
+/* Modal Overlay with light blur and transparency */
 .pairing-modal-overlay {
     position: fixed;
     inset: 0;
@@ -1379,12 +1379,9 @@ input[type="tel"]:focus::placeholder {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: 
-        radial-gradient(circle at 20% 30%, rgba(0, 212, 255, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, rgba(255, 27, 107, 0.06) 0%, transparent 50%),
-        rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(25px) saturate(180%);
-    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    background: rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(8px) saturate(120%);
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
     animation: modalFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     overflow-y: auto;
     padding: 10px;
@@ -1403,11 +1400,11 @@ input[type="tel"]:focus::placeholder {
     position: relative;
     animation: modalSlideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     padding: 20px 15px;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.4);
     border-radius: 25px;
     -webkit-backdrop-filter: blur(15px);
             backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 /* Floating particles animation */
@@ -2239,12 +2236,18 @@ input[type="tel"]:focus::placeholder {
 @media (max-width: 768px) {
     .pairing-modal-overlay {
         padding: 5px;
+        background: rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(6px) saturate(110%);
+        -webkit-backdrop-filter: blur(6px) saturate(110%);
     }
 
     .pairing-modal-container {
         padding: 15px 10px;
         max-width: 95%;
         margin: 5px auto;
+        background: rgba(0, 0, 0, 0.3);
+        -webkit-backdrop-filter: blur(12px);
+                backdrop-filter: blur(12px);
     }
 
     .modal-title {
