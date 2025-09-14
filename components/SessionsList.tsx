@@ -20,39 +20,17 @@ interface SessionCardProps {
 }
 
 function SessionCard({ session }: SessionCardProps) {
+  // Only show if status is Connected/Active, hide Disconnected
+  if (session.status === 'Disconnected') {
+    return null;
+  }
+
   return (
-    <div className="session-card">
-      <div className="user-info">
-        <div className="user-avatar">
-          <i className="fab fa-whatsapp"></i>
-        </div>
-        <div className="user-details">
-          <h3 className="user-number">+{session.number}</h3>
-          {session.user && session.user !== 'Unknown' && (
-            <div className="user-name" style={{ color: 'var(--pink-primary)', fontSize: '0.9rem', fontWeight: '600', marginBottom: '4px' }}>
-              {session.user}
-            </div>
-          )}
-          <span className="user-status">
-            <i 
-              className="fas fa-circle" 
-              style={{ color: session.status === 'Connected' ? '#25D366' : '#ff4444' }}
-            ></i>
-            {session.status || 'Active'}
-          </span>
-          {session.lastSeen && (
-            <small style={{ color: 'var(--gray-light)', fontSize: '0.7rem' }}>
-              Last seen: {new Date(session.lastSeen).toLocaleString()}
-            </small>
-          )}
-        </div>
-      </div>
-      <div className="user-actions">
-        <div className="contact-admin">
-          <small style={{ color: 'var(--gray-light)', fontSize: '0.7rem' }}>
-            Contact admin to remove
-          </small>
-        </div>
+    <div className="session-card-transparent">
+      <div className="session-number">+{session.number}</div>
+      <div className="session-status">
+        <i className="fas fa-circle" style={{ color: '#25D366' }}></i>
+        Active
       </div>
     </div>
   );
