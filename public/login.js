@@ -3,11 +3,24 @@
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const passwordInput = document.getElementById('password');
-    const submitBtn = document.querySelector('.submit-btn');
-    const errorMessage = document.querySelector('.error-message');
+    const passwordToggle = document.getElementById('passwordToggle');
+    const loginBtn = document.querySelector('.login-btn');
+    const toast = document.getElementById('toast');
 
     // Check if already logged in
     checkAuthStatus();
+
+    // Password toggle functionality
+    if (passwordToggle) {
+        passwordToggle.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            const icon = passwordToggle.querySelector('i');
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+    }
 
     loginForm.addEventListener('submit', handleLogin);
 
@@ -17,14 +30,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = passwordInput.value.trim();
         
         if (!password) {
-            showError('Please enter password');
+            showToast('Please enter password', 'error');
             return;
         }
 
         // Show loading state
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
-        hideError();
+        loginBtn.disabled = true;
+        const btnText = loginBtn.querySelector('.btn-text');
+        const btnLoader = loginBtn.querySelector('.btn-loader');
+        
+        if (btnText) btnText.style.display = 'none';
+        if (btnLoader) btnLoader.style.display = 'flex';
 
         try {
             const response = await fetch('/api/admin/login', {
@@ -39,17 +55,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (data.success) {
-                // Redirect to admin panel
-                window.location.href = '/admin.html';
+                showToast('Login successful! Redirecting...', 'success');
+                // Redirect to admin panel after short delay
+                setTimeout(() => {
+                    window.location.href = '/admin.html';
+                }, 1000);
             } else {
-                showError(data.error || 'Invalid password');
+                showToast(data.error || 'Invalid password', 'error');
             }
         } catch (error) {
             console.error('Login error:', error);
-            showError('Login failed. Please try again.');
+            showToast('Login failed. Please try again.', 'error');
         } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+            loginBtn.disabled = false;
+            if (btnText) btnText.style.display = 'flex';
+            if (btnLoader) btnLoader.style.display = 'none';
         }
     }
 
@@ -65,15 +85,42 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             // Not authenticated, stay on login page
+            console.log('Not authenticated');
         }
     }
 
-    function showError(message) {
-        errorMessage.textContent = message;
-        errorMessage.style.display = 'block';
+    function showToast(message, type = 'success') {
+        const toastIcon = toast.querySelector('.toast-icon i');
+        const toastTitle = toast.querySelector('.toast-title');
+        const toastText = toast.querySelector('.toast-text');
+        
+        // Update toast content
+        if (type === 'success') {
+            toastIcon.className = 'fas fa-check-circle';
+            toastTitle.textContent = 'Success';
+            toast.querySelector('.toast-icon').className = 'toast-icon success';
+        } else {
+            toastIcon.className = 'fas fa-exclamation-circle';
+            toastTitle.textContent = 'Error';
+            toast.querySelector('.toast-icon').className = 'toast-icon error';
+        }
+        
+        toastText.textContent = message;
+        
+        // Show toast
+        toast.classList.add('show');
+        
+        // Hide toast after 3 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
     }
 
-    function hideError() {
-        errorMessage.style.display = 'none';
+    // Toast close button
+    const toastClose = toast.querySelector('.toast-close');
+    if (toastClose) {
+        toastClose.addEventListener('click', () => {
+            toast.classList.remove('show');
+        });
     }
 });

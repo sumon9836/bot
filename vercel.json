@@ -36,6 +36,10 @@
       "destination": "/public/login.html"
     },
     {
+      "source": "/admin.html",
+      "destination": "/public/admin.html"
+    },
+    {
       "source": "/admin-panel",
       "destination": "/public/admin.html"
     },
