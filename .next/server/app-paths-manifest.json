@@ -1,6 +1,1 @@
-{
-  "/api/sessions/route": "app/api/sessions/route.js",
-  "/api/blocklist/route": "app/api/blocklist/route.js",
-  "/api/pair/route": "app/api/pair/route.js",
-  "/page": "app/page.js"
-}
+{}

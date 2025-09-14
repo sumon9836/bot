@@ -7,11 +7,17 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: '𝐊ąìʂҽղ-𝐌𝐃 | Bot Dashboard',
   description: 'Modern WhatsApp Bot Management Dashboard',
-  viewport: 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes',
-  themeColor: '#000000',
   icons: {
     icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>",
   },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1.0,
+  maximumScale: 5.0,
+  userScalable: true,
+  themeColor: '#000000',
 };
 
 export default function RootLayout({

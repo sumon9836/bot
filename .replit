@@ -16,23 +16,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Development Server"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Next.js Development Server"
-
-[[workflows.workflow]]
-name = "Development Server"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "webview"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run dev"
-waitForPort = 5000
+args = "WhatsApp Dashboard"
 
 [[workflows.workflow]]
 name = "Development Server Fixed"
@@ -44,7 +28,7 @@ task = "shell.exec"
 args = "node dev-server.js"
 
 [[workflows.workflow]]
-name = "Next.js Development Server"
+name = "WhatsApp Dashboard"
 author = "agent"
 
 [[workflows.workflow.tasks]]
@@ -60,9 +44,10 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 40027
+localPort = 45599
 externalPort = 3000
 
 [deployment]
-run = ["sh", "-c", "node dev-server.js"]
+run = ["npm", "start"]
 deploymentTarget = "autoscale"
+build = ["npm", "run", "build"]
