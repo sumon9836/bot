@@ -15,40 +15,9 @@ interface SessionCardProps {
     lastSeen?: string;
     platform?: string;
   };
-  onDelete?: (number: string) => void;
-  showToast?: (title: string, message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
-function SessionCard({ session, onDelete, showToast }: SessionCardProps) {
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const handleDelete = async () => {
-    if (!onDelete) return;
-    
-    setIsDeleting(true);
-    
-    try {
-      const response = await fetch('/api/delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ number: session.number })
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        showToast?.('Success', 'Session deleted successfully', 'success');
-        onDelete(session.number);
-      } else {
-        showToast?.('Delete Failed', data.error || 'Failed to delete session', 'error');
-      }
-    } catch (error) {
-      showToast?.('Network Error', 'Failed to connect to server', 'error');
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
+function SessionCard({ session }: SessionCardProps) {
   return (
     <div className="session-card">
       <div className="user-info">
@@ -69,23 +38,11 @@ function SessionCard({ session, onDelete, showToast }: SessionCardProps) {
         </div>
       </div>
       <div className="user-actions">
-        <button 
-          className="btn btn-sm btn-danger"
-          onClick={handleDelete}
-          disabled={isDeleting}
-        >
-          {isDeleting ? (
-            <>
-              <i className="fas fa-spinner fa-spin"></i>
-              Deleting...
-            </>
-          ) : (
-            <>
-              <i className="fas fa-trash"></i>
-              Delete
-            </>
-          )}
-        </button>
+        <div className="contact-admin">
+          <small style={{ color: 'var(--gray-light)', fontSize: '0.7rem' }}>
+            Contact admin to remove
+          </small>
+        </div>
       </div>
     </div>
   );
@@ -95,10 +52,6 @@ export function SessionsList({ showToast }: SessionsListProps) {
   const { sessions, loading, error, refreshSessions, sessionsCount } = useSessions({
     showToast
   });
-
-  const handleSessionDeleted = () => {
-    refreshSessions();
-  };
 
   if (loading) {
     return (
@@ -175,8 +128,6 @@ export function SessionsList({ showToast }: SessionsListProps) {
               <SessionCard
                 key={session.id}
                 session={session}
-                onDelete={handleSessionDeleted}
-                showToast={showToast}
               />
             ))}
           </div>
@@ -185,6 +136,3 @@ export function SessionsList({ showToast }: SessionsListProps) {
     </section>
   );
 }
-
-// Import React for useState
-import { useState } from 'react';

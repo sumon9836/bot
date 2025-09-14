@@ -12,41 +12,9 @@ interface BannedUserCardProps {
     number: string;
     blockedAt?: string;
   };
-  onUnblock?: (number: string) => void;
-  showToast?: (title: string, message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
-function BannedUserCard({ user, onUnblock, showToast }: BannedUserCardProps) {
-  const [isUnblocking, setIsUnblocking] = useState(false);
-
-  const handleUnblock = async () => {
-    if (!onUnblock) return;
-    
-    setIsUnblocking(true);
-    
-    try {
-      const response = await fetch('/api/admin/unblock', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ number: user.number })
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        showToast?.('Success', 'User unblocked successfully', 'success');
-        onUnblock(user.number);
-      } else {
-        showToast?.('Unblock Failed', data.error || 'Failed to unblock user', 'error');
-      }
-    } catch (error) {
-      showToast?.('Network Error', 'Failed to connect to server', 'error');
-    } finally {
-      setIsUnblocking(false);
-    }
-  };
-
+function BannedUserCard({ user }: BannedUserCardProps) {
   return (
     <div className="banned-user-card">
       <div className="user-info">
@@ -67,23 +35,11 @@ function BannedUserCard({ user, onUnblock, showToast }: BannedUserCardProps) {
         </div>
       </div>
       <div className="user-actions">
-        <button 
-          className="btn btn-sm btn-success"
-          onClick={handleUnblock}
-          disabled={isUnblocking}
-        >
-          {isUnblocking ? (
-            <>
-              <i className="fas fa-spinner fa-spin"></i>
-              Unblocking...
-            </>
-          ) : (
-            <>
-              <i className="fas fa-unlock"></i>
-              Unblock
-            </>
-          )}
-        </button>
+        <div className="contact-admin">
+          <small style={{ color: 'var(--gray-light)', fontSize: '0.7rem' }}>
+            Contact admin to unblock
+          </small>
+        </div>
       </div>
     </div>
   );
@@ -93,10 +49,6 @@ export function BannedUsersPanel({ showToast }: BannedUsersPanelProps) {
   const { bannedUsers, loading, error, refreshBanlist, bannedCount } = useBanlist({
     showToast
   });
-
-  const handleUserUnblocked = () => {
-    refreshBanlist();
-  };
 
   if (loading) {
     return (
@@ -173,8 +125,6 @@ export function BannedUsersPanel({ showToast }: BannedUsersPanelProps) {
                 <BannedUserCard
                   key={user.number}
                   user={user}
-                  onUnblock={handleUserUnblocked}
-                  showToast={showToast}
                 />
               ))}
             </div>
@@ -190,6 +140,3 @@ export function BannedUsersPanel({ showToast }: BannedUsersPanelProps) {
     </section>
   );
 }
-
-// Import React for useState
-import { useState } from 'react';

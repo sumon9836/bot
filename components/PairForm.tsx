@@ -39,6 +39,23 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
     setIsFocused(false);
   };
 
+  const checkIfBlocked = async (number: string): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/blocklist');
+      if (!response.ok) {
+        return false; // If we can't check, allow the attempt (backend will handle it)
+      }
+      
+      const blockedUsers = await response.json();
+      const cleanNumber = number.replace(/[^0-9]/g, '');
+      
+      // Check if user is in the blocklist
+      return !!blockedUsers[cleanNumber];
+    } catch (error) {
+      return false; // If we can't check, allow the attempt
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -50,6 +67,14 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
     setIsSubmitting(true);
 
     try {
+      // Check if user is blocked first
+      const isBlocked = await checkIfBlocked(phoneNumber);
+      if (isBlocked) {
+        showToast?.('User Blocked', 'This number is banned. Contact the developer for assistance.', 'error');
+        setIsSubmitting(false);
+        return;
+      }
+
       const response = await post('/api/pair', { number: phoneNumber });
 
       if (response.success) {
@@ -57,7 +82,12 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
         resetDetection();
         onSuccess?.(phoneNumber);
       } else {
-        showToast?.('Pairing Failed', response.error || 'Failed to pair phone number', 'error');
+        // Handle specific error messages from backend
+        if (response.error && response.error.includes('ban')) {
+          showToast?.('User Blocked', 'This number is banned. Contact the developer for assistance.', 'error');
+        } else {
+          showToast?.('Pairing Failed', response.error || 'Failed to pair phone number', 'error');
+        }
       }
     } catch (error) {
       showToast?.('Network Error', 'Failed to connect to server', 'error');
