@@ -183,172 +183,180 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
         </div>
       </div>
 
-      {/* Full Screen WhatsApp Pairing Code Modal */}
+      {/* Enhanced Full Screen WhatsApp Pairing Code Modal */}
       {showPairCode && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: 'rgba(0, 0, 0, 0.9)', backdropFilter: 'blur(15px)' }}>
-          <div className="w-full h-full max-w-4xl mx-auto flex flex-col justify-center items-center p-8 text-center text-white relative overflow-y-auto" style={{ background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.1), rgba(25, 25, 25, 0.2))' }}>
+        <div className="pairing-modal-overlay">
+          <div className="pairing-modal-container">
             
-            {/* Success Message */}
-            <div className="mb-6 p-4 bg-green-500/20 border border-green-500/40 rounded-xl">
-              <div className="flex items-center justify-center gap-3 mb-2">
-                <i className="fas fa-check-circle text-green-400 text-2xl"></i>
-                <h2 className="text-xl font-bold text-green-300">Phone number {currentNumber} paired successfully!</h2>
+            {/* Floating particles background */}
+            <div className="floating-particles">
+              {[...Array(12)].map((_, i) => (
+                <div key={i} className="particle" style={{ 
+                  animationDelay: `${i * 0.5}s`,
+                  left: `${Math.random() * 100}%`,
+                  animationDuration: `${3 + Math.random() * 4}s`
+                }}></div>
+              ))}
+            </div>
+
+            {/* Success Message with animation */}
+            <div className="success-banner">
+              <div className="success-content">
+                <div className="success-icon">
+                  <i className="fas fa-check-circle"></i>
+                </div>
+                <div className="success-text">
+                  <h2>Phone number paired successfully!</h2>
+                  <p className="success-number">{currentNumber}</p>
+                </div>
               </div>
             </div>
 
-            {/* Header */}
-            <div className="mb-8">
-              <div className="w-24 h-24 mx-auto mb-6 bg-green-500/20 rounded-full flex items-center justify-center border-2 border-green-500/50 shadow-lg">
-                <i className="fab fa-whatsapp text-5xl text-green-400"></i>
+            {/* WhatsApp Header with pulsing logo */}
+            <div className="whatsapp-header">
+              <div className="whatsapp-logo">
+                <i className="fab fa-whatsapp"></i>
               </div>
-              <h1 className="text-4xl font-bold text-white mb-4">WhatsApp Device Pairing</h1>
-              <p className="text-xl text-gray-300">Use this code to link your device to WhatsApp</p>
+              <h1 className="modal-title">WhatsApp Device Pairing</h1>
+              <p className="modal-subtitle">Use this code to link your device to WhatsApp</p>
             </div>
 
-            {/* Pairing Code Display */}
+            {/* Enhanced Pairing Code Display */}
             {pairCodeData?.code ? (
-              <div className="mb-12 p-10 bg-gradient-to-br from-emerald-500/25 to-cyan-500/25 border-2 border-emerald-400/50 rounded-3xl w-full max-w-2xl shadow-2xl" style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 182, 212, 0.15)), rgba(0, 0, 0, 0.3)', backdropFilter: 'blur(20px)' }}>
-                <div className="flex items-center justify-center gap-3 mb-8">
-                  <i className="fas fa-key text-emerald-400 text-3xl"></i>
-                  <p className="text-emerald-300 text-2xl font-bold">Your WhatsApp Pairing Code</p>
+              <div className="pairing-code-section">
+                <div className="code-header">
+                  <i className="fas fa-key"></i>
+                  <span>Your WhatsApp Pairing Code</span>
                 </div>
                 
-                <div className="mb-10 p-8 bg-black/30 rounded-2xl border border-emerald-500/30" style={{ backdropFilter: 'blur(10px)' }}>
+                <div className="code-display-container">
                   <div 
-                    className="text-7xl font-mono font-black text-transparent bg-gradient-to-r from-emerald-300 to-cyan-300 bg-clip-text select-all tracking-[0.3em] cursor-pointer hover:from-emerald-200 hover:to-cyan-200 transition-all duration-300 transform hover:scale-110 drop-shadow-lg"
+                    className="pairing-code-display"
                     onClick={() => copyToClipboard(pairCodeData.code!)}
                     title="Click to copy code"
-                    style={{ 
-                      textShadow: '0 0 30px rgba(16, 185, 129, 0.7)',
-                      filter: 'drop-shadow(0 0 15px rgba(16, 185, 129, 0.5))'
-                    }}
                   >
-                    {pairCodeData.code}
+                    {pairCodeData.code?.split('').map((char, index) => (
+                      <span 
+                        key={index} 
+                        className="code-char"
+                        style={{ animationDelay: `${index * 0.1}s` }}
+                      >
+                        {char}
+                      </span>
+                    ))}
                   </div>
+                  
+                  {/* Code glow effect */}
+                  <div className="code-glow"></div>
                 </div>
                 
-                <div className="flex flex-col gap-4">
+                <div className="copy-actions">
                   <button
                     onClick={() => copyToClipboard(pairCodeData.code!)}
-                    className="px-10 py-5 bg-gradient-to-r from-emerald-500/40 to-cyan-500/40 border-2 border-emerald-400/50 text-emerald-200 rounded-2xl hover:from-emerald-500/50 hover:to-cyan-500/50 hover:border-emerald-300/70 transition-all duration-300 font-bold text-xl flex items-center gap-4 mx-auto transform hover:scale-105 shadow-lg"
-                    style={{ backdropFilter: 'blur(10px)' }}
+                    className="copy-button"
                   >
-                    <i className="fas fa-copy text-2xl"></i>
-                    Copy Pairing Code
+                    <div className="button-content">
+                      <i className="fas fa-copy"></i>
+                      <span>Copy Pairing Code</span>
+                    </div>
+                    <div className="button-shine"></div>
                   </button>
                   
-                  <p className="text-emerald-400/80 text-sm mt-2">Click the code above or this button to copy</p>
+                  <p className="copy-hint">Click the code above or this button to copy</p>
                 </div>
               </div>
             ) : (
-              <div className="mb-8 p-8 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-2 border-yellow-500/40 rounded-2xl w-full max-w-lg">
-                <div className="flex items-center justify-center gap-3 mb-4">
-                  <i className="fas fa-exclamation-triangle text-yellow-400 text-2xl"></i>
-                  <p className="text-yellow-300 text-xl font-bold">No Pairing Code Received</p>
+              <div className="error-section">
+                <div className="error-icon">
+                  <i className="fas fa-exclamation-triangle"></i>
                 </div>
-                <p className="text-yellow-200">The backend didn't return a pairing code. Please try again.</p>
+                <div className="error-content">
+                  <h3>No Pairing Code Received</h3>
+                  <p>The backend didn't return a pairing code. Please try again.</p>
+                </div>
               </div>
             )}
 
-            {/* WhatsApp Direct Link */}
-            <div className="mb-10">
+            {/* WhatsApp Direct Link Button */}
+            <div className="whatsapp-link-section">
               {pairCodeData?.link ? (
                 <a 
                   href={pairCodeData.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block px-12 py-6 bg-gradient-to-r from-green-500/40 to-emerald-500/40 border-2 border-green-400/60 text-green-200 rounded-2xl hover:from-green-500/50 hover:to-emerald-500/50 hover:border-green-300/80 transition-all duration-300 font-bold text-xl transform hover:scale-105 shadow-2xl"
-                  style={{ backdropFilter: 'blur(15px)' }}
+                  className="whatsapp-link-button"
                 >
-                  <i className="fab fa-whatsapp mr-4 text-3xl"></i>
-                  Open WhatsApp Directly
+                  <i className="fab fa-whatsapp"></i>
+                  <span>Open WhatsApp Directly</span>
+                  <div className="button-ripple"></div>
                 </a>
               ) : pairCodeData?.code ? (
                 <a 
                   href={`https://wa.me/qr/${pairCodeData.code}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block px-12 py-6 bg-gradient-to-r from-green-500/40 to-emerald-500/40 border-2 border-green-400/60 text-green-200 rounded-2xl hover:from-green-500/50 hover:to-emerald-500/50 hover:border-green-300/80 transition-all duration-300 font-bold text-xl transform hover:scale-105 shadow-2xl"
-                  style={{ backdropFilter: 'blur(15px)' }}
+                  className="whatsapp-link-button"
                 >
-                  <i className="fab fa-whatsapp mr-4 text-3xl"></i>
-                  Open WhatsApp
+                  <i className="fab fa-whatsapp"></i>
+                  <span>Open WhatsApp</span>
+                  <div className="button-ripple"></div>
                 </a>
               ) : null}
             </div>
 
-            {/* Step-by-Step Instructions */}
-            <div className="mb-10 bg-gray-900/50 border border-gray-500/40 rounded-3xl p-10 w-full max-w-3xl" style={{ backdropFilter: 'blur(20px)' }}>
-              <h3 className="text-3xl font-bold text-white mb-8 flex items-center justify-center gap-4">
-                <i className="fas fa-list-ol text-cyan-400 text-2xl"></i>
+            {/* Enhanced Step-by-Step Instructions */}
+            <div className="instructions-section">
+              <h3 className="instructions-title">
+                <i className="fas fa-list-ol"></i>
                 How to Link Your Device:
               </h3>
-              <div className="grid gap-4 text-left">
-                <div className="flex items-start gap-4 p-4 bg-gray-700/30 rounded-xl border border-gray-600/20">
-                  <div className="w-8 h-8 bg-blue-500/30 rounded-full flex items-center justify-center text-blue-300 font-bold text-sm flex-shrink-0">1</div>
-                  <div>
-                    <p className="text-white font-semibold mb-1">Open WhatsApp on your phone</p>
-                    <p className="text-gray-400 text-sm">Make sure you have WhatsApp installed and running</p>
+              <div className="steps-container">
+                {[
+                  { icon: "fab fa-whatsapp", title: "Open WhatsApp on your phone", desc: "Make sure you have WhatsApp installed and running" },
+                  { icon: "fas fa-cog", title: "Go to Settings → Linked Devices", desc: "Tap the three dots menu, then Settings, then Linked Devices" },
+                  { icon: "fas fa-link", title: 'Tap "Link a Device"', desc: "You'll see options to link using QR code or phone number" },
+                  { icon: "fas fa-phone", title: 'Select "Link with phone number instead"', desc: "Choose the phone number option at the bottom" },
+                  { icon: "fas fa-keyboard", title: "Enter the pairing code above", desc: "Type or paste the 8-character code exactly as shown", highlight: true }
+                ].map((step, index) => (
+                  <div key={index} className={`step-item ${step.highlight ? 'step-highlight' : ''}`}>
+                    <div className="step-number">{index + 1}</div>
+                    <div className="step-content">
+                      <i className={step.icon}></i>
+                      <div className="step-text">
+                        <h4>{step.title}</h4>
+                        <p>{step.desc}</p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start gap-4 p-4 bg-gray-700/30 rounded-xl border border-gray-600/20">
-                  <div className="w-8 h-8 bg-blue-500/30 rounded-full flex items-center justify-center text-blue-300 font-bold text-sm flex-shrink-0">2</div>
-                  <div>
-                    <p className="text-white font-semibold mb-1">Go to Settings → Linked Devices</p>
-                    <p className="text-gray-400 text-sm">Tap the three dots menu, then Settings, then Linked Devices</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4 p-4 bg-gray-700/30 rounded-xl border border-gray-600/20">
-                  <div className="w-8 h-8 bg-blue-500/30 rounded-full flex items-center justify-center text-blue-300 font-bold text-sm flex-shrink-0">3</div>
-                  <div>
-                    <p className="text-white font-semibold mb-1">Tap "Link a Device"</p>
-                    <p className="text-gray-400 text-sm">You'll see options to link using QR code or phone number</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4 p-4 bg-gray-700/30 rounded-xl border border-gray-600/20">
-                  <div className="w-8 h-8 bg-blue-500/30 rounded-full flex items-center justify-center text-blue-300 font-bold text-sm flex-shrink-0">4</div>
-                  <div>
-                    <p className="text-white font-semibold mb-1">Select "Link with phone number instead"</p>
-                    <p className="text-gray-400 text-sm">Choose the phone number option at the bottom</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4 p-4 bg-gradient-to-r from-green-500/20 to-blue-500/20 rounded-xl border border-green-500/30">
-                  <div className="w-8 h-8 bg-green-500/40 rounded-full flex items-center justify-center text-green-300 font-bold text-sm flex-shrink-0">5</div>
-                  <div>
-                    <p className="text-green-300 font-semibold mb-1">Enter the pairing code above</p>
-                    <p className="text-green-200 text-sm">Type or paste the 8-character code exactly as shown</p>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex justify-center">
+            {/* Enhanced Close Button */}
+            <div className="modal-actions">
               <button
                 onClick={() => {
                   setShowPairCode(false);
                   setPairCodeData(null);
                   setCurrentNumber('');
                 }}
-                className="px-12 py-5 bg-gray-700/40 border-2 border-gray-500/50 text-gray-300 rounded-2xl hover:bg-gray-600/50 hover:border-gray-400/60 transition-all duration-300 font-bold text-lg transform hover:scale-105"
-                style={{ backdropFilter: 'blur(10px)' }}
+                className="close-button"
               >
-                <i className="fas fa-times mr-3 text-xl"></i>
-                Close
+                <i className="fas fa-times"></i>
+                <span>Close</span>
               </button>
             </div>
 
-            {/* Close button */}
+            {/* Floating close button */}
             <button
               onClick={() => {
                 setShowPairCode(false);
                 setPairCodeData(null);
                 setCurrentNumber('');
               }}
-              className="absolute top-8 right-8 w-14 h-14 bg-gray-700/50 border-2 border-gray-500/50 text-gray-300 rounded-full hover:bg-gray-600/60 hover:border-gray-400/70 transition-all duration-200 flex items-center justify-center transform hover:scale-110"
-              style={{ backdropFilter: 'blur(10px)' }}
+              className="floating-close-button"
             >
-              <i className="fas fa-times text-2xl"></i>
+              <i className="fas fa-times"></i>
             </button>
           </div>
         </div>
