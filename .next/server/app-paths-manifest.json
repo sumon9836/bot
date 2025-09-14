@@ -2,6 +2,5 @@
   "/_not-found/page": "app/_not-found/page.js",
   "/page": "app/page.js",
   "/api/blocklist/route": "app/api/blocklist/route.js",
-  "/admin/page": "app/admin/page.js",
-  "/api/admin/blocklist/route": "app/api/admin/blocklist/route.js"
+  "/api/sessions/route": "app/api/sessions/route.js"
 }
