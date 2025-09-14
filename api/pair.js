@@ -13,7 +13,7 @@ function validatePhoneNumber(number) {
     return { valid: true, number: cleaned };
 }
 
-module.exports = async function handler(req, res) {
+module.exports = async function pair(req, res) {
     if (handleOptions(req, res)) return;
     
     if (req.method !== 'GET') {

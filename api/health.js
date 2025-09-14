@@ -1,6 +1,6 @@
 const { handleOptions, json } = require('../lib/http');
 
-module.exports = async function handler(req, res) {
+module.exports = async function health(req, res) {
     if (handleOptions(req, res)) return;
     
     if (req.method !== 'GET') {
