@@ -43,10 +43,6 @@ args = "node dev-server.js"
 localPort = 5000
 externalPort = 80
 
-[[ports]]
-localPort = 42657
-externalPort = 3000
-
 [deployment]
 run = ["node", "dev-server.js"]
 deploymentTarget = "autoscale"

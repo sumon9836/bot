@@ -346,7 +346,7 @@ function initPhoneInputAnimation() {
         inputWrapper.classList.remove('has-country-code', 'has-value', 'number-complete');
         countryFlag.textContent = '';
         countryCodeSpan.textContent = '+';
-        pairNumberInput.value = '';
+        // Don't clear the input value - preserve what user typed
     }
 
     function animateCountryDetection(detection) {
@@ -371,18 +371,26 @@ function initPhoneInputAnimation() {
     }
 
     pairNumberInput.addEventListener('input', (e) => {
-        let value = e.target.value.replace(/\D/g, '');
+        let value = e.target.value; // Keep the original value as typed by user
+        let digitsOnly = value.replace(/\D/g, ''); // Only use digits for detection logic
 
-        if (!value) {
-            resetCountryDisplay();
+        if (!digitsOnly) {
+            // Only reset UI state if we had a detected country
+            if (detectedCountry) {
+                detectedCountry = null;
+                countryDisplay.classList.remove('show', 'detected', 'complete');
+                inputWrapper.classList.remove('has-country-code', 'number-complete');
+                countryFlag.textContent = '';
+                countryCodeSpan.textContent = '+';
+            }
+            inputWrapper.classList.remove('has-value');
             return;
         }
 
         inputWrapper.classList.add('has-value');
 
-        if (detectedCountry && value.startsWith(detectedCountry.countryCode)) {
-            const nationalPart = value.substring(detectedCountry.countryCode.length);
-            // Don't modify the input value - let user keep what they typed
+        if (detectedCountry && digitsOnly.startsWith(detectedCountry.countryCode)) {
+            const nationalPart = digitsOnly.substring(detectedCountry.countryCode.length);
 
             if (nationalPart.length >= 7) {
                 countryDisplay.classList.add('complete');
@@ -393,16 +401,19 @@ function initPhoneInputAnimation() {
             }
         }
 
-        const detection = detectCountryFromPhoneNumber(value);
+        const detection = detectCountryFromPhoneNumber(digitsOnly);
 
         if (detection && !detectedCountry) {
             detectedCountry = detection;
             animateCountryDetection(detection);
-            // Don't modify the input value - let user keep what they typed
         } else if (!detection) {
-            // Don't modify the input value - let user keep what they typed  
+            // Only reset UI state if we had a detected country
             if (detectedCountry) {
-                resetCountryDisplay();
+                detectedCountry = null;
+                countryDisplay.classList.remove('show', 'detected', 'complete');
+                inputWrapper.classList.remove('has-country-code', 'number-complete');
+                countryFlag.textContent = '';
+                countryCodeSpan.textContent = '+';
             }
         }
     });
