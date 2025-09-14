@@ -1,7 +1,6 @@
 {
   "/page": "app/page.js",
-  "/api/sessions/route": "app/api/sessions/route.js",
   "/api/blocklist/route": "app/api/blocklist/route.js",
-  "/api/pair/route": "app/api/pair/route.js",
-  "/api/pair-with-code/route": "app/api/pair-with-code/route.js"
+  "/api/sessions/route": "app/api/sessions/route.js",
+  "/api/pair/route": "app/api/pair/route.js"
 }
