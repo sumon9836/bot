@@ -32,17 +32,11 @@ export function useSessions(options: UseSessionsOptions = {}) {
       if (!mountedRef.current) return;
       
       if (response.ok) {
-        // Handle different response formats
+        // Handle different response formats - CHECK SPECIFIC FORMATS FIRST!
         let sessionList: Session[] = [];
         
-        if (Array.isArray(data)) {
-          sessionList = data;
-        } else if (data.data && Array.isArray(data.data)) {
-          sessionList = data.data;
-        } else if (data.sessions && Array.isArray(data.sessions)) {
-          sessionList = data.sessions;
-        } else if (data.data && Array.isArray(data.data.active) && data.data.status) {
-          // Handle backend format: {success: true, data: {active: [...], status: {...}}}
+        // Check nested format first: {success: true, data: {active: [...], status: {...}}}
+        if (data.data && Array.isArray(data.data.active) && data.data.status) {
           const { active, status } = data.data;
           sessionList = active.map((number: string) => ({
             id: number,
@@ -52,8 +46,9 @@ export function useSessions(options: UseSessionsOptions = {}) {
             platform: status[number]?.platform || 'WhatsApp',
             user: status[number]?.user !== 'unknown' ? status[number]?.user : undefined
           }));
-        } else if (Array.isArray(data.active) && data.status) {
-          // Handle direct backend format: {active: [...], status: {...}}
+        } 
+        // Check direct format: {active: [...], status: {...}}
+        else if (Array.isArray(data.active) && data.status) {
           const { active, status } = data;
           sessionList = active.map((number: string) => ({
             id: number,
@@ -63,8 +58,21 @@ export function useSessions(options: UseSessionsOptions = {}) {
             platform: status[number]?.platform || 'WhatsApp',
             user: status[number]?.user !== 'unknown' ? status[number]?.user : undefined
           }));
-        } else if (typeof data === 'object' && data !== null) {
-          // Convert object to array (for cases where sessions are returned as an object)
+        }
+        // Check if data itself is an array
+        else if (Array.isArray(data)) {
+          sessionList = data;
+        } 
+        // Check if data.data is an array
+        else if (data.data && Array.isArray(data.data)) {
+          sessionList = data.data;
+        } 
+        // Check sessions array (should be last to avoid empty array trap)
+        else if (data.sessions && Array.isArray(data.sessions) && data.sessions.length > 0) {
+          sessionList = data.sessions;
+        } 
+        // Fallback: convert object to array
+        else if (typeof data === 'object' && data !== null) {
           sessionList = Object.keys(data).map(key => ({
             id: key,
             number: key,
@@ -73,6 +81,8 @@ export function useSessions(options: UseSessionsOptions = {}) {
             platform: data[key].platform
           }));
         }
+        
+        console.log('Parsed sessions:', sessionList.length, 'from data:', data);
 
         setSessions(sessionList);
         setError(null);
