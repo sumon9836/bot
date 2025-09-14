@@ -200,16 +200,7 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
         <div className="pairing-modal-overlay">
           <div className="pairing-modal-container">
             
-            {/* Floating particles background */}
-            <div className="floating-particles">
-              {[...Array(12)].map((_, i) => (
-                <div key={i} className="particle" style={{ 
-                  animationDelay: `${i * 0.5}s`,
-                  left: `${Math.random() * 100}%`,
-                  animationDuration: `${3 + Math.random() * 4}s`
-                }}></div>
-              ))}
-            </div>
+            
 
             {/* Success Message with animation */}
             <div className="success-banner">
@@ -289,32 +280,7 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
               </div>
             )}
 
-            {/* WhatsApp Direct Link Button */}
-            <div className="whatsapp-link-section">
-              {pairCodeData?.link ? (
-                <a 
-                  href={pairCodeData.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="whatsapp-link-button"
-                >
-                  <i className="fab fa-whatsapp"></i>
-                  <span>Open WhatsApp Directly</span>
-                  <div className="button-ripple"></div>
-                </a>
-              ) : pairCodeData?.code ? (
-                <a 
-                  href={`https://wa.me/qr/${pairCodeData.code}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="whatsapp-link-button"
-                >
-                  <i className="fab fa-whatsapp"></i>
-                  <span>Open WhatsApp</span>
-                  <div className="button-ripple"></div>
-                </a>
-              ) : null}
-            </div>
+            
 
             {/* Enhanced Step-by-Step Instructions */}
             <div className="instructions-section">
