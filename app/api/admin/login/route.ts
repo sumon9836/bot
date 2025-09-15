@@ -37,8 +37,8 @@ export async function POST(request: NextRequest) {
     // Set secure session cookie
     response.cookies.set('admin_session', sessionToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: false, // Set to false for development
+      sameSite: 'lax', // Changed to lax for better compatibility
       maxAge: 24 * 60 * 60, // 24 hours
       path: '/'
     });

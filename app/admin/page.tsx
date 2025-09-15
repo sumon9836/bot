@@ -66,19 +66,27 @@ export default function AdminDashboard() {
   const checkAuth = async () => {
     try {
       const response = await fetch('/api/admin/blocklist', {
-        credentials: 'include'
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
       if (response.status === 401 || response.status === 403) {
+        console.log('Authentication failed, redirecting to login');
         window.location.href = '/login';
         return;
       }
+
+      if (response.ok) {
+        loadBlockedUsers();
+      }
     } catch (error) {
+      console.error('Auth check error:', error);
       window.location.href = '/login';
       return;
     }
-    
-    loadBlockedUsers();
   };
 
   const loadBlockedUsers = async () => {

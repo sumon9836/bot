@@ -53,7 +53,8 @@ export function isAdminAuthenticated(request: NextRequest): boolean {
     return false;
   }
   
-  return validateSession(token);
+  const isValid = validateSession(token);
+  return isValid;
 }
 
 export function requireAdminAuth(request: NextRequest): NextResponse | null {
