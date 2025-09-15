@@ -47,10 +47,6 @@ externalPort = 80
 localPort = 37237
 externalPort = 3000
 
-[[ports]]
-localPort = 38795
-externalPort = 3001
-
 [deployment]
 run = ["npm", "start"]
 deploymentTarget = "autoscale"
