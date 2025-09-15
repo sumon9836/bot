@@ -4,10 +4,18 @@ import { useState, useEffect } from 'react';
 import { useToast } from '../../hooks/useToast';
 import { ToastContainer } from '../../components/Toast';
 import { Loader } from '../../components/Loader';
+import { useSessions } from '../../hooks/useSessions';
 
 interface BlockedUser {
   number: string;
   blockedAt?: string;
+}
+
+interface DashboardStats {
+  totalSessions: number;
+  blockedUsers: number;
+  activeConnections: number;
+  serverStatus: 'online' | 'offline' | 'error';
 }
 
 export default function AdminDashboard() {
@@ -15,7 +23,35 @@ export default function AdminDashboard() {
   const [blockedUsers, setBlockedUsers] = useState<BlockedUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [stats, setStats] = useState<DashboardStats>({
+    totalSessions: 0,
+    blockedUsers: 0,
+    activeConnections: 0,
+    serverStatus: 'online'
+  });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentTime, setCurrentTime] = useState(new Date());
   const { toasts, showToast, removeToast } = useToast();
+  const { sessions, sessionsCount, refreshSessions } = useSessions({ showToast, autoRefresh: true });
+
+  // Update current time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Update stats when sessions or blocked users change
+  useEffect(() => {
+    setStats(prev => ({
+      ...prev,
+      totalSessions: sessionsCount,
+      blockedUsers: blockedUsers.length,
+      activeConnections: sessionsCount,
+      serverStatus: 'online'
+    }));
+  }, [sessionsCount, blockedUsers.length]);
 
   // Check authentication
   useEffect(() => {
@@ -177,6 +213,74 @@ export default function AdminDashboard() {
       </header>
 
       <main className="main-content">
+        {/* Dashboard Stats */}
+        <section className="stats-grid">
+          <div className="stat-card">
+            <div className="stat-icon">
+              <i className="fas fa-users" style={{color: 'var(--blue-primary)'}}></i>
+            </div>
+            <div className="stat-content">
+              <h3>{stats.totalSessions}</h3>
+              <p>Active Sessions</p>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon">
+              <i className="fas fa-ban" style={{color: 'var(--pink-primary)'}}></i>
+            </div>
+            <div className="stat-content">
+              <h3>{stats.blockedUsers}</h3>
+              <p>Blocked Users</p>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon">
+              <i className="fas fa-signal" style={{color: 'var(--green-primary, #10b981)'}}></i>
+            </div>
+            <div className="stat-content">
+              <h3>{stats.activeConnections}</h3>
+              <p>Connections</p>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon">
+              <i className="fas fa-server" style={{color: stats.serverStatus === 'online' ? 'var(--green-primary, #10b981)' : 'var(--red-primary, #ef4444)'}}></i>
+            </div>
+            <div className="stat-content">
+              <h3 style={{textTransform: 'capitalize', color: stats.serverStatus === 'online' ? 'var(--green-primary, #10b981)' : 'var(--red-primary, #ef4444)'}}>{stats.serverStatus}</h3>
+              <p>Server Status</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Quick Actions */}
+        <section className="card">
+          <div className="card-header">
+            <h2><i className="fas fa-tachometer-alt"></i> Quick Actions</h2>
+            <p>Server Time: {currentTime.toLocaleTimeString()}</p>
+          </div>
+          <div className="card-content">
+            <div className="quick-actions">
+              <button className="btn btn-info" onClick={refreshSessions}>
+                <i className="fas fa-sync-alt"></i>
+                Refresh Sessions
+              </button>
+              <button className="btn btn-primary" onClick={loadBlockedUsers}>
+                <i className="fas fa-shield-alt"></i>
+                Reload Blocklist
+              </button>
+              <button className="btn btn-warning" onClick={() => window.location.reload()}>
+                <i className="fas fa-redo"></i>
+                Full Refresh
+              </button>
+              <a href="/" className="btn btn-secondary">
+                <i className="fas fa-home"></i>
+                Main Dashboard
+              </a>
+            </div>
+          </div>
+        </section>
+
         {/* Block Management Section */}
         <section className="card">
           <div className="card-header">
