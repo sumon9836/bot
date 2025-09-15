@@ -30,15 +30,20 @@ export default function AdminDashboard() {
     serverStatus: 'online'
   });
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
+  const [mounted, setMounted] = useState(false);
   const { toasts, showToast, removeToast } = useToast();
   const { sessions, sessionsCount, refreshSessions } = useSessions({ showToast, autoRefresh: true });
 
-  // Update current time every second
+  // Prevent hydration issues by only showing time after mount
   useEffect(() => {
+    setMounted(true);
+    setCurrentTime(new Date());
+    
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
+    
     return () => clearInterval(timer);
   }, []);
 
@@ -257,7 +262,7 @@ export default function AdminDashboard() {
         <section className="card">
           <div className="card-header">
             <h2><i className="fas fa-tachometer-alt"></i> Quick Actions</h2>
-            <p>Server Time: {currentTime.toLocaleTimeString()}</p>
+            <p>Server Time: {mounted && currentTime ? currentTime.toLocaleTimeString() : '--:--:--'}</p>
           </div>
           <div className="card-content">
             <div className="quick-actions">
