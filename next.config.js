@@ -18,7 +18,7 @@ const nextConfig = {
         headers: [
           { key: 'Cache-Control', value: 'no-store, max-age=0' },
           // More restrictive CORS for production
-          { key: 'Access-Control-Allow-Origin', value: process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '*' },
+          { key: 'Access-Control-Allow-Origin', value: '*' },
           { key: 'Access-Control-Allow-Methods', value: 'GET, POST, PUT, DELETE, OPTIONS' },
           { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization, Cookie' },
           { key: 'Access-Control-Allow-Credentials', value: 'true' },
