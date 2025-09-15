@@ -31,17 +31,21 @@ args = "node dev-server.js"
 name = "WhatsApp Dashboard"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "webview"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
 
-[workflows.workflow.metadata]
-outputType = "webview"
-
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 37237
+externalPort = 3000
 
 [deployment]
 run = ["npm", "start"]
