@@ -21,7 +21,15 @@ export async function POST(request: NextRequest) {
     }
 
     const endpoint = `/block?number=${encodeURIComponent(number)}`;
-    return createProxy(request, endpoint, 'GET'); // Backend expects GET for block
+    const proxyResponse = await createProxy(request, endpoint, 'GET');
+    
+    // Ensure consistent response format for frontend
+    if (proxyResponse.status === 200) {
+      return Response.json({ success: true, message: 'User blocked successfully' });
+    } else {
+      const errorData = await proxyResponse.json();
+      return Response.json({ success: false, error: errorData.error || 'Failed to block user' }, { status: proxyResponse.status });
+    }
   } catch (error) {
     return Response.json(
       { success: false, error: 'Invalid request body' },
