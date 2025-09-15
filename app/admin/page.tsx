@@ -153,10 +153,19 @@ export default function AdminDashboard() {
     try {
       const response = await fetch(`/api/admin/${action}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
+        },
         credentials: 'include',
         body: JSON.stringify({ number })
       });
+
+      if (response.status === 401 || response.status === 403) {
+        showToast('Authentication Failed', 'Please log in again', 'error');
+        window.location.href = '/login';
+        return;
+      }
 
       const data = await response.json();
 
@@ -184,10 +193,19 @@ export default function AdminDashboard() {
     try {
       const response = await fetch('/api/admin/unblock', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
+        },
         credentials: 'include',
         body: JSON.stringify({ number })
       });
+
+      if (response.status === 401 || response.status === 403) {
+        showToast('Authentication Failed', 'Please log in again', 'error');
+        window.location.href = '/login';
+        return;
+      }
 
       const data = await response.json();
 

@@ -50,10 +50,13 @@ export function destroySession(token: string): void {
 export function isAdminAuthenticated(request: NextRequest): boolean {
   const token = request.cookies.get('admin_session')?.value;
   if (!token) {
+    console.log('No admin session token found');
     return false;
   }
   
+  console.log('Validating admin session token:', token.substring(0, 8) + '...');
   const isValid = validateSession(token);
+  console.log('Session validation result:', isValid);
   return isValid;
 }
 
