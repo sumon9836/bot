@@ -3,10 +3,14 @@ const nextConfig = {
   env: {
     BACKEND_URL: process.env.BACKEND_URL || 'http://tramway.proxy.rlwy.net:12332',
   },
-  // Allow all hosts for Replit proxy environment
+  // Replit and Vercel proxy configuration
   async rewrites() {
     return [];
   },
+  // Fix cross-origin issues for development
+  ...(process.env.NODE_ENV === 'development' ? {
+    crossOrigin: 'anonymous',
+  } : {}),
   async headers() {
     return [
       {

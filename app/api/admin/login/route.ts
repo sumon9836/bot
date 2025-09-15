@@ -24,9 +24,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate secure session token
-    const sessionToken = generateSecureToken();
-    createSession(sessionToken, 24); // 24 hours expiry
+    // Generate secure session token (JWT-like)
+    const sessionToken = generateSecureToken(); // Already includes 24 hours expiry
 
     // If password matches, set secure authentication cookie and return success
     const response = NextResponse.json(

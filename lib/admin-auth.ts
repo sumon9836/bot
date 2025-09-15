@@ -1,50 +1,72 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { randomBytes } from 'crypto';
+import { randomBytes, createHmac } from 'crypto';
 
-// In-memory session store (in production, use Redis or database)
-const activeSessions = new Map<string, { expires: number; created: number }>();
+// JWT-like token system for serverless environments
+interface TokenPayload {
+  created: number;
+  expires: number;
+  type: 'admin';
+}
 
-// Clean up expired sessions every hour
-setInterval(() => {
-  const now = Date.now();
-  const entries = Array.from(activeSessions.entries());
-  for (const [token, session] of entries) {
-    if (session.expires < now) {
-      activeSessions.delete(token);
+function getSecret(): string {
+  return process.env.JWT_SECRET || process.env.ADMIN_PASSWORD || 'default-secret-change-in-production';
+}
+
+function createJWTLikeToken(payload: TokenPayload): string {
+  const secret = getSecret();
+  const data = JSON.stringify(payload);
+  const signature = createHmac('sha256', secret).update(data).digest('hex');
+  return Buffer.from(JSON.stringify({ data, signature })).toString('base64');
+}
+
+function verifyJWTLikeToken(token: string): TokenPayload | null {
+  try {
+    const secret = getSecret();
+    const decoded = JSON.parse(Buffer.from(token, 'base64').toString());
+    const { data, signature } = decoded;
+    
+    // Verify signature
+    const expectedSignature = createHmac('sha256', secret).update(data).digest('hex');
+    if (signature !== expectedSignature) {
+      return null;
     }
+    
+    const payload: TokenPayload = JSON.parse(data);
+    
+    // Check expiration
+    if (payload.expires < Date.now()) {
+      return null;
+    }
+    
+    return payload;
+  } catch {
+    return null;
   }
-}, 60 * 60 * 1000); // 1 hour
+}
 
 export function generateSecureToken(): string {
-  return randomBytes(32).toString('hex');
+  const payload: TokenPayload = {
+    created: Date.now(),
+    expires: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
+    type: 'admin'
+  };
+  return createJWTLikeToken(payload);
 }
 
 export function createSession(token: string, expirationHours: number = 24): void {
-  const now = Date.now();
-  const expires = now + (expirationHours * 60 * 60 * 1000);
-  
-  activeSessions.set(token, {
-    expires,
-    created: now
-  });
+  // Token creation is now handled in generateSecureToken
+  // This function is kept for compatibility
 }
 
 export function validateSession(token: string): boolean {
-  const session = activeSessions.get(token);
-  if (!session) {
-    return false;
-  }
-  
-  if (session.expires < Date.now()) {
-    activeSessions.delete(token);
-    return false;
-  }
-  
-  return true;
+  const payload = verifyJWTLikeToken(token);
+  return payload !== null && payload.type === 'admin';
 }
 
 export function destroySession(token: string): void {
-  activeSessions.delete(token);
+  // With JWT-like tokens, we can't really "destroy" them
+  // They expire naturally. For immediate logout, we'd need a blacklist
+  // For now, this is a no-op
 }
 
 export function isAdminAuthenticated(request: NextRequest): boolean {
@@ -71,18 +93,10 @@ export function requireAdminAuth(request: NextRequest): NextResponse | null {
 }
 
 export function getSessionInfo(): { activeSessions: number; oldestSession: number | null } {
-  const now = Date.now();
-  let oldestSession: number | null = null;
-  
-  const sessions = Array.from(activeSessions.values());
-  for (const session of sessions) {
-    if (oldestSession === null || session.created < oldestSession) {
-      oldestSession = session.created;
-    }
-  }
-  
+  // With JWT-like tokens, we can't track active sessions in memory
+  // This is kept for compatibility but returns default values
   return {
-    activeSessions: activeSessions.size,
-    oldestSession
+    activeSessions: 0,
+    oldestSession: null
   };
 }

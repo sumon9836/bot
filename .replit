@@ -43,6 +43,14 @@ waitForPort = 5000
 localPort = 5000
 externalPort = 80
 
+[[ports]]
+localPort = 34431
+externalPort = 3000
+
+[[ports]]
+localPort = 42781
+externalPort = 3001
+
 [deployment]
 run = ["npm", "start"]
 deploymentTarget = "autoscale"
