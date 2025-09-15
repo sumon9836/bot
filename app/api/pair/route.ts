@@ -1,22 +1,17 @@
 import { NextRequest } from 'next/server';
 import { createProxy } from '../../../lib/proxy';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://tramway.proxy.rlwy.net:12332';
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
-// Internal function to check if a number is blocked
-async function isNumberBlocked(number: string): Promise<boolean> {
+// Internal function to check if a number is blocked using createProxy
+async function isNumberBlocked(number: string, request: NextRequest): Promise<boolean> {
   try {
     // Clean the phone number for comparison
     const cleanNumber = number.replace(/[^0-9]/g, '');
 
-    // Fetch blocklist from backend internally
-    const response = await fetch(`${BACKEND_URL}/blocklist`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      cache: 'no-store',
-    });
+    // Use createProxy to fetch blocklist for consistent HTTPS validation
+    const response = await createProxy(request, '/blocklist', 'GET');
 
     if (!response.ok) {
       // If we can't check blocklist, allow the attempt (backend will handle it)
@@ -50,7 +45,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Check if number is blocked before forwarding to backend
-  const isBlocked = await isNumberBlocked(number);
+  const isBlocked = await isNumberBlocked(number, request);
   if (isBlocked) {
     return Response.json(
       { success: false, error: 'This number is banned from using the service' },
@@ -58,34 +53,9 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  try {
-    const response = await fetch(`${BACKEND_URL}/pair?number=${encodeURIComponent(number)}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      return Response.json(
-        { success: false, error: result.error || 'Failed to get pairing code' },
-        { status: response.status }
-      );
-    }
-
-    return Response.json({
-      success: true,
-      ...result
-    });
-  } catch (error) {
-    console.error('Pair API error:', error);
-    return Response.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
+  // Use createProxy for consistent HTTPS validation and error handling
+  const endpoint = `/pair?number=${encodeURIComponent(number)}`;
+  return createProxy(request, endpoint, 'GET');
 }
 
 export async function POST(request: NextRequest) {
@@ -101,7 +71,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if number is blocked before forwarding to backend
-    const isBlocked = await isNumberBlocked(number);
+    const isBlocked = await isNumberBlocked(number, request);
     if (isBlocked) {
       return Response.json(
         { success: false, error: 'This number is banned from using the service' },
@@ -109,34 +79,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    try {
-      const response = await fetch(`${BACKEND_URL}/pair?number=${encodeURIComponent(number)}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        return Response.json(
-          { success: false, error: result.error || 'Failed to get pairing code' },
-          { status: response.status }
-        );
-      }
-
-      return Response.json({
-        success: true,
-        ...result
-      });
-    } catch (error) {
-      console.error('Pair API error:', error);
-      return Response.json(
-        { success: false, error: 'Internal server error' },
-        { status: 500 }
-      );
-    }
+    // Use createProxy for consistent HTTPS validation and error handling
+    const endpoint = `/pair?number=${encodeURIComponent(number)}`;
+    return createProxy(request, endpoint, 'GET'); // Backend expects GET for pair operation
   } catch (error) {
     return Response.json(
       { success: false, error: 'Invalid request body' },

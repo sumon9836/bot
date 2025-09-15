@@ -1,7 +1,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
+import { createProxy } from '../../../lib/proxy';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://tramway.proxy.rlwy.net:12332';
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,28 +17,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Send to backend
-    const response = await fetch(`${BACKEND_URL}/pair-with-code`, {
+    // Use createProxy for consistent HTTPS validation and error handling
+    const tempRequest = new Request(request.url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ number, code }),
+      headers: request.headers,
+      body: JSON.stringify({ number, code })
     });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      return NextResponse.json(
-        { success: false, error: result.error || 'Failed to pair device' },
-        { status: response.status }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      ...result
-    });
+    
+    return createProxy(tempRequest as NextRequest, '/pair-with-code', 'POST');
 
   } catch (error) {
     console.error('Pair with code error:', error);

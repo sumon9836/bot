@@ -1,5 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Production validation - check environment variable directly before applying defaults
+if (process.env.NODE_ENV === 'production') {
+  const envBackendUrl = process.env.BACKEND_URL;
+  
+  if (!envBackendUrl) {
+    throw new Error('BACKEND_URL environment variable is required in production environment');
+  }
+  
+  if (!envBackendUrl.startsWith('https://')) {
+    throw new Error('BACKEND_URL must use HTTPS in production environment for security');
+  }
+}
+
 const BACKEND_URL = process.env.BACKEND_URL || 'http://tramway.proxy.rlwy.net:12332';
 
 export async function createProxy(
@@ -33,6 +46,8 @@ export async function createProxy(
       headers,
       body,
       cache: 'no-store',
+      // Add timeout for better error handling
+      signal: AbortSignal.timeout(25000),
     });
 
     const responseText = await response.text();
@@ -68,11 +83,13 @@ export async function createProxy(
 
   } catch (error) {
     console.error('Proxy error:', error);
+    console.error('Backend URL:', BACKEND_URL);
+    console.error('Full URL:', `${BACKEND_URL}${endpoint}`);
     return NextResponse.json(
       { 
         success: false, 
         error: 'Network error',
-        message: 'Failed to connect to backend server'
+        message: `Failed to connect to backend server: ${error instanceof Error ? error.message : 'Unknown error'}`
       },
       { 
         status: 500,

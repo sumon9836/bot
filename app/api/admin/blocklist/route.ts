@@ -2,6 +2,9 @@ import { NextRequest } from 'next/server';
 import { createProxy } from '../../../../lib/proxy';
 import { requireAdminAuth } from '../../../../lib/admin-auth';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function GET(request: NextRequest) {
   // Check admin authentication
   const authError = requireAdminAuth(request);
