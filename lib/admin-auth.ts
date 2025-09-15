@@ -9,7 +9,15 @@ interface TokenPayload {
 }
 
 function getSecret(): string {
-  return process.env.JWT_SECRET || process.env.ADMIN_PASSWORD || 'default-secret-change-in-production';
+  // For production, require JWT_SECRET to be set
+  if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET environment variable is required for production');
+    }
+    return process.env.JWT_SECRET;
+  }
+  // For development, fallback to ADMIN_PASSWORD or default
+  return process.env.JWT_SECRET || process.env.ADMIN_PASSWORD || 'dev-secret-not-for-production';
 }
 
 function createJWTLikeToken(payload: TokenPayload): string {

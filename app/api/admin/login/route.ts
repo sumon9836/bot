@@ -34,10 +34,11 @@ export async function POST(request: NextRequest) {
     );
 
     // Set secure session cookie
+    const isProduction = !!(process.env.VERCEL || process.env.NODE_ENV === 'production');
     response.cookies.set('admin_session', sessionToken, {
       httpOnly: true,
-      secure: false, // Set to false for development
-      sameSite: 'lax', // Changed to lax for better compatibility
+      secure: isProduction, // Secure cookies for production (HTTPS)
+      sameSite: 'lax',
       maxAge: 24 * 60 * 60, // 24 hours
       path: '/'
     });

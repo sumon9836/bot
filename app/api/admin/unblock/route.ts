@@ -27,7 +27,12 @@ export async function POST(request: NextRequest) {
     if (proxyResponse.status === 200) {
       return Response.json({ success: true, message: 'User unblocked successfully' });
     } else {
-      const errorData = await proxyResponse.json();
+      let errorData;
+      try {
+        errorData = await proxyResponse.json();
+      } catch {
+        errorData = { error: 'Backend service error' };
+      }
       return Response.json({ success: false, error: errorData.error || 'Failed to unblock user' }, { status: proxyResponse.status });
     }
   } catch (error) {
