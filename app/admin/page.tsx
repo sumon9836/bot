@@ -289,8 +289,10 @@ export default function AdminDashboard() {
         {/* Block Management Section */}
         <section className="card">
           <div className="card-header">
-            <h2><i className="fas fa-ban"></i> Block Management</h2>
-            <p>Block or unblock users from using the bot</p>
+            <div>
+              <h2><i className="fas fa-ban"></i> Block Management</h2>
+              <p>Block or unblock users from using the bot</p>
+            </div>
           </div>
           <div className="card-content">
             <form className="form" onSubmit={(e) => e.preventDefault()}>
@@ -304,12 +306,12 @@ export default function AdminDashboard() {
                   id="blockNumber"
                   value={blockNumber}
                   onChange={(e) => setBlockNumber(e.target.value.replace(/\D/g, ''))}
-                  placeholder="917003816486" 
+                  placeholder="Enter phone number (e.g., 917003816486)" 
                   maxLength={15}
                   pattern="[0-9]{10,15}"
                   required
                 />
-                <small>Enter phone number without + or spaces</small>
+                <small>Enter phone number without country code prefix (+) or spaces</small>
               </div>
               <div className="form-actions">
                 <button 
@@ -319,7 +321,7 @@ export default function AdminDashboard() {
                   disabled={isSubmitting}
                 >
                   <i className="fas fa-ban"></i>
-                  {isSubmitting ? 'Processing...' : 'Delete & Block User'}
+                  {isSubmitting ? 'Processing...' : 'Block User'}
                 </button>
                 <button 
                   type="button"
@@ -327,8 +329,8 @@ export default function AdminDashboard() {
                   onClick={() => handleAction('delete')}
                   disabled={isSubmitting}
                 >
-                  <i className="fas fa-trash"></i>
-                  Delete/Logout
+                  <i className="fas fa-sign-out-alt"></i>
+                  Force Logout
                 </button>
                 <button 
                   type="button"
@@ -336,7 +338,7 @@ export default function AdminDashboard() {
                   onClick={() => handleAction('unblock')}
                   disabled={isSubmitting}
                 >
-                  <i className="fas fa-check-circle"></i>
+                  <i className="fas fa-unlock"></i>
                   Unblock User
                 </button>
               </div>
@@ -347,9 +349,11 @@ export default function AdminDashboard() {
         {/* Blocked Users List */}
         <section className="card">
           <div className="card-header">
-            <h2><i className="fas fa-list"></i> Blocked Users</h2>
+            <div>
+              <h2><i className="fas fa-list"></i> Blocked Users</h2>
+            </div>
             <div className="card-actions">
-              <button onClick={loadBlockedUsers} className="btn btn-primary">
+              <button onClick={loadBlockedUsers} className="btn btn-info">
                 <i className="fas fa-sync-alt"></i>
                 Refresh
               </button>
