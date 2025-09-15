@@ -274,7 +274,7 @@ body::after {
 }
 
 .header h1 {
-    font-size: 1.4rem;
+    font-size: 2rem;
     font-weight: 700;
     letter-spacing: 0.5px;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(0, 212, 255, 0.8));
@@ -290,13 +290,13 @@ body::after {
 
 @media (max-width: 768px) {
     .header h1 {
-        font-size: 1.2rem;
+        font-size: 1.8rem;
     }
 }
 
 @media (max-width: 480px) {
     .header h1 {
-        font-size: 1rem;
+        font-size: 1.5rem;
     }
 }
 
@@ -316,7 +316,7 @@ body::after {
 }
 
 .header-subtitle {
-    font-size: 1rem;
+    font-size: 1.3rem;
     color: rgba(125, 211, 252, 0.7);
     font-weight: 500;
     opacity: 0.8;
@@ -325,7 +325,7 @@ body::after {
 }
 
 .developer-credit {
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     color: rgba(148, 163, 184, 0.6);
     font-weight: 400;
     opacity: 0.6;
