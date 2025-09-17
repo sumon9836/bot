@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface BannedUser {
   number: string;
@@ -8,83 +9,52 @@ interface BannedUser {
 }
 
 interface UseBanlistOptions {
-  pollingInterval?: number;
-  autoRefresh?: boolean;
   showToast?: (title: string, message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
 export function useBanlist(options: UseBanlistOptions = {}) {
-  const { pollingInterval = 30000, autoRefresh = true, showToast } = options;
+  const { showToast } = options;
   const [bannedUsers, setBannedUsers] = useState<BannedUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const mountedRef = useRef(true);
 
-  const fetchBanlist = useCallback(async () => {
+  const fetchBannedUsers = useCallback(async () => {
     try {
       const response = await fetch('/api/blocklist');
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
       const data = await response.json();
-
-      if (!mountedRef.current) return;
-
+      
       if (data.success) {
         setBannedUsers(data.blocklist || []);
         setError(null);
       } else {
-        setError(data.error || 'Failed to fetch banned users');
-        showToast?.('Error', data.error || 'Failed to fetch banned users', 'error');
+        throw new Error(data.error || 'Failed to fetch banned users');
       }
     } catch (err: any) {
-      if (!mountedRef.current) return;
-
-      const errorMessage = err.message || 'Network error occurred';
-      setError(errorMessage);
-      showToast?.('Network Error', errorMessage, 'error');
+      console.error('Banlist fetch error:', err);
+      setError(err.message || 'Network error');
+      showToast?.('Error', 'Failed to fetch banned users', 'error');
+      setBannedUsers([]);
     } finally {
-      if (mountedRef.current) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
   }, [showToast]);
 
-  const refreshBanlist = useCallback(() => {
+  const refresh = useCallback(() => {
     setLoading(true);
-    fetchBanlist();
-  }, [fetchBanlist]);
+    fetchBannedUsers();
+  }, [fetchBannedUsers]);
 
-  // Initial fetch
   useEffect(() => {
-    fetchBanlist();
-  }, [fetchBanlist]);
-
-  // Auto refresh polling
-  useEffect(() => {
-    if (autoRefresh && pollingInterval > 0) {
-      intervalRef.current = setInterval(fetchBanlist, pollingInterval);
-    }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [autoRefresh, pollingInterval, fetchBanlist]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      mountedRef.current = false;
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, []);
+    fetchBannedUsers();
+  }, [fetchBannedUsers]);
 
   return {
     bannedUsers,
     loading,
     error,
-    refreshBanlist
+    refresh
   };
 }
