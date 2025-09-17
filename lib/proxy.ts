@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 
 // Production validation - check environment variable directly before applying defaults
@@ -13,98 +14,85 @@ if (process.env.NODE_ENV === 'production') {
   }
 }
 
+// Backend URL configuration with fallback
 const BACKEND_URL = process.env.BACKEND_URL || 'http://interchange.proxy.rlwy.net:24084';
 
-export async function createProxy(
-  request: NextRequest,
-  endpoint: string,
-  method: string = 'GET'
-): Promise<NextResponse> {
+export async function createProxy(request: NextRequest, endpoint: string, method: string = 'GET') {
   try {
     const url = `${BACKEND_URL}${endpoint}`;
-    
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
+    console.log(`Proxying ${method} request to: ${url}`);
 
-    // Forward cookies for authentication
-    const cookies = request.headers.get('cookie');
-    if (cookies) {
-      headers['Cookie'] = cookies;
-    }
-
-    // Prepare request body
+    // Get request body for POST/PUT requests
     let body: string | undefined;
-    if (method !== 'GET' && request.body) {
-      body = await request.text();
+    if (method !== 'GET' && method !== 'HEAD') {
+      try {
+        body = await request.text();
+      } catch (err) {
+        console.warn('Could not read request body:', err);
+      }
     }
 
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`Proxying ${method} request to: ${url}`);
+    // Copy headers from original request
+    const headers: Record<string, string> = {};
+    request.headers.forEach((value, key) => {
+      // Skip headers that shouldn't be forwarded
+      if (!['host', 'connection', 'transfer-encoding', 'content-length'].includes(key.toLowerCase())) {
+        headers[key] = value;
+      }
+    });
+
+    // Set content type for POST requests
+    if (body && !headers['content-type']) {
+      headers['content-type'] = 'application/json';
     }
 
     const response = await fetch(url, {
       method,
       headers,
       body,
-      cache: 'no-store',
-      // Add timeout for better error handling
-      signal: AbortSignal.timeout(25000),
     });
 
-    const responseText = await response.text();
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`Backend response status: ${response.status}`);
-    }
+    console.log(`Backend response status: ${response.status}`);
 
-    // Try to parse as JSON, fallback to text
-    let responseData: any;
+    // Get response data
+    const responseText = await response.text();
+    let responseData;
+
     try {
       responseData = JSON.parse(responseText);
-    } catch {
+    } catch (err) {
+      // If not valid JSON, treat as plain text
       responseData = responseText;
     }
 
-    // Forward response with appropriate headers
-    const responseHeaders: HeadersInit = {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-store, max-age=0',
-    };
+    console.log('Backend response data:', responseData);
 
-    // Forward Set-Cookie headers for authentication
-    const setCookie = response.headers.get('set-cookie');
-    if (setCookie) {
-      responseHeaders['Set-Cookie'] = setCookie;
-    }
-
-    return NextResponse.json(
-      responseData,
-      { 
-        status: response.status,
-        headers: responseHeaders
-      }
-    );
-
-  } catch (error) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.error('Proxy error:', error);
-      console.error('Backend URL:', BACKEND_URL);
-      console.error('Full URL:', `${BACKEND_URL}${endpoint}`);
-    } else {
-      console.error('Proxy error:', error instanceof Error ? error.message : 'Unknown error');
-    }
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Network error',
-        message: `Failed to connect to backend server: ${error instanceof Error ? error.message : 'Unknown error'}`
+    // Return the response
+    return NextResponse.json(responseData, {
+      status: response.status,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       },
-      { 
+    });
+
+  } catch (error: any) {
+    console.error('Proxy error:', error);
+    
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message || 'Proxy request failed',
+        details: error.toString()
+      },
+      {
         status: 500,
         headers: {
           'Content-Type': 'application/json',
-          'Cache-Control': 'no-store, max-age=0'
-        }
+          'Access-Control-Allow-Origin': '*',
+        },
       }
     );
   }

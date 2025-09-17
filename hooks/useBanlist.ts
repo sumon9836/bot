@@ -26,15 +26,29 @@ export function useBanlist(options: UseBanlistOptions = {}) {
       }
 
       const data = await response.json();
+      console.log('Banlist API response:', data);
       
       if (!mountedRef.current) return;
 
-      if (data.success) {
-        setBannedUsers(data.data || {});
-        setError(null);
-      } else {
-        throw new Error(data.error || 'Failed to fetch banlist');
+      // Handle different response formats
+      let banlistData: Record<string, any> = {};
+
+      if (data && typeof data === 'object') {
+        if (data.success === true) {
+          banlistData = data.data || {};
+        } else if (data.success === false) {
+          throw new Error(data.error || 'Failed to fetch banlist');
+        } else if (typeof data === 'object' && !data.hasOwnProperty('success')) {
+          // Direct object response
+          banlistData = data;
+        } else {
+          console.warn('Unexpected banlist data format:', data);
+          banlistData = {};
+        }
       }
+
+      setBannedUsers(banlistData);
+      setError(null);
     } catch (err: any) {
       if (!mountedRef.current) return;
       

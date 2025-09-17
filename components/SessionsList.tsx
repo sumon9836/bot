@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useSessions } from '../hooks/useSessions';
@@ -19,17 +20,28 @@ interface SessionCardProps {
 }
 
 function SessionCard({ session }: SessionCardProps) {
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'Unknown';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Unknown';
+      return date.toLocaleString();
+    } catch (err) {
+      return 'Unknown';
+    }
+  };
+
   return (
     <div className="session-card-transparent">
       <div className="session-info">
-        <div className="session-number">+{session.number}</div>
+        <div className="session-number">+{session.number || session.id}</div>
         <div className="session-details">
           {session.status && <span className="session-status">{session.status}</span>}
           {session.platform && <span className="session-platform">{session.platform}</span>}
         </div>
-        {session.lastSeen && (
-          <div className="session-last-seen">Last seen: {new Date(session.lastSeen).toLocaleString()}</div>
-        )}
+        <div className="session-last-seen">
+          Last seen: {formatDate(session.lastSeen)}
+        </div>
       </div>
     </div>
   );
@@ -89,7 +101,7 @@ export function SessionsList({ showToast }: SessionsListProps) {
         ) : (
           <div className="sessions-grid">
             {sessions.map((session) => (
-              <SessionCard key={session.id} session={session} />
+              <SessionCard key={session.id || session.number} session={session} />
             ))}
           </div>
         )}

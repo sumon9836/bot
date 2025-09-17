@@ -16,11 +16,22 @@ interface BannedUserCardProps {
 }
 
 function BannedUserCard({ user }: BannedUserCardProps) {
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'Unknown';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Unknown';
+      return date.toLocaleDateString();
+    } catch (err) {
+      return 'Unknown';
+    }
+  };
+
   return (
     <div className="banned-user-card-compact">
       <div className="user-number">+{user.number}</div>
       <div className="blocked-date">
-        {user.blockedAt ? new Date(user.blockedAt).toLocaleDateString() : 'Unknown'}
+        {formatDate(user.blockedAt)}
       </div>
     </div>
   );
@@ -65,7 +76,7 @@ export function BannedUsersPanel({ showToast }: BannedUsersPanelProps) {
 
   const usersList = Object.keys(bannedUsers || {}).map(number => ({
     number,
-    blockedAt: bannedUsers[number]?.blockedAt
+    blockedAt: bannedUsers[number]?.blockedAt || bannedUsers[number]?.timestamp
   }));
 
   return (

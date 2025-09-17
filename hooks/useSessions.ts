@@ -27,15 +27,46 @@ export function useSessions(options: UseSessionsOptions = {}) {
       }
 
       const data = await response.json();
+      console.log('Sessions API response:', data);
       
       if (!mountedRef.current) return;
 
-      if (data.success && Array.isArray(data.data)) {
-        setSessions(data.data);
-        setError(null);
-      } else {
-        throw new Error(data.error || 'Invalid response format');
+      // Handle different response formats
+      let sessionsData: Session[] = [];
+
+      if (data && typeof data === 'object') {
+        if (data.success === true && Array.isArray(data.data)) {
+          sessionsData = data.data;
+        } else if (data.success === true && data.data && typeof data.data === 'object') {
+          // Convert object to array if needed
+          sessionsData = Object.keys(data.data).map(key => ({
+            id: key,
+            number: data.data[key].number || key,
+            status: data.data[key].status || 'active',
+            lastSeen: data.data[key].lastSeen || data.data[key].connectedAt,
+            platform: data.data[key].platform || data.data[key].deviceInfo,
+            user: data.data[key].user
+          }));
+        } else if (Array.isArray(data)) {
+          sessionsData = data;
+        } else if (typeof data === 'object' && !data.success) {
+          // Direct object response - convert to array
+          sessionsData = Object.keys(data).map(key => ({
+            id: key,
+            number: data[key].number || key,
+            status: data[key].status || 'active',
+            lastSeen: data[key].lastSeen || data[key].connectedAt,
+            platform: data[key].platform || data[key].deviceInfo,
+            user: data[key].user
+          }));
+        } else {
+          console.warn('Unexpected sessions data format:', data);
+          sessionsData = [];
+        }
       }
+
+      setSessions(sessionsData);
+      setError(null);
     } catch (err: any) {
       if (!mountedRef.current) return;
       
