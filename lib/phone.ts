@@ -51,10 +51,10 @@ export function normalizeToE164(phoneNumber: string): PhoneValidation {
     return { valid: false, error: `Phone number too long for ${countryInfo.name}` };
   }
 
-  return { 
-    valid: true, 
-    e164, 
-    countryCode, 
+  return {
+    valid: true,
+    e164,
+    countryCode,
     nationalNumber,
     country: countryInfo.name,
     detectedCountry: `${countryInfo.flag} ${countryInfo.name} (+${countryCode})`
@@ -69,64 +69,7 @@ export function validatePhoneNumber(number: string): boolean {
   const phoneRegex = /^[0-9]{10,15}$/;
   return phoneRegex.test(number.trim());
 }
-import { countries, Country } from './countries';
 
 export function cleanPhoneNumber(phone: string): string {
   return phone.replace(/[^0-9]/g, '');
-}
-
-export function formatPhoneNumber(phone: string, country?: Country): string {
-  const clean = cleanPhoneNumber(phone);
-  
-  if (country) {
-    if (clean.startsWith(country.dialCode)) {
-      return `${country.code}${clean.substring(country.dialCode.length)}`;
-    }
-    return `${country.code}${clean}`;
-  }
-  
-  return clean;
-}
-
-export function validatePhoneNumber(phone: string): boolean {
-  const clean = cleanPhoneNumber(phone);
-  
-  // Basic validation: should be at least 7 digits and at most 15 digits
-  if (clean.length < 7 || clean.length > 15) {
-    return false;
-  }
-  
-  // Check if it starts with a valid country code
-  const country = detectCountryByPhone(clean);
-  return country !== null;
-}
-
-export function detectCountryByPhone(phone: string): Country | null {
-  const clean = cleanPhoneNumber(phone);
-  
-  if (clean.length < 1) {
-    return null;
-  }
-
-  // Sort by dial code length (longest first) to match more specific codes first
-  const sortedCountries = [...countries].sort((a, b) => b.dialCode.length - a.dialCode.length);
-  
-  for (const country of sortedCountries) {
-    if (clean.startsWith(country.dialCode)) {
-      return country;
-    }
-  }
-
-  return null;
-}
-
-export function getPhoneNumberWithoutCountryCode(phone: string): string {
-  const clean = cleanPhoneNumber(phone);
-  const country = detectCountryByPhone(clean);
-  
-  if (country) {
-    return clean.substring(country.dialCode.length);
-  }
-  
-  return clean;
 }
