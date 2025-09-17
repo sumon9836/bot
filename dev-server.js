@@ -3,12 +3,14 @@ const { createServer } = require('http');
 const { parse } = require('url');
 const next = require('next');
 
-const dev = process.env.NODE_ENV !== 'production';
+const dev = true;
 const hostname = '0.0.0.0';
-const port = parseInt(process.env.PORT || '5000', 10);
+const port = 5000;
 
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
+
+console.log('Starting development server...');
 
 app.prepare().then(() => {
   createServer(async (req, res) => {
@@ -22,10 +24,10 @@ app.prepare().then(() => {
     }
   })
   .once('error', (err) => {
-    console.error(err);
+    console.error('Server error:', err);
     process.exit(1);
   })
-  .listen(port, () => {
-    console.log(`> Ready on http://${hostname}:${port}`);
+  .listen(port, hostname, () => {
+    console.log(`> Development server ready on http://${hostname}:${port}`);
   });
 });

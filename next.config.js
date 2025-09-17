@@ -24,6 +24,8 @@ const nextConfig = {
   devIndicators: {
     buildActivity: false,
   },
+  // Enable standalone output for better deployment
+  output: 'standalone',
   // Disable Next.js integrated ESLint to use ESLint 9 flat config
   eslint: {
     ignoreDuringBuilds: true,
