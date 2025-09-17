@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useSessions } from '../hooks/useSessions';
@@ -22,28 +23,37 @@ function SessionCard({ session }: SessionCardProps) {
   return (
     <div className="session-card-transparent">
       <div className="session-header">
-        <div className="session-number">+{session.number}</div>
-        <div className={`session-status ${session.status?.toLowerCase() || 'unknown'}`}>
-          {session.status || 'Unknown'}
+        <div className="session-info">
+          <div className="session-number">+{session.number}</div>
+          <div className="session-status">
+            <span className={`status-indicator ${session.status?.toLowerCase() || 'offline'}`}></span>
+            {session.status || 'Offline'}
+          </div>
+        </div>
+        <div className="session-actions">
+          <button className="btn btn-danger btn-sm" title="Delete Session">
+            <i className="fas fa-trash"></i>
+          </button>
         </div>
       </div>
+      
       <div className="session-details">
-        {session.user && (
-          <div className="session-user">
-            <i className="fas fa-user"></i>
-            <span>{session.user}</span>
-          </div>
-        )}
         {session.platform && (
-          <div className="session-platform">
+          <div className="detail-item">
             <i className="fas fa-mobile-alt"></i>
             <span>{session.platform}</span>
           </div>
         )}
         {session.lastSeen && (
-          <div className="session-last-seen">
+          <div className="detail-item">
             <i className="fas fa-clock"></i>
-            <span>{new Date(session.lastSeen).toLocaleString()}</span>
+            <span>Last seen: {new Date(session.lastSeen).toLocaleString()}</span>
+          </div>
+        )}
+        {session.user && (
+          <div className="detail-item">
+            <i className="fas fa-user"></i>
+            <span>{session.user}</span>
           </div>
         )}
       </div>
@@ -52,70 +62,75 @@ function SessionCard({ session }: SessionCardProps) {
 }
 
 export function SessionsList({ showToast }: SessionsListProps) {
-  const { sessions, loading, error, refreshSessions } = useSessions();
-  const sessionsCount = sessions.length;
+  const { sessions, loading, error, refreshSessions } = useSessions({
+    showToast,
+    autoRefresh: true,
+    pollingInterval: 30000
+  });
 
   if (loading) {
     return (
-      <section className="card sessions-section">
+      <div className="card">
         <div className="card-header">
-          <h2><i className="fas fa-users"></i> Active Sessions</h2>
+          <i className="fas fa-list card-icon"></i>
+          <h2>Active Sessions</h2>
         </div>
         <div className="card-content">
           <Loader message="Loading sessions..." />
         </div>
-      </section>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <section className="card sessions-section">
+      <div className="card">
         <div className="card-header">
-          <h2><i className="fas fa-users"></i> Active Sessions</h2>
+          <i className="fas fa-list card-icon"></i>
+          <h2>Active Sessions</h2>
         </div>
         <div className="card-content">
           <div className="error-state">
+            <i className="fas fa-exclamation-triangle"></i>
             <p>Failed to load sessions: {error}</p>
             <button onClick={refreshSessions} className="btn btn-primary">
+              <i className="fas fa-redo"></i>
               Retry
             </button>
           </div>
         </div>
-      </section>
+      </div>
     );
   }
 
   return (
-    <section className="card sessions-section">
+    <div className="card">
       <div className="card-header">
-        <h2><i className="fas fa-users"></i> Active Sessions</h2>
-        <div className="card-actions">
-          <div className="session-count">
-            {sessionsCount} session{sessionsCount !== 1 ? 's' : ''}
-          </div>
-        </div>
+        <i className="fas fa-list card-icon"></i>
+        <h2>Active Sessions</h2>
+        <button 
+          onClick={refreshSessions}
+          className="btn btn-secondary btn-sm"
+          title="Refresh Sessions"
+        >
+          <i className="fas fa-sync-alt"></i>
+        </button>
       </div>
       <div className="card-content">
-        {sessionsCount === 0 ? (
+        {sessions.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-icon">
-              <i className="fas fa-users"></i>
-            </div>
-            <h3>No Active Sessions</h3>
-            <p>No paired numbers found. Add a new number to get started.</p>
+            <i className="fas fa-inbox"></i>
+            <p>No active sessions found</p>
+            <small>Pair a phone number to create a new session</small>
           </div>
         ) : (
           <div className="sessions-grid">
-            {sessions.map(session => (
-              <SessionCard
-                key={session.id}
-                session={session}
-              />
+            {sessions.map((session) => (
+              <SessionCard key={session.id} session={session} />
             ))}
           </div>
         )}
       </div>
-    </section>
+    </div>
   );
 }

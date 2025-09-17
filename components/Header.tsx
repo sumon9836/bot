@@ -1,3 +1,4 @@
+
 'use client';
 
 interface HeaderProps {
@@ -10,22 +11,31 @@ export function Header({ onRefresh, showRefreshButton = false }: HeaderProps) {
     <header className="header">
       <div className="header-content">
         <div className="header-left">
-          <span className="header-icon">🤖</span>
+          <i className="fab fa-whatsapp header-icon"></i>
           <div>
             <h1>𝐊ąìʂҽղ-𝐌𝐃</h1>
-            <div className="header-subtitle">Bot Dashboard</div>
-            <div className="developer-credit">by Sumon Developer</div>
+            <p className="header-subtitle">Advanced Bot Management</p>
+            <p className="developer-credit">Powered by Sumon Developer</p>
           </div>
         </div>
         <div className="header-right">
+          <a 
+            href="https://chat.whatsapp.com/CQyxExEBMGvEnkA32zqbNY" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="btn btn-support" 
+            title="Join Support Group"
+          >
+            <i className="fab fa-whatsapp"></i>
+            <span className="support-text">Support</span>
+          </a>
           {showRefreshButton && onRefresh && (
             <button 
               onClick={onRefresh}
-              className="btn btn-secondary btn-sm"
-              title="Refresh Dashboard"
+              className="btn btn-secondary" 
+              title="Refresh Sessions"
             >
               <i className="fas fa-sync-alt"></i>
-              Refresh
             </button>
           )}
         </div>

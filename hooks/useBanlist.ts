@@ -1,7 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { BannedUser } from '../lib/types';
+
+interface BannedUser {
+  number: string;
+  blockedAt?: string;
+}
 
 interface UseBanlistOptions {
   pollingInterval?: number;
@@ -14,121 +18,73 @@ export function useBanlist(options: UseBanlistOptions = {}) {
   const [bannedUsers, setBannedUsers] = useState<BannedUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval>>();
-  const abortControllerRef = useRef<AbortController>();
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const mountedRef = useRef(true);
 
-  const fetchBanlist = useCallback(async (showLoadingState = true) => {
-    // Cancel previous request silently
-    if (abortControllerRef.current) {
-      // Just replace the controller, don't abort the old one
-    }
-
-    abortControllerRef.current = new AbortController();
-
-    if (showLoadingState) {
-      setLoading(true);
-    }
-    setError(null);
-
+  const fetchBanlist = useCallback(async () => {
     try {
-      const response = await fetch('/api/blocklist', {
-        signal: abortControllerRef.current.signal,
-        credentials: 'include',
-      });
+      const response = await fetch('/api/blocklist');
+      const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+      if (!mountedRef.current) return;
+
+      if (data.success) {
+        setBannedUsers(data.blocklist || []);
+        setError(null);
+      } else {
+        setError(data.error || 'Failed to fetch banned users');
+        showToast?.('Error', data.error || 'Failed to fetch banned users', 'error');
       }
+    } catch (err: any) {
+      if (!mountedRef.current) return;
 
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        setBannedUsers([]);
-        return;
-      }
-
-      const responseText = await response.text();
-
-      // Check if response starts with HTML
-      if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<html')) {
-        setBannedUsers([]);
-        return;
-      }
-
-      const data = JSON.parse(responseText);
-
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      // Handle different response formats
-      let userList: BannedUser[] = [];
-
-      if (Array.isArray(data)) {
-        userList = data.map(user => ({
-          number: typeof user === 'string' ? user : user.number,
-          blockedAt: user.blockedAt || user.timestamp
-        }));
-      } else if (data.data && Array.isArray(data.data)) {
-        userList = data.data.map((user: any) => ({
-          number: typeof user === 'string' ? user : user.number,
-          blockedAt: user.blockedAt || user.timestamp
-        }));
-      } else if (typeof data === 'object' && data !== null) {
-        // Convert object to array (for cases where banlist is returned as an object)
-        userList = Object.keys(data).map(number => ({
-          number,
-          blockedAt: data[number].blockedAt || data[number].timestamp || new Date().toISOString()
-        }));
-      }
-
-      setBannedUsers(userList);
-      setError(null);
-    } catch (err) {
-      if (err && (err as Error).name !== 'AbortError') {
-        // If it's a JSON parse error, show empty state instead of error
-        if ((err as Error).message.includes('Unexpected token') || (err as Error).message.includes('JSON')) {
-          setBannedUsers([]);
-        } else {
-          const errorMessage = 'Failed to fetch banlist';
-          setError(errorMessage);
-          if (showLoadingState) {
-            showToast?.('Failed to Load Banlist', errorMessage, 'error');
-          }
-        }
-      }
+      const errorMessage = err.message || 'Network error occurred';
+      setError(errorMessage);
+      showToast?.('Network Error', errorMessage, 'error');
     } finally {
-      setLoading(false);
+      if (mountedRef.current) {
+        setLoading(false);
+      }
     }
   }, [showToast]);
 
   const refreshBanlist = useCallback(() => {
-    fetchBanlist(true);
+    setLoading(true);
+    fetchBanlist();
   }, [fetchBanlist]);
 
+  // Initial fetch
   useEffect(() => {
-    fetchBanlist(true);
+    fetchBanlist();
+  }, [fetchBanlist]);
 
+  // Auto refresh polling
+  useEffect(() => {
     if (autoRefresh && pollingInterval > 0) {
-      intervalRef.current = setInterval(() => {
-        fetchBanlist(false); // Silent refresh
-      }, pollingInterval);
+      intervalRef.current = setInterval(fetchBanlist, pollingInterval);
     }
 
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
-        intervalRef.current = undefined;
       }
-      // Just clear the ref, don't call abort during cleanup to avoid React errors
-      abortControllerRef.current = undefined;
     };
-  }, [fetchBanlist, autoRefresh, pollingInterval]);
+  }, [autoRefresh, pollingInterval, fetchBanlist]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
 
   return {
     bannedUsers,
     loading,
     error,
-    refreshBanlist,
-    bannedCount: bannedUsers.length
+    refreshBanlist
   };
 }

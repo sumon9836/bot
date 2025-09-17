@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -20,7 +19,7 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { post } = useApi();
-  
+
   const {
     phoneNumber,
     detectedCountry,
@@ -67,7 +66,7 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
         document.execCommand('copy');
         document.body.removeChild(textArea);
       }
-      
+
       // Add visual feedback to copy button
       const copyButton = document.querySelector('.copy-button');
       if (copyButton) {
@@ -76,7 +75,7 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
           copyButton.classList.remove('copied');
         }, 600);
       }
-      
+
       showToast?.('Copied!', 'Pairing code copied to clipboard', 'success');
     } catch (err) {
       console.error('Copy failed:', err);
@@ -86,7 +85,7 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validation.valid) {
       showToast?.('Invalid Number', validationError || 'Please enter a valid phone number', 'error');
       return;
@@ -102,10 +101,10 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
         // Show pairing code or WhatsApp link
         const pairingData = response.data as PairingResponse;
         const pairCode = pairingData?.code || pairingData?.pairCode;
-        
+
         console.log('API Response:', response);
         console.log('Extracted pairing code:', pairCode);
-        
+
         // Always show the modal for successful pairing - even if no code
         setPairCodeData({
           code: pairCode,
@@ -113,13 +112,13 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
           link: pairingData?.link
         });
         setShowPairCode(true);
-        
+
         if (pairCode) {
           showToast?.('Success', `Pairing code: ${pairCode}`, 'success');
         } else {
           showToast?.('Success', 'Phone number paired successfully!', 'success');
         }
-        
+
         resetDetection();
         onSuccess?.(phoneNumber, pairCode);
       } else {
@@ -144,7 +143,7 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
     }
   };
 
-  
+
 
   return (
     <>
@@ -176,7 +175,7 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
                   pattern="^[\d\s-]{10,18}$"
                   title="Enter phone number with country code"
                 />
-                
+
                 {detectedCountry && (
                   <div className={`country-code-display ${hasCountry ? 'show' : ''} ${isComplete ? 'complete' : 'detected'} ${isFocused ? 'focused' : ''}`}>
                     <div className="country-badge">
@@ -195,7 +194,7 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
                 </div>
               )}
             </div>
-            
+
             <button 
               type="submit" 
               className="btn btn-primary"
@@ -218,8 +217,7 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
       {showPairCode && (
         <div className="pairing-modal-overlay">
           <div className="pairing-modal-container">
-            
-            
+
 
             {/* Success Message with animation */}
             <div className="success-banner">
@@ -250,7 +248,7 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
                   <i className="fas fa-key"></i>
                   <span>Your WhatsApp Pairing Code</span>
                 </div>
-                
+
                 <div className="code-display-container">
                   <div 
                     className="pairing-code-display"
@@ -267,11 +265,11 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
                       </span>
                     ))}
                   </div>
-                  
+
                   {/* Code glow effect */}
                   <div className="code-glow"></div>
                 </div>
-                
+
                 <div className="copy-actions">
                   <button
                     onClick={() => copyToClipboard(pairCodeData.code!)}
@@ -283,7 +281,7 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
                     </div>
                     <div className="button-shine"></div>
                   </button>
-                  
+
                   <p className="copy-hint">Click the code above or this button to copy</p>
                 </div>
               </div>
@@ -299,7 +297,7 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
               </div>
             )}
 
-            
+
 
             {/* Enhanced Step-by-Step Instructions */}
             <div className="instructions-section">
@@ -359,112 +357,7 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
         </div>
       )}
 
-      
+
     </>
-  );
-}
-'use client';
-
-import { useState } from 'react';
-import { useCountryDetection } from '../hooks/useCountryDetection';
-
-interface PairFormProps {
-  onSuccess: (number: string) => void;
-  showToast: (title: string, message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
-}
-
-export function PairForm({ onSuccess, showToast }: PairFormProps) {
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const { detectedCountry, formatPhoneNumber } = useCountryDetection(phoneNumber);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!phoneNumber.trim()) {
-      showToast('Error', 'Please enter a phone number', 'error');
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const response = await fetch('/api/pair', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ number: phoneNumber }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        onSuccess(phoneNumber);
-        setPhoneNumber('');
-      } else {
-        showToast('Error', data.error || 'Failed to pair phone number', 'error');
-      }
-    } catch (error) {
-      showToast('Error', 'Network error occurred', 'error');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <div className="card">
-      <div className="card-header">
-        <span className="card-icon">📱</span>
-        <h2>Pair Phone Number</h2>
-      </div>
-      
-      <form onSubmit={handleSubmit} className="action-form">
-        <div className="form-group">
-          <label htmlFor="phone">Phone Number</label>
-          <div className={`input-wrapper ${detectedCountry ? 'has-country-code' : ''}`}>
-            {detectedCountry && (
-              <div className="country-code-display show">
-                <div className="country-badge">
-                  <span className="country-flag">{detectedCountry.flag}</span>
-                  <span>{detectedCountry.code}</span>
-                </div>
-              </div>
-            )}
-            <input
-              type="tel"
-              id="phone"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              placeholder="Enter phone number"
-              disabled={isLoading}
-              className="form-input"
-            />
-            <span className="input-icon">📞</span>
-          </div>
-          <small className="form-help">
-            Enter your WhatsApp phone number with country code
-          </small>
-        </div>
-
-        <button 
-          type="submit" 
-          className="btn btn-primary"
-          disabled={isLoading || !phoneNumber.trim()}
-        >
-          {isLoading ? (
-            <>
-              <div className="spinner"></div>
-              Processing...
-            </>
-          ) : (
-            <>
-              <i className="fas fa-link"></i>
-              Pair Device
-            </>
-          )}
-        </button>
-      </form>
-    </div>
   );
 }

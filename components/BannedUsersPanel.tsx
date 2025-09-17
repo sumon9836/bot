@@ -22,87 +22,82 @@ function BannedUserCard({ user }: BannedUserCardProps) {
       <div className="blocked-date">
         {user.blockedAt ? new Date(user.blockedAt).toLocaleDateString() : 'Unknown'}
       </div>
+      <button className="unblock-btn" title="Unblock User">
+        <i className="fas fa-unlock"></i>
+      </button>
     </div>
   );
 }
 
 export function BannedUsersPanel({ showToast }: BannedUsersPanelProps) {
-  const { bannedUsers, loading, error, unblockUser } = useBanlist();
-
-  const handleUnblock = async (number: string) => {
-    try {
-      await unblockUser(number);
-      showToast?.('Success', `User ${number} has been unblocked`, 'success');
-    } catch (error) {
-      showToast?.('Error', 'Failed to unblock user', 'error');
-    }
-  };
+  const { bannedUsers, loading, error, refreshBanlist } = useBanlist({
+    showToast,
+    autoRefresh: true
+  });
 
   if (loading) {
     return (
-      <section className="card banned-users-section">
+      <div className="card">
         <div className="card-header">
-          <h2><i className="fas fa-user-slash"></i> Banned Users</h2>
+          <i className="fas fa-ban card-icon"></i>
+          <h2>Banned Users</h2>
         </div>
         <div className="card-content">
           <Loader message="Loading banned users..." />
         </div>
-      </section>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <section className="card banned-users-section">
+      <div className="card">
         <div className="card-header">
-          <h2><i className="fas fa-user-slash"></i> Banned Users</h2>
+          <i className="fas fa-ban card-icon"></i>
+          <h2>Banned Users</h2>
         </div>
         <div className="card-content">
           <div className="error-state">
+            <i className="fas fa-exclamation-triangle"></i>
             <p>Failed to load banned users: {error}</p>
+            <button onClick={refreshBanlist} className="btn btn-primary">
+              <i className="fas fa-redo"></i>
+              Retry
+            </button>
           </div>
         </div>
-      </section>
+      </div>
     );
   }
 
   return (
-    <section className="card banned-users-section">
+    <div className="card">
       <div className="card-header">
-        <h2><i className="fas fa-user-slash"></i> Banned Users</h2>
-        <div className="card-actions">
-          <div className="session-count">
-            {bannedUsers.length} banned user{bannedUsers.length !== 1 ? 's' : ''}
-          </div>
-        </div>
+        <i className="fas fa-ban card-icon"></i>
+        <h2>Banned Users</h2>
+        <button 
+          onClick={refreshBanlist}
+          className="btn btn-secondary btn-sm"
+          title="Refresh Banned Users"
+        >
+          <i className="fas fa-sync-alt"></i>
+        </button>
       </div>
       <div className="card-content">
         {bannedUsers.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-icon">
-              <i className="fas fa-user-slash"></i>
-            </div>
-            <h3>No Banned Users</h3>
-            <p>No users are currently banned from the system.</p>
+            <i className="fas fa-check-circle"></i>
+            <p>No banned users</p>
+            <small>All users are currently allowed to use the bot</small>
           </div>
         ) : (
           <div className="banned-users-grid">
-            {bannedUsers.map(user => (
-              <div key={user.number} className="banned-user-item">
-                <BannedUserCard user={user} />
-                <button 
-                  onClick={() => handleUnblock(user.number)}
-                  className="btn btn-sm btn-outline"
-                  title="Unblock User"
-                >
-                  <i className="fas fa-unlock"></i>
-                  Unblock
-                </button>
-              </div>
+            {bannedUsers.map((user, index) => (
+              <BannedUserCard key={`${user.number}-${index}`} user={user} />
             ))}
           </div>
         )}
       </div>
-    </section>
+    </div>
   );
 }

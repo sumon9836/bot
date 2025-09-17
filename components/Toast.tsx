@@ -19,43 +19,42 @@ export function Toast({ toast, onRemove }: ToastProps) {
       case 'success':
         return 'fas fa-check-circle';
       case 'error':
-        return 'fas fa-exclamation-circle';
+        return 'fas fa-times-circle';
       case 'warning':
         return 'fas fa-exclamation-triangle';
       case 'info':
         return 'fas fa-info-circle';
       default:
-        return 'fas fa-info-circle';
+        return 'fas fa-bell';
     }
   };
 
   const getToastColor = () => {
     switch (toast.type) {
       case 'success':
-        return '#10b981';
+        return '#10B981';
       case 'error':
-        return '#ef4444';
+        return '#EF4444';
       case 'warning':
-        return '#f59e0b';
+        return '#F59E0B';
       case 'info':
-        return '#3b82f6';
+        return '#3B82F6';
       default:
-        return '#3b82f6';
+        return '#6B7280';
     }
   };
 
   return (
-    <div
+    <div 
+      className={`toast toast-${toast.type}`}
       style={{
-        background: 'rgba(0, 0, 0, 0.8)',
-        backdropFilter: 'blur(10px)',
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
         border: `1px solid ${getToastColor()}`,
-        borderRadius: '12px',
+        borderRadius: '8px',
         padding: '16px',
-        marginBottom: '12px',
+        margin: '8px 0',
         minWidth: '300px',
-        maxWidth: '400px',
-        color: 'white',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
         position: 'relative',
         animation: 'slideInRight 0.3s ease-out'
       }}
@@ -68,18 +67,19 @@ export function Toast({ toast, onRemove }: ToastProps) {
             fontSize: '18px',
             marginTop: '2px'
           }}
-        ></i>
+        />
         <div style={{ flex: 1 }}>
           <div style={{ 
+            color: '#FFFFFF', 
             fontWeight: '600', 
-            fontSize: '14px',
-            marginBottom: '4px'
+            marginBottom: '4px',
+            fontSize: '14px'
           }}>
             {toast.title}
           </div>
           <div style={{ 
-            fontSize: '13px', 
-            opacity: 0.9,
+            color: '#D1D5DB', 
+            fontSize: '13px',
             lineHeight: '1.4'
           }}>
             {toast.message}
@@ -90,7 +90,7 @@ export function Toast({ toast, onRemove }: ToastProps) {
           style={{
             background: 'none',
             border: 'none',
-            color: 'rgba(255, 255, 255, 0.7)',
+            color: '#9CA3AF',
             cursor: 'pointer',
             fontSize: '16px',
             padding: '0',
@@ -101,7 +101,7 @@ export function Toast({ toast, onRemove }: ToastProps) {
             justifyContent: 'center'
           }}
         >
-          <i className="fas fa-times"></i>
+          <i className="fas fa-times" />
         </button>
       </div>
     </div>
