@@ -1,0 +1,1153 @@
+
+Build Error
+Failed to compile
+
+Next.js (14.2.32) is outdated (learn more)
+./components/PairForm.tsx
+Error: 
+  × the name `useState` is defined multiple times
+     ╭─[/home/runner/workspace/components/PairForm.tsx:1:1]
+   1 │ 
+   2 │ 'use client';
+   3 │ 
+   4 │ import { useState, useRef, useEffect } from 'react';
+     ·          ────┬───
+     ·              ╰── previous definition of `useState` here
+   5 │ import { useCountryDetection } from '../hooks/useCountryDetection';
+   6 │ import { useApi } from '../hooks/useApi';
+   7 │ import { useRouter } from 'next/navigation';
+   8 │ import { PairingResponse } from '../lib/types';
+   9 │ 
+  10 │ interface PairFormProps {
+  11 │   onSuccess?: (number: string, pairCode?: string) => void;
+  12 │   showToast?: (title: string, message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
+  13 │ }
+  14 │ 
+  15 │ export function PairForm({ onSuccess, showToast }: PairFormProps) {
+  16 │   const [isSubmitting, setIsSubmitting] = useState(false);
+  17 │   const [showPairCode, setShowPairCode] = useState(false);
+  18 │   const [pairCodeData, setPairCodeData] = useState<{ code?: string, qr?: string, link?: string } | null>(null);
+  19 │   const [currentNumber, setCurrentNumber] = useState('');
+  20 │   const inputRef = useRef<HTMLInputElement>(null);
+  21 │   const router = useRouter();
+  22 │   const { post } = useApi();
+  23 │   
+  24 │   const {
+  25 │     phoneNumber,
+  26 │     detectedCountry,
+  27 │     validation,
+  28 │     isFocused,
+  29 │     setIsFocused,
+  30 │     updatePhoneNumber,
+  31 │     resetDetection,
+  32 │     hasCountry,
+  33 │     isComplete,
+  34 │     validationError
+  35 │   } = useCountryDetection();
+  36 │ 
+  37 │   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  38 │     updatePhoneNumber(e.target.value);
+  39 │   };
+  40 │ 
+  41 │   const handleFocus = () => {
+  42 │     setIsFocused(true);
+  43 │   };
+  44 │ 
+  45 │   const handleBlur = () => {
+  46 │     setIsFocused(false);
+  47 │   };
+  48 │ 
+  49 │   const copyToClipboard = async (text: string) => {
+  50 │     try {
+  51 │       if (!text) {
+  52 │         showToast?.('No code to copy', 'Pairing code is not available', 'error');
+  53 │         return;
+  54 │       }
+  55 │ 
+  56 │       if (navigator.clipboard && window.isSecureContext) {
+  57 │         await navigator.clipboard.writeText(text);
+  58 │       } else {
+  59 │         // Fallback for non-secure contexts
+  60 │         const textArea = document.createElement('textarea');
+  61 │         textArea.value = text;
+  62 │         textArea.style.position = 'fixed';
+  63 │         textArea.style.opacity = '0';
+  64 │         document.body.appendChild(textArea);
+  65 │         textArea.focus();
+  66 │         textArea.select();
+  67 │         document.execCommand('copy');
+  68 │         document.body.removeChild(textArea);
+  69 │       }
+  70 │       
+  71 │       // Add visual feedback to copy button
+  72 │       const copyButton = document.querySelector('.copy-button');
+  73 │       if (copyButton) {
+  74 │         copyButton.classList.add('copied');
+  75 │         setTimeout(() => {
+  76 │           copyButton.classList.remove('copied');
+  77 │         }, 600);
+  78 │       }
+  79 │       
+  80 │       showToast?.('Copied!', 'Pairing code copied to clipboard', 'success');
+  81 │     } catch (err) {
+  82 │       console.error('Copy failed:', err);
+  83 │       showToast?.('Failed to copy', 'Please copy the code manually: ' + text, 'error');
+  84 │     }
+  85 │   };
+  86 │ 
+  87 │   const handleSubmit = async (e: React.FormEvent) => {
+  88 │     e.preventDefault();
+  89 │     
+  90 │     if (!validation.valid) {
+  91 │       showToast?.('Invalid Number', validationError || 'Please enter a valid phone number', 'error');
+  92 │       return;
+  93 │     }
+  94 │ 
+  95 │     setIsSubmitting(true);
+  96 │     setCurrentNumber(phoneNumber);
+  97 │ 
+  98 │     try {
+  99 │       const response = await post('/api/pair', { number: phoneNumber });
+ 100 │ 
+ 101 │       if (response.success) {
+ 102 │         // Show pairing code or WhatsApp link
+ 103 │         const pairingData = response.data as PairingResponse;
+ 104 │         const pairCode = pairingData?.code || pairingData?.pairCode;
+ 105 │         
+ 106 │         console.log('API Response:', response);
+ 107 │         console.log('Extracted pairing code:', pairCode);
+ 108 │         
+ 109 │         // Always show the modal for successful pairing - even if no code
+ 110 │         setPairCodeData({
+ 111 │           code: pairCode,
+ 112 │           qr: pairingData?.qr,
+ 113 │           link: pairingData?.link
+ 114 │         });
+ 115 │         setShowPairCode(true);
+ 116 │         
+ 117 │         if (pairCode) {
+ 118 │           showToast?.('Success', `Pairing code: ${pairCode}`, 'success');
+ 119 │         } else {
+ 120 │           showToast?.('Success', 'Phone number paired successfully!', 'success');
+ 121 │         }
+ 122 │         
+ 123 │         resetDetection();
+ 124 │         onSuccess?.(phoneNumber, pairCode);
+ 125 │       } else {
+ 126 │         // Handle specific error messages from backend
+ 127 │         if (response.error && (response.error.includes('ban') || response.error.includes('blocked'))) {
+ 128 │           // Redirect to full-screen blocked page for banned/blocked users
+ 129 │           router.push('/blocked');
+ 130 │         } else {
+ 131 │           showToast?.('Pairing Failed', response.error || 'Failed to pair phone number', 'error');
+ 132 │         }
+ 133 │       }
+ 134 │     } catch (error: any) {
+ 135 │       // Handle network errors and HTTP error responses
+ 136 │       if (error?.response?.status === 403) {
+ 137 │         // Server returned 403 Forbidden - user is blocked
+ 138 │         router.push('/blocked');
+ 139 │       } else {
+ 140 │         showToast?.('Network Error', 'Failed to connect to server', 'error');
+ 141 │       }
+ 142 │     } finally {
+ 143 │       setIsSubmitting(false);
+ 144 │     }
+ 145 │   };
+ 146 │ 
+ 147 │   
+ 148 │ 
+ 149 │   return (
+ 150 │     <>
+ 151 │       <div className="card action-card">
+ 152 │         <div className="card-header">
+ 153 │           <i className="fas fa-plus-circle card-icon"></i>
+ 154 │           <h2>Pair New Number</h2>
+ 155 │         </div>
+ 156 │         <div className="card-content">
+ 157 │           <form onSubmit={handleSubmit} className="action-form">
+ 158 │             <div className="form-group">
+ 159 │               <label htmlFor="pairNumber">Phone Number</label>
+ 160 │               <div 
+ 161 │                 className={`input-wrapper ${isFocused ? 'focused' : ''} ${hasCountry ? 'has-country-code' : ''} ${phoneNumber ? 'has-value' : ''} ${isComplete ? 'number-complete' : ''}`}
+ 162 │               >
+ 163 │                 <i className="fas fa-phone input-icon"></i>
+ 164 │                 <input
+ 165 │                   ref={inputRef}
+ 166 │                   type="tel"
+ 167 │                   id="pairNumber"
+ 168 │                   value={phoneNumber}
+ 169 │                   onChange={handleInputChange}
+ 170 │                   onFocus={handleFocus}
+ 171 │                   onBlur={handleBlur}
+ 172 │                   placeholder="Enter number (e.g., 919876543210)"
+ 173 │                   required
+ 174 │                   inputMode="numeric"
+ 175 │                   autoComplete="tel"
+ 176 │                   pattern="^[\d\s-]{10,18}$"
+ 177 │                   title="Enter phone number with country code"
+ 178 │                 />
+ 179 │                 
+ 180 │                 {detectedCountry && (
+ 181 │                   <div className={`country-code-display ${hasCountry ? 'show' : ''} ${isComplete ? 'complete' : 'detected'} ${isFocused ? 'focused' : ''}`}>
+ 182 │                     <div className="country-badge">
+ 183 │                       <span className="country-flag">{detectedCountry.countryInfo.flag}</span>
+ 184 │                       <span className="country-code">+{detectedCountry.countryCode}</span>
+ 185 │                     </div>
+ 186 │                   </div>
+ 187 │                 )}
+ 188 │               </div>
+ 189 │               <small className="form-help">
+ 190 │                 Enter your phone number with country code (e.g., 919876543210). Country will be auto-detected.
+ 191 │               </small>
+ 192 │               {validationError && (
+ 193 │                 <div className="error-message">
+ 194 │                   {validationError}
+ 195 │                 </div>
+ 196 │               )}
+ 197 │             </div>
+ 198 │             
+ 199 │             <button 
+ 200 │               type="submit" 
+ 201 │               className="btn btn-primary"
+ 202 │               disabled={isSubmitting || !validation.valid}
+ 203 │             >
+ 204 │               <span className="btn-text">
+ 205 │                 {isSubmitting ? 'Getting Pairing Code...' : 'Get Pairing Code'}
+ 206 │               </span>
+ 207 │               {isSubmitting && (
+ 208 │                 <div className="btn-loader">
+ 209 │                   <i className="fas fa-spinner fa-spin"></i>
+ 210 │                 </div>
+ 211 │               )}
+ 212 │             </button>
+ 213 │           </form>
+ 214 │         </div>
+ 215 │       </div>
+ 216 │ 
+ 217 │       {/* Enhanced Full Screen WhatsApp Pairing Code Modal */}
+ 218 │       {showPairCode && (
+ 219 │         <div className="pairing-modal-overlay">
+ 220 │           <div className="pairing-modal-container">
+ 221 │             
+ 222 │             
+ 223 │ 
+ 224 │             {/* Success Message with animation */}
+ 225 │             <div className="success-banner">
+ 226 │               <div className="success-content">
+ 227 │                 <div className="success-icon">
+ 228 │                   <i className="fas fa-check-circle"></i>
+ 229 │                 </div>
+ 230 │                 <div className="success-text">
+ 231 │                   <h2>Phone number paired successfully!</h2>
+ 232 │                   <p className="success-number">{currentNumber}</p>
+ 233 │                 </div>
+ 234 │               </div>
+ 235 │             </div>
+ 236 │ 
+ 237 │             {/* WhatsApp Header with pulsing logo */}
+ 238 │             <div className="whatsapp-header">
+ 239 │               <div className="whatsapp-logo">
+ 240 │                 <i className="fab fa-whatsapp"></i>
+ 241 │               </div>
+ 242 │               <h1 className="modal-title">WhatsApp Device Pairing</h1>
+ 243 │               <p className="modal-subtitle">Use this code to link your device to WhatsApp</p>
+ 244 │             </div>
+ 245 │ 
+ 246 │             {/* Enhanced Pairing Code Display */}
+ 247 │             {pairCodeData?.code ? (
+ 248 │               <div className="pairing-code-section">
+ 249 │                 <div className="code-header">
+ 250 │                   <i className="fas fa-key"></i>
+ 251 │                   <span>Your WhatsApp Pairing Code</span>
+ 252 │                 </div>
+ 253 │                 
+ 254 │                 <div className="code-display-container">
+ 255 │                   <div 
+ 256 │                     className="pairing-code-display"
+ 257 │                     onClick={() => copyToClipboard(pairCodeData.code!)}
+ 258 │                     title="Click to copy code"
+ 259 │                   >
+ 260 │                     {pairCodeData.code?.split('').map((char, index) => (
+ 261 │                       <span 
+ 262 │                         key={index} 
+ 263 │                         className="code-char"
+ 264 │                         style={{ animationDelay: `${index * 0.1}s` }}
+ 265 │                       >
+ 266 │                         {char}
+ 267 │                       </span>
+ 268 │                     ))}
+ 269 │                   </div>
+ 270 │                   
+ 271 │                   {/* Code glow effect */}
+ 272 │                   <div className="code-glow"></div>
+ 273 │                 </div>
+ 274 │                 
+ 275 │                 <div className="copy-actions">
+ 276 │                   <button
+ 277 │                     onClick={() => copyToClipboard(pairCodeData.code!)}
+ 278 │                     className="copy-button"
+ 279 │                   >
+ 280 │                     <div className="button-content">
+ 281 │                       <i className="fas fa-copy"></i>
+ 282 │                       <span>Copy Pairing Code</span>
+ 283 │                     </div>
+ 284 │                     <div className="button-shine"></div>
+ 285 │                   </button>
+ 286 │                   
+ 287 │                   <p className="copy-hint">Click the code above or this button to copy</p>
+ 288 │                 </div>
+ 289 │               </div>
+ 290 │             ) : (
+ 291 │               <div className="error-section">
+ 292 │                 <div className="error-icon">
+ 293 │                   <i className="fas fa-exclamation-triangle"></i>
+ 294 │                 </div>
+ 295 │                 <div className="error-content">
+ 296 │                   <h3>No Pairing Code Received</h3>
+ 297 │                   <p>The backend didn't return a pairing code. Please try again.</p>
+ 298 │                 </div>
+ 299 │               </div>
+ 300 │             )}
+ 301 │ 
+ 302 │             
+ 303 │ 
+ 304 │             {/* Enhanced Step-by-Step Instructions */}
+ 305 │             <div className="instructions-section">
+ 306 │               <h3 className="instructions-title">
+ 307 │                 <i className="fas fa-list-ol"></i>
+ 308 │                 How to Link Your Device:
+ 309 │               </h3>
+ 310 │               <div className="steps-container">
+ 311 │                 {[
+ 312 │                   { icon: "fab fa-whatsapp", title: "Open WhatsApp on your phone", desc: "Make sure you have WhatsApp installed and running" },
+ 313 │                   { icon: "fas fa-cog", title: "Go to Settings → Linked Devices", desc: "Tap the three dots menu, then Settings, then Linked Devices" },
+ 314 │                   { icon: "fas fa-link", title: 'Tap "Link a Device"', desc: "You'll see options to link using QR code or phone number" },
+ 315 │                   { icon: "fas fa-phone", title: 'Select "Link with phone number instead"', desc: "Choose the phone number option at the bottom" },
+ 316 │                   { icon: "fas fa-keyboard", title: "Enter the pairing code above", desc: "Type or paste the 8-character code exactly as shown", highlight: true }
+ 317 │                 ].map((step, index) => (
+ 318 │                   <div key={index} className={`step-item ${step.highlight ? 'step-highlight' : ''}`}>
+ 319 │                     <div className="step-number">{index + 1}</div>
+ 320 │                     <div className="step-content">
+ 321 │                       <i className={step.icon}></i>
+ 322 │                       <div className="step-text">
+ 323 │                         <h4>{step.title}</h4>
+ 324 │                         <p>{step.desc}</p>
+ 325 │                       </div>
+ 326 │                     </div>
+ 327 │                   </div>
+ 328 │                 ))}
+ 329 │               </div>
+ 330 │             </div>
+ 331 │ 
+ 332 │             {/* Enhanced Close Button */}
+ 333 │             <div className="modal-actions">
+ 334 │               <button
+ 335 │                 onClick={() => {
+ 336 │                   setShowPairCode(false);
+ 337 │                   setPairCodeData(null);
+ 338 │                   setCurrentNumber('');
+ 339 │                 }}
+ 340 │                 className="close-button"
+ 341 │               >
+ 342 │                 <i className="fas fa-times"></i>
+ 343 │                 <span>Close</span>
+ 344 │               </button>
+ 345 │             </div>
+ 346 │ 
+ 347 │             {/* Floating close button */}
+ 348 │             <button
+ 349 │               onClick={() => {
+ 350 │                 setShowPairCode(false);
+ 351 │                 setPairCodeData(null);
+ 352 │                 setCurrentNumber('');
+ 353 │               }}
+ 354 │               className="floating-close-button"
+ 355 │             >
+ 356 │               <i className="fas fa-times"></i>
+ 357 │             </button>
+ 358 │           </div>
+ 359 │         </div>
+ 360 │       )}
+ 361 │ 
+ 362 │       
+ 363 │     </>
+ 364 │   );
+ 365 │ }
+ 366 │ 'use client';
+ 367 │ 
+ 368 │ import { useState } from 'react';
+     ·          ────┬───
+     ·              ╰── `useState` redefined here
+ 369 │ import { useCountryDetection } from '../hooks/useCountryDetection';
+ 370 │ 
+ 371 │ interface PairFormProps {
+     ╰────
+
+  × the name `useCountryDetection` is defined multiple times
+     ╭─[/home/runner/workspace/components/PairForm.tsx:2:1]
+   2 │ 'use client';
+   3 │ 
+   4 │ import { useState, useRef, useEffect } from 'react';
+   5 │ import { useCountryDetection } from '../hooks/useCountryDetection';
+     ·          ─────────┬─────────
+     ·                   ╰── previous definition of `useCountryDetection` here
+   6 │ import { useApi } from '../hooks/useApi';
+   7 │ import { useRouter } from 'next/navigation';
+   8 │ import { PairingResponse } from '../lib/types';
+   9 │ 
+  10 │ interface PairFormProps {
+  11 │   onSuccess?: (number: string, pairCode?: string) => void;
+  12 │   showToast?: (title: string, message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
+  13 │ }
+  14 │ 
+  15 │ export function PairForm({ onSuccess, showToast }: PairFormProps) {
+  16 │   const [isSubmitting, setIsSubmitting] = useState(false);
+  17 │   const [showPairCode, setShowPairCode] = useState(false);
+  18 │   const [pairCodeData, setPairCodeData] = useState<{ code?: string, qr?: string, link?: string } | null>(null);
+  19 │   const [currentNumber, setCurrentNumber] = useState('');
+  20 │   const inputRef = useRef<HTMLInputElement>(null);
+  21 │   const router = useRouter();
+  22 │   const { post } = useApi();
+  23 │   
+  24 │   const {
+  25 │     phoneNumber,
+  26 │     detectedCountry,
+  27 │     validation,
+  28 │     isFocused,
+  29 │     setIsFocused,
+  30 │     updatePhoneNumber,
+  31 │     resetDetection,
+  32 │     hasCountry,
+  33 │     isComplete,
+  34 │     validationError
+  35 │   } = useCountryDetection();
+  36 │ 
+  37 │   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  38 │     updatePhoneNumber(e.target.value);
+  39 │   };
+  40 │ 
+  41 │   const handleFocus = () => {
+  42 │     setIsFocused(true);
+  43 │   };
+  44 │ 
+  45 │   const handleBlur = () => {
+  46 │     setIsFocused(false);
+  47 │   };
+  48 │ 
+  49 │   const copyToClipboard = async (text: string) => {
+  50 │     try {
+  51 │       if (!text) {
+  52 │         showToast?.('No code to copy', 'Pairing code is not available', 'error');
+  53 │         return;
+  54 │       }
+  55 │ 
+  56 │       if (navigator.clipboard && window.isSecureContext) {
+  57 │         await navigator.clipboard.writeText(text);
+  58 │       } else {
+  59 │         // Fallback for non-secure contexts
+  60 │         const textArea = document.createElement('textarea');
+  61 │         textArea.value = text;
+  62 │         textArea.style.position = 'fixed';
+  63 │         textArea.style.opacity = '0';
+  64 │         document.body.appendChild(textArea);
+  65 │         textArea.focus();
+  66 │         textArea.select();
+  67 │         document.execCommand('copy');
+  68 │         document.body.removeChild(textArea);
+  69 │       }
+  70 │       
+  71 │       // Add visual feedback to copy button
+  72 │       const copyButton = document.querySelector('.copy-button');
+  73 │       if (copyButton) {
+  74 │         copyButton.classList.add('copied');
+  75 │         setTimeout(() => {
+  76 │           copyButton.classList.remove('copied');
+  77 │         }, 600);
+  78 │       }
+  79 │       
+  80 │       showToast?.('Copied!', 'Pairing code copied to clipboard', 'success');
+  81 │     } catch (err) {
+  82 │       console.error('Copy failed:', err);
+  83 │       showToast?.('Failed to copy', 'Please copy the code manually: ' + text, 'error');
+  84 │     }
+  85 │   };
+  86 │ 
+  87 │   const handleSubmit = async (e: React.FormEvent) => {
+  88 │     e.preventDefault();
+  89 │     
+  90 │     if (!validation.valid) {
+  91 │       showToast?.('Invalid Number', validationError || 'Please enter a valid phone number', 'error');
+  92 │       return;
+  93 │     }
+  94 │ 
+  95 │     setIsSubmitting(true);
+  96 │     setCurrentNumber(phoneNumber);
+  97 │ 
+  98 │     try {
+  99 │       const response = await post('/api/pair', { number: phoneNumber });
+ 100 │ 
+ 101 │       if (response.success) {
+ 102 │         // Show pairing code or WhatsApp link
+ 103 │         const pairingData = response.data as PairingResponse;
+ 104 │         const pairCode = pairingData?.code || pairingData?.pairCode;
+ 105 │         
+ 106 │         console.log('API Response:', response);
+ 107 │         console.log('Extracted pairing code:', pairCode);
+ 108 │         
+ 109 │         // Always show the modal for successful pairing - even if no code
+ 110 │         setPairCodeData({
+ 111 │           code: pairCode,
+ 112 │           qr: pairingData?.qr,
+ 113 │           link: pairingData?.link
+ 114 │         });
+ 115 │         setShowPairCode(true);
+ 116 │         
+ 117 │         if (pairCode) {
+ 118 │           showToast?.('Success', `Pairing code: ${pairCode}`, 'success');
+ 119 │         } else {
+ 120 │           showToast?.('Success', 'Phone number paired successfully!', 'success');
+ 121 │         }
+ 122 │         
+ 123 │         resetDetection();
+ 124 │         onSuccess?.(phoneNumber, pairCode);
+ 125 │       } else {
+ 126 │         // Handle specific error messages from backend
+ 127 │         if (response.error && (response.error.includes('ban') || response.error.includes('blocked'))) {
+ 128 │           // Redirect to full-screen blocked page for banned/blocked users
+ 129 │           router.push('/blocked');
+ 130 │         } else {
+ 131 │           showToast?.('Pairing Failed', response.error || 'Failed to pair phone number', 'error');
+ 132 │         }
+ 133 │       }
+ 134 │     } catch (error: any) {
+ 135 │       // Handle network errors and HTTP error responses
+ 136 │       if (error?.response?.status === 403) {
+ 137 │         // Server returned 403 Forbidden - user is blocked
+ 138 │         router.push('/blocked');
+ 139 │       } else {
+ 140 │         showToast?.('Network Error', 'Failed to connect to server', 'error');
+ 141 │       }
+ 142 │     } finally {
+ 143 │       setIsSubmitting(false);
+ 144 │     }
+ 145 │   };
+ 146 │ 
+ 147 │   
+ 148 │ 
+ 149 │   return (
+ 150 │     <>
+ 151 │       <div className="card action-card">
+ 152 │         <div className="card-header">
+ 153 │           <i className="fas fa-plus-circle card-icon"></i>
+ 154 │           <h2>Pair New Number</h2>
+ 155 │         </div>
+ 156 │         <div className="card-content">
+ 157 │           <form onSubmit={handleSubmit} className="action-form">
+ 158 │             <div className="form-group">
+ 159 │               <label htmlFor="pairNumber">Phone Number</label>
+ 160 │               <div 
+ 161 │                 className={`input-wrapper ${isFocused ? 'focused' : ''} ${hasCountry ? 'has-country-code' : ''} ${phoneNumber ? 'has-value' : ''} ${isComplete ? 'number-complete' : ''}`}
+ 162 │               >
+ 163 │                 <i className="fas fa-phone input-icon"></i>
+ 164 │                 <input
+ 165 │                   ref={inputRef}
+ 166 │                   type="tel"
+ 167 │                   id="pairNumber"
+ 168 │                   value={phoneNumber}
+ 169 │                   onChange={handleInputChange}
+ 170 │                   onFocus={handleFocus}
+ 171 │                   onBlur={handleBlur}
+ 172 │                   placeholder="Enter number (e.g., 919876543210)"
+ 173 │                   required
+ 174 │                   inputMode="numeric"
+ 175 │                   autoComplete="tel"
+ 176 │                   pattern="^[\d\s-]{10,18}$"
+ 177 │                   title="Enter phone number with country code"
+ 178 │                 />
+ 179 │                 
+ 180 │                 {detectedCountry && (
+ 181 │                   <div className={`country-code-display ${hasCountry ? 'show' : ''} ${isComplete ? 'complete' : 'detected'} ${isFocused ? 'focused' : ''}`}>
+ 182 │                     <div className="country-badge">
+ 183 │                       <span className="country-flag">{detectedCountry.countryInfo.flag}</span>
+ 184 │                       <span className="country-code">+{detectedCountry.countryCode}</span>
+ 185 │                     </div>
+ 186 │                   </div>
+ 187 │                 )}
+ 188 │               </div>
+ 189 │               <small className="form-help">
+ 190 │                 Enter your phone number with country code (e.g., 919876543210). Country will be auto-detected.
+ 191 │               </small>
+ 192 │               {validationError && (
+ 193 │                 <div className="error-message">
+ 194 │                   {validationError}
+ 195 │                 </div>
+ 196 │               )}
+ 197 │             </div>
+ 198 │             
+ 199 │             <button 
+ 200 │               type="submit" 
+ 201 │               className="btn btn-primary"
+ 202 │               disabled={isSubmitting || !validation.valid}
+ 203 │             >
+ 204 │               <span className="btn-text">
+ 205 │                 {isSubmitting ? 'Getting Pairing Code...' : 'Get Pairing Code'}
+ 206 │               </span>
+ 207 │               {isSubmitting && (
+ 208 │                 <div className="btn-loader">
+ 209 │                   <i className="fas fa-spinner fa-spin"></i>
+ 210 │                 </div>
+ 211 │               )}
+ 212 │             </button>
+ 213 │           </form>
+ 214 │         </div>
+ 215 │       </div>
+ 216 │ 
+ 217 │       {/* Enhanced Full Screen WhatsApp Pairing Code Modal */}
+ 218 │       {showPairCode && (
+ 219 │         <div className="pairing-modal-overlay">
+ 220 │           <div className="pairing-modal-container">
+ 221 │             
+ 222 │             
+ 223 │ 
+ 224 │             {/* Success Message with animation */}
+ 225 │             <div className="success-banner">
+ 226 │               <div className="success-content">
+ 227 │                 <div className="success-icon">
+ 228 │                   <i className="fas fa-check-circle"></i>
+ 229 │                 </div>
+ 230 │                 <div className="success-text">
+ 231 │                   <h2>Phone number paired successfully!</h2>
+ 232 │                   <p className="success-number">{currentNumber}</p>
+ 233 │                 </div>
+ 234 │               </div>
+ 235 │             </div>
+ 236 │ 
+ 237 │             {/* WhatsApp Header with pulsing logo */}
+ 238 │             <div className="whatsapp-header">
+ 239 │               <div className="whatsapp-logo">
+ 240 │                 <i className="fab fa-whatsapp"></i>
+ 241 │               </div>
+ 242 │               <h1 className="modal-title">WhatsApp Device Pairing</h1>
+ 243 │               <p className="modal-subtitle">Use this code to link your device to WhatsApp</p>
+ 244 │             </div>
+ 245 │ 
+ 246 │             {/* Enhanced Pairing Code Display */}
+ 247 │             {pairCodeData?.code ? (
+ 248 │               <div className="pairing-code-section">
+ 249 │                 <div className="code-header">
+ 250 │                   <i className="fas fa-key"></i>
+ 251 │                   <span>Your WhatsApp Pairing Code</span>
+ 252 │                 </div>
+ 253 │                 
+ 254 │                 <div className="code-display-container">
+ 255 │                   <div 
+ 256 │                     className="pairing-code-display"
+ 257 │                     onClick={() => copyToClipboard(pairCodeData.code!)}
+ 258 │                     title="Click to copy code"
+ 259 │                   >
+ 260 │                     {pairCodeData.code?.split('').map((char, index) => (
+ 261 │                       <span 
+ 262 │                         key={index} 
+ 263 │                         className="code-char"
+ 264 │                         style={{ animationDelay: `${index * 0.1}s` }}
+ 265 │                       >
+ 266 │                         {char}
+ 267 │                       </span>
+ 268 │                     ))}
+ 269 │                   </div>
+ 270 │                   
+ 271 │                   {/* Code glow effect */}
+ 272 │                   <div className="code-glow"></div>
+ 273 │                 </div>
+ 274 │                 
+ 275 │                 <div className="copy-actions">
+ 276 │                   <button
+ 277 │                     onClick={() => copyToClipboard(pairCodeData.code!)}
+ 278 │                     className="copy-button"
+ 279 │                   >
+ 280 │                     <div className="button-content">
+ 281 │                       <i className="fas fa-copy"></i>
+ 282 │                       <span>Copy Pairing Code</span>
+ 283 │                     </div>
+ 284 │                     <div className="button-shine"></div>
+ 285 │                   </button>
+ 286 │                   
+ 287 │                   <p className="copy-hint">Click the code above or this button to copy</p>
+ 288 │                 </div>
+ 289 │               </div>
+ 290 │             ) : (
+ 291 │               <div className="error-section">
+ 292 │                 <div className="error-icon">
+ 293 │                   <i className="fas fa-exclamation-triangle"></i>
+ 294 │                 </div>
+ 295 │                 <div className="error-content">
+ 296 │                   <h3>No Pairing Code Received</h3>
+ 297 │                   <p>The backend didn't return a pairing code. Please try again.</p>
+ 298 │                 </div>
+ 299 │               </div>
+ 300 │             )}
+ 301 │ 
+ 302 │             
+ 303 │ 
+ 304 │             {/* Enhanced Step-by-Step Instructions */}
+ 305 │             <div className="instructions-section">
+ 306 │               <h3 className="instructions-title">
+ 307 │                 <i className="fas fa-list-ol"></i>
+ 308 │                 How to Link Your Device:
+ 309 │               </h3>
+ 310 │               <div className="steps-container">
+ 311 │                 {[
+ 312 │                   { icon: "fab fa-whatsapp", title: "Open WhatsApp on your phone", desc: "Make sure you have WhatsApp installed and running" },
+ 313 │                   { icon: "fas fa-cog", title: "Go to Settings → Linked Devices", desc: "Tap the three dots menu, then Settings, then Linked Devices" },
+ 314 │                   { icon: "fas fa-link", title: 'Tap "Link a Device"', desc: "You'll see options to link using QR code or phone number" },
+ 315 │                   { icon: "fas fa-phone", title: 'Select "Link with phone number instead"', desc: "Choose the phone number option at the bottom" },
+ 316 │                   { icon: "fas fa-keyboard", title: "Enter the pairing code above", desc: "Type or paste the 8-character code exactly as shown", highlight: true }
+ 317 │                 ].map((step, index) => (
+ 318 │                   <div key={index} className={`step-item ${step.highlight ? 'step-highlight' : ''}`}>
+ 319 │                     <div className="step-number">{index + 1}</div>
+ 320 │                     <div className="step-content">
+ 321 │                       <i className={step.icon}></i>
+ 322 │                       <div className="step-text">
+ 323 │                         <h4>{step.title}</h4>
+ 324 │                         <p>{step.desc}</p>
+ 325 │                       </div>
+ 326 │                     </div>
+ 327 │                   </div>
+ 328 │                 ))}
+ 329 │               </div>
+ 330 │             </div>
+ 331 │ 
+ 332 │             {/* Enhanced Close Button */}
+ 333 │             <div className="modal-actions">
+ 334 │               <button
+ 335 │                 onClick={() => {
+ 336 │                   setShowPairCode(false);
+ 337 │                   setPairCodeData(null);
+ 338 │                   setCurrentNumber('');
+ 339 │                 }}
+ 340 │                 className="close-button"
+ 341 │               >
+ 342 │                 <i className="fas fa-times"></i>
+ 343 │                 <span>Close</span>
+ 344 │               </button>
+ 345 │             </div>
+ 346 │ 
+ 347 │             {/* Floating close button */}
+ 348 │             <button
+ 349 │               onClick={() => {
+ 350 │                 setShowPairCode(false);
+ 351 │                 setPairCodeData(null);
+ 352 │                 setCurrentNumber('');
+ 353 │               }}
+ 354 │               className="floating-close-button"
+ 355 │             >
+ 356 │               <i className="fas fa-times"></i>
+ 357 │             </button>
+ 358 │           </div>
+ 359 │         </div>
+ 360 │       )}
+ 361 │ 
+ 362 │       
+ 363 │     </>
+ 364 │   );
+ 365 │ }
+ 366 │ 'use client';
+ 367 │ 
+ 368 │ import { useState } from 'react';
+ 369 │ import { useCountryDetection } from '../hooks/useCountryDetection';
+     ·          ─────────┬─────────
+     ·                   ╰── `useCountryDetection` redefined here
+ 370 │ 
+ 371 │ interface PairFormProps {
+ 372 │   onSuccess: (number: string) => void;
+     ╰────
+
+  × the name `PairForm` is defined multiple times
+     ╭─[/home/runner/workspace/components/PairForm.tsx:12:1]
+  12 │   showToast?: (title: string, message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
+  13 │ }
+  14 │ 
+  15 │ export function PairForm({ onSuccess, showToast }: PairFormProps) {
+     ·                 ────┬───
+     ·                     ╰── previous definition of `PairForm` here
+  16 │   const [isSubmitting, setIsSubmitting] = useState(false);
+  17 │   const [showPairCode, setShowPairCode] = useState(false);
+  18 │   const [pairCodeData, setPairCodeData] = useState<{ code?: string, qr?: string, link?: string } | null>(null);
+  19 │   const [currentNumber, setCurrentNumber] = useState('');
+  20 │   const inputRef = useRef<HTMLInputElement>(null);
+  21 │   const router = useRouter();
+  22 │   const { post } = useApi();
+  23 │   
+  24 │   const {
+  25 │     phoneNumber,
+  26 │     detectedCountry,
+  27 │     validation,
+  28 │     isFocused,
+  29 │     setIsFocused,
+  30 │     updatePhoneNumber,
+  31 │     resetDetection,
+  32 │     hasCountry,
+  33 │     isComplete,
+  34 │     validationError
+  35 │   } = useCountryDetection();
+  36 │ 
+  37 │   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  38 │     updatePhoneNumber(e.target.value);
+  39 │   };
+  40 │ 
+  41 │   const handleFocus = () => {
+  42 │     setIsFocused(true);
+  43 │   };
+  44 │ 
+  45 │   const handleBlur = () => {
+  46 │     setIsFocused(false);
+  47 │   };
+  48 │ 
+  49 │   const copyToClipboard = async (text: string) => {
+  50 │     try {
+  51 │       if (!text) {
+  52 │         showToast?.('No code to copy', 'Pairing code is not available', 'error');
+  53 │         return;
+  54 │       }
+  55 │ 
+  56 │       if (navigator.clipboard && window.isSecureContext) {
+  57 │         await navigator.clipboard.writeText(text);
+  58 │       } else {
+  59 │         // Fallback for non-secure contexts
+  60 │         const textArea = document.createElement('textarea');
+  61 │         textArea.value = text;
+  62 │         textArea.style.position = 'fixed';
+  63 │         textArea.style.opacity = '0';
+  64 │         document.body.appendChild(textArea);
+  65 │         textArea.focus();
+  66 │         textArea.select();
+  67 │         document.execCommand('copy');
+  68 │         document.body.removeChild(textArea);
+  69 │       }
+  70 │       
+  71 │       // Add visual feedback to copy button
+  72 │       const copyButton = document.querySelector('.copy-button');
+  73 │       if (copyButton) {
+  74 │         copyButton.classList.add('copied');
+  75 │         setTimeout(() => {
+  76 │           copyButton.classList.remove('copied');
+  77 │         }, 600);
+  78 │       }
+  79 │       
+  80 │       showToast?.('Copied!', 'Pairing code copied to clipboard', 'success');
+  81 │     } catch (err) {
+  82 │       console.error('Copy failed:', err);
+  83 │       showToast?.('Failed to copy', 'Please copy the code manually: ' + text, 'error');
+  84 │     }
+  85 │   };
+  86 │ 
+  87 │   const handleSubmit = async (e: React.FormEvent) => {
+  88 │     e.preventDefault();
+  89 │     
+  90 │     if (!validation.valid) {
+  91 │       showToast?.('Invalid Number', validationError || 'Please enter a valid phone number', 'error');
+  92 │       return;
+  93 │     }
+  94 │ 
+  95 │     setIsSubmitting(true);
+  96 │     setCurrentNumber(phoneNumber);
+  97 │ 
+  98 │     try {
+  99 │       const response = await post('/api/pair', { number: phoneNumber });
+ 100 │ 
+ 101 │       if (response.success) {
+ 102 │         // Show pairing code or WhatsApp link
+ 103 │         const pairingData = response.data as PairingResponse;
+ 104 │         const pairCode = pairingData?.code || pairingData?.pairCode;
+ 105 │         
+ 106 │         console.log('API Response:', response);
+ 107 │         console.log('Extracted pairing code:', pairCode);
+ 108 │         
+ 109 │         // Always show the modal for successful pairing - even if no code
+ 110 │         setPairCodeData({
+ 111 │           code: pairCode,
+ 112 │           qr: pairingData?.qr,
+ 113 │           link: pairingData?.link
+ 114 │         });
+ 115 │         setShowPairCode(true);
+ 116 │         
+ 117 │         if (pairCode) {
+ 118 │           showToast?.('Success', `Pairing code: ${pairCode}`, 'success');
+ 119 │         } else {
+ 120 │           showToast?.('Success', 'Phone number paired successfully!', 'success');
+ 121 │         }
+ 122 │         
+ 123 │         resetDetection();
+ 124 │         onSuccess?.(phoneNumber, pairCode);
+ 125 │       } else {
+ 126 │         // Handle specific error messages from backend
+ 127 │         if (response.error && (response.error.includes('ban') || response.error.includes('blocked'))) {
+ 128 │           // Redirect to full-screen blocked page for banned/blocked users
+ 129 │           router.push('/blocked');
+ 130 │         } else {
+ 131 │           showToast?.('Pairing Failed', response.error || 'Failed to pair phone number', 'error');
+ 132 │         }
+ 133 │       }
+ 134 │     } catch (error: any) {
+ 135 │       // Handle network errors and HTTP error responses
+ 136 │       if (error?.response?.status === 403) {
+ 137 │         // Server returned 403 Forbidden - user is blocked
+ 138 │         router.push('/blocked');
+ 139 │       } else {
+ 140 │         showToast?.('Network Error', 'Failed to connect to server', 'error');
+ 141 │       }
+ 142 │     } finally {
+ 143 │       setIsSubmitting(false);
+ 144 │     }
+ 145 │   };
+ 146 │ 
+ 147 │   
+ 148 │ 
+ 149 │   return (
+ 150 │     <>
+ 151 │       <div className="card action-card">
+ 152 │         <div className="card-header">
+ 153 │           <i className="fas fa-plus-circle card-icon"></i>
+ 154 │           <h2>Pair New Number</h2>
+ 155 │         </div>
+ 156 │         <div className="card-content">
+ 157 │           <form onSubmit={handleSubmit} className="action-form">
+ 158 │             <div className="form-group">
+ 159 │               <label htmlFor="pairNumber">Phone Number</label>
+ 160 │               <div 
+ 161 │                 className={`input-wrapper ${isFocused ? 'focused' : ''} ${hasCountry ? 'has-country-code' : ''} ${phoneNumber ? 'has-value' : ''} ${isComplete ? 'number-complete' : ''}`}
+ 162 │               >
+ 163 │                 <i className="fas fa-phone input-icon"></i>
+ 164 │                 <input
+ 165 │                   ref={inputRef}
+ 166 │                   type="tel"
+ 167 │                   id="pairNumber"
+ 168 │                   value={phoneNumber}
+ 169 │                   onChange={handleInputChange}
+ 170 │                   onFocus={handleFocus}
+ 171 │                   onBlur={handleBlur}
+ 172 │                   placeholder="Enter number (e.g., 919876543210)"
+ 173 │                   required
+ 174 │                   inputMode="numeric"
+ 175 │                   autoComplete="tel"
+ 176 │                   pattern="^[\d\s-]{10,18}$"
+ 177 │                   title="Enter phone number with country code"
+ 178 │                 />
+ 179 │                 
+ 180 │                 {detectedCountry && (
+ 181 │                   <div className={`country-code-display ${hasCountry ? 'show' : ''} ${isComplete ? 'complete' : 'detected'} ${isFocused ? 'focused' : ''}`}>
+ 182 │                     <div className="country-badge">
+ 183 │                       <span className="country-flag">{detectedCountry.countryInfo.flag}</span>
+ 184 │                       <span className="country-code">+{detectedCountry.countryCode}</span>
+ 185 │                     </div>
+ 186 │                   </div>
+ 187 │                 )}
+ 188 │               </div>
+ 189 │               <small className="form-help">
+ 190 │                 Enter your phone number with country code (e.g., 919876543210). Country will be auto-detected.
+ 191 │               </small>
+ 192 │               {validationError && (
+ 193 │                 <div className="error-message">
+ 194 │                   {validationError}
+ 195 │                 </div>
+ 196 │               )}
+ 197 │             </div>
+ 198 │             
+ 199 │             <button 
+ 200 │               type="submit" 
+ 201 │               className="btn btn-primary"
+ 202 │               disabled={isSubmitting || !validation.valid}
+ 203 │             >
+ 204 │               <span className="btn-text">
+ 205 │                 {isSubmitting ? 'Getting Pairing Code...' : 'Get Pairing Code'}
+ 206 │               </span>
+ 207 │               {isSubmitting && (
+ 208 │                 <div className="btn-loader">
+ 209 │                   <i className="fas fa-spinner fa-spin"></i>
+ 210 │                 </div>
+ 211 │               )}
+ 212 │             </button>
+ 213 │           </form>
+ 214 │         </div>
+ 215 │       </div>
+ 216 │ 
+ 217 │       {/* Enhanced Full Screen WhatsApp Pairing Code Modal */}
+ 218 │       {showPairCode && (
+ 219 │         <div className="pairing-modal-overlay">
+ 220 │           <div className="pairing-modal-container">
+ 221 │             
+ 222 │             
+ 223 │ 
+ 224 │             {/* Success Message with animation */}
+ 225 │             <div className="success-banner">
+ 226 │               <div className="success-content">
+ 227 │                 <div className="success-icon">
+ 228 │                   <i className="fas fa-check-circle"></i>
+ 229 │                 </div>
+ 230 │                 <div className="success-text">
+ 231 │                   <h2>Phone number paired successfully!</h2>
+ 232 │                   <p className="success-number">{currentNumber}</p>
+ 233 │                 </div>
+ 234 │               </div>
+ 235 │             </div>
+ 236 │ 
+ 237 │             {/* WhatsApp Header with pulsing logo */}
+ 238 │             <div className="whatsapp-header">
+ 239 │               <div className="whatsapp-logo">
+ 240 │                 <i className="fab fa-whatsapp"></i>
+ 241 │               </div>
+ 242 │               <h1 className="modal-title">WhatsApp Device Pairing</h1>
+ 243 │               <p className="modal-subtitle">Use this code to link your device to WhatsApp</p>
+ 244 │             </div>
+ 245 │ 
+ 246 │             {/* Enhanced Pairing Code Display */}
+ 247 │             {pairCodeData?.code ? (
+ 248 │               <div className="pairing-code-section">
+ 249 │                 <div className="code-header">
+ 250 │                   <i className="fas fa-key"></i>
+ 251 │                   <span>Your WhatsApp Pairing Code</span>
+ 252 │                 </div>
+ 253 │                 
+ 254 │                 <div className="code-display-container">
+ 255 │                   <div 
+ 256 │                     className="pairing-code-display"
+ 257 │                     onClick={() => copyToClipboard(pairCodeData.code!)}
+ 258 │                     title="Click to copy code"
+ 259 │                   >
+ 260 │                     {pairCodeData.code?.split('').map((char, index) => (
+ 261 │                       <span 
+ 262 │                         key={index} 
+ 263 │                         className="code-char"
+ 264 │                         style={{ animationDelay: `${index * 0.1}s` }}
+ 265 │                       >
+ 266 │                         {char}
+ 267 │                       </span>
+ 268 │                     ))}
+ 269 │                   </div>
+ 270 │                   
+ 271 │                   {/* Code glow effect */}
+ 272 │                   <div className="code-glow"></div>
+ 273 │                 </div>
+ 274 │                 
+ 275 │                 <div className="copy-actions">
+ 276 │                   <button
+ 277 │                     onClick={() => copyToClipboard(pairCodeData.code!)}
+ 278 │                     className="copy-button"
+ 279 │                   >
+ 280 │                     <div className="button-content">
+ 281 │                       <i className="fas fa-copy"></i>
+ 282 │                       <span>Copy Pairing Code</span>
+ 283 │                     </div>
+ 284 │                     <div className="button-shine"></div>
+ 285 │                   </button>
+ 286 │                   
+ 287 │                   <p className="copy-hint">Click the code above or this button to copy</p>
+ 288 │                 </div>
+ 289 │               </div>
+ 290 │             ) : (
+ 291 │               <div className="error-section">
+ 292 │                 <div className="error-icon">
+ 293 │                   <i className="fas fa-exclamation-triangle"></i>
+ 294 │                 </div>
+ 295 │                 <div className="error-content">
+ 296 │                   <h3>No Pairing Code Received</h3>
+ 297 │                   <p>The backend didn't return a pairing code. Please try again.</p>
+ 298 │                 </div>
+ 299 │               </div>
+ 300 │             )}
+ 301 │ 
+ 302 │             
+ 303 │ 
+ 304 │             {/* Enhanced Step-by-Step Instructions */}
+ 305 │             <div className="instructions-section">
+ 306 │               <h3 className="instructions-title">
+ 307 │                 <i className="fas fa-list-ol"></i>
+ 308 │                 How to Link Your Device:
+ 309 │               </h3>
+ 310 │               <div className="steps-container">
+ 311 │                 {[
+ 312 │                   { icon: "fab fa-whatsapp", title: "Open WhatsApp on your phone", desc: "Make sure you have WhatsApp installed and running" },
+ 313 │                   { icon: "fas fa-cog", title: "Go to Settings → Linked Devices", desc: "Tap the three dots menu, then Settings, then Linked Devices" },
+ 314 │                   { icon: "fas fa-link", title: 'Tap "Link a Device"', desc: "You'll see options to link using QR code or phone number" },
+ 315 │                   { icon: "fas fa-phone", title: 'Select "Link with phone number instead"', desc: "Choose the phone number option at the bottom" },
+ 316 │                   { icon: "fas fa-keyboard", title: "Enter the pairing code above", desc: "Type or paste the 8-character code exactly as shown", highlight: true }
+ 317 │                 ].map((step, index) => (
+ 318 │                   <div key={index} className={`step-item ${step.highlight ? 'step-highlight' : ''}`}>
+ 319 │                     <div className="step-number">{index + 1}</div>
+ 320 │                     <div className="step-content">
+ 321 │                       <i className={step.icon}></i>
+ 322 │                       <div className="step-text">
+ 323 │                         <h4>{step.title}</h4>
+ 324 │                         <p>{step.desc}</p>
+ 325 │                       </div>
+ 326 │                     </div>
+ 327 │                   </div>
+ 328 │                 ))}
+ 329 │               </div>
+ 330 │             </div>
+ 331 │ 
+ 332 │             {/* Enhanced Close Button */}
+ 333 │             <div className="modal-actions">
+ 334 │               <button
+ 335 │                 onClick={() => {
+ 336 │                   setShowPairCode(false);
+ 337 │                   setPairCodeData(null);
+ 338 │                   setCurrentNumber('');
+ 339 │                 }}
+ 340 │                 className="close-button"
+ 341 │               >
+ 342 │                 <i className="fas fa-times"></i>
+ 343 │                 <span>Close</span>
+ 344 │               </button>
+ 345 │             </div>
+ 346 │ 
+ 347 │             {/* Floating close button */}
+ 348 │             <button
+ 349 │               onClick={() => {
+ 350 │                 setShowPairCode(false);
+ 351 │                 setPairCodeData(null);
+ 352 │                 setCurrentNumber('');
+ 353 │               }}
+ 354 │               className="floating-close-button"
+ 355 │             >
+ 356 │               <i className="fas fa-times"></i>
+ 357 │             </button>
+ 358 │           </div>
+ 359 │         </div>
+ 360 │       )}
+ 361 │ 
+ 362 │       
+ 363 │     </>
+ 364 │   );
+ 365 │ }
+ 366 │ 'use client';
+ 367 │ 
+ 368 │ import { useState } from 'react';
+ 369 │ import { useCountryDetection } from '../hooks/useCountryDetection';
+ 370 │ 
+ 371 │ interface PairFormProps {
+ 372 │   onSuccess: (number: string) => void;
+ 373 │   showToast: (title: string, message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
+ 374 │ }
+ 375 │ 
+ 376 │ export function PairForm({ onSuccess, showToast }: PairFormProps) {
+     ·                 ────┬───
+     ·                     ╰── `PairForm` redefined here
+ 377 │   const [phoneNumber, setPhoneNumber] = useState('');
+ 378 │   const [isLoading, setIsLoading] = useState(false);
+ 379 │   const { detectedCountry, formatPhoneNumber } = useCountryDetection(phoneNumber);
+     ╰────
+
+  × The "use client" directive must be placed before other expressions. Move it to the top of the file to resolve this issue.
+     ╭─[/home/runner/workspace/components/PairForm.tsx:363:1]
+ 363 │     </>
+ 364 │   );
+ 365 │ }
+ 366 │ 'use client';
+     · ─────────────
+ 367 │ 
+ 368 │ import { useState } from 'react';
+ 369 │ import { useCountryDetection } from '../hooks/useCountryDetection';
+     ╰────
+This error occurred during the build process and can only be dismissed by fixing the error.
