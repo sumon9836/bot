@@ -207,3 +207,62 @@ export const COUNTRY_CODES: Record<string, CountryInfo> = {
     '996': { flag: '🇰🇬', name: 'Kyrgyzstan', maxLength: 9 },
     '998': { flag: '🇺🇿', name: 'Uzbekistan', maxLength: 9 }
 };
+export interface Country {
+  name: string;
+  code: string;
+  flag: string;
+  dialCode: string;
+}
+
+export const countries: Country[] = [
+  { name: 'Afghanistan', code: '+93', flag: '🇦🇫', dialCode: '93' },
+  { name: 'Albania', code: '+355', flag: '🇦🇱', dialCode: '355' },
+  { name: 'Algeria', code: '+213', flag: '🇩🇿', dialCode: '213' },
+  { name: 'Argentina', code: '+54', flag: '🇦🇷', dialCode: '54' },
+  { name: 'Australia', code: '+61', flag: '🇦🇺', dialCode: '61' },
+  { name: 'Austria', code: '+43', flag: '🇦🇹', dialCode: '43' },
+  { name: 'Bangladesh', code: '+880', flag: '🇧🇩', dialCode: '880' },
+  { name: 'Belgium', code: '+32', flag: '🇧🇪', dialCode: '32' },
+  { name: 'Brazil', code: '+55', flag: '🇧🇷', dialCode: '55' },
+  { name: 'Canada', code: '+1', flag: '🇨🇦', dialCode: '1' },
+  { name: 'China', code: '+86', flag: '🇨🇳', dialCode: '86' },
+  { name: 'France', code: '+33', flag: '🇫🇷', dialCode: '33' },
+  { name: 'Germany', code: '+49', flag: '🇩🇪', dialCode: '49' },
+  { name: 'India', code: '+91', flag: '🇮🇳', dialCode: '91' },
+  { name: 'Indonesia', code: '+62', flag: '🇮🇩', dialCode: '62' },
+  { name: 'Italy', code: '+39', flag: '🇮🇹', dialCode: '39' },
+  { name: 'Japan', code: '+81', flag: '🇯🇵', dialCode: '81' },
+  { name: 'Malaysia', code: '+60', flag: '🇲🇾', dialCode: '60' },
+  { name: 'Pakistan', code: '+92', flag: '🇵🇰', dialCode: '92' },
+  { name: 'Philippines', code: '+63', flag: '🇵🇭', dialCode: '63' },
+  { name: 'Russia', code: '+7', flag: '🇷🇺', dialCode: '7' },
+  { name: 'Saudi Arabia', code: '+966', flag: '🇸🇦', dialCode: '966' },
+  { name: 'Singapore', code: '+65', flag: '🇸🇬', dialCode: '65' },
+  { name: 'South Korea', code: '+82', flag: '🇰🇷', dialCode: '82' },
+  { name: 'Spain', code: '+34', flag: '🇪🇸', dialCode: '34' },
+  { name: 'Thailand', code: '+66', flag: '🇹🇭', dialCode: '66' },
+  { name: 'Turkey', code: '+90', flag: '🇹🇷', dialCode: '90' },
+  { name: 'United Arab Emirates', code: '+971', flag: '🇦🇪', dialCode: '971' },
+  { name: 'United Kingdom', code: '+44', flag: '🇬🇧', dialCode: '44' },
+  { name: 'United States', code: '+1', flag: '🇺🇸', dialCode: '1' },
+  { name: 'Vietnam', code: '+84', flag: '🇻🇳', dialCode: '84' },
+];
+
+export function detectCountryByPhone(phoneNumber: string): Country | null {
+  const cleanNumber = phoneNumber.replace(/[^0-9]/g, '');
+  
+  if (cleanNumber.length < 1) {
+    return null;
+  }
+
+  // Sort by dial code length (longest first) to match more specific codes first
+  const sortedCountries = [...countries].sort((a, b) => b.dialCode.length - a.dialCode.length);
+  
+  for (const country of sortedCountries) {
+    if (cleanNumber.startsWith(country.dialCode)) {
+      return country;
+    }
+  }
+
+  return null;
+}

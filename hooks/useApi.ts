@@ -84,3 +84,47 @@ export function useApi() {
     del
   };
 }
+'use client';
+
+import { useState, useCallback } from 'react';
+
+export function useApi() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const makeRequest = useCallback(async (url: string, options: RequestInit = {}) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers,
+        },
+        ...options,
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP error! status: ${response.status}`);
+      }
+      
+      return data;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  return {
+    makeRequest,
+    isLoading,
+    error,
+    clearError: () => setError(null)
+  };
+}

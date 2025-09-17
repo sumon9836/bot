@@ -140,3 +140,43 @@ export function useSessions(options: UseSessionsOptions = {}) {
     sessionsCount: sessions.length
   };
 }
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+
+export function useSessions() {
+  const [sessions, setSessions] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchSessions = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await fetch('/api/sessions');
+      const data = await response.json();
+      
+      if (response.ok) {
+        setSessions(data);
+      } else {
+        setError(data.error || 'Failed to fetch sessions');
+      }
+    } catch (err) {
+      setError('Network error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSessions();
+  }, [fetchSessions]);
+
+  return {
+    sessions,
+    isLoading,
+    error,
+    refetch: fetchSessions
+  };
+}

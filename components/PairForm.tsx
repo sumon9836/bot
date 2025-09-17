@@ -363,3 +363,108 @@ export function PairForm({ onSuccess, showToast }: PairFormProps) {
     </>
   );
 }
+'use client';
+
+import { useState } from 'react';
+import { useCountryDetection } from '../hooks/useCountryDetection';
+
+interface PairFormProps {
+  onSuccess: (number: string) => void;
+  showToast: (title: string, message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
+}
+
+export function PairForm({ onSuccess, showToast }: PairFormProps) {
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { detectedCountry, formatPhoneNumber } = useCountryDetection(phoneNumber);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!phoneNumber.trim()) {
+      showToast('Error', 'Please enter a phone number', 'error');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/pair', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ number: phoneNumber }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        onSuccess(phoneNumber);
+        setPhoneNumber('');
+      } else {
+        showToast('Error', data.error || 'Failed to pair phone number', 'error');
+      }
+    } catch (error) {
+      showToast('Error', 'Network error occurred', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="card">
+      <div className="card-header">
+        <span className="card-icon">📱</span>
+        <h2>Pair Phone Number</h2>
+      </div>
+      
+      <form onSubmit={handleSubmit} className="action-form">
+        <div className="form-group">
+          <label htmlFor="phone">Phone Number</label>
+          <div className={`input-wrapper ${detectedCountry ? 'has-country-code' : ''}`}>
+            {detectedCountry && (
+              <div className="country-code-display show">
+                <div className="country-badge">
+                  <span className="country-flag">{detectedCountry.flag}</span>
+                  <span>{detectedCountry.code}</span>
+                </div>
+              </div>
+            )}
+            <input
+              type="tel"
+              id="phone"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="Enter phone number"
+              disabled={isLoading}
+              className="form-input"
+            />
+            <span className="input-icon">📞</span>
+          </div>
+          <small className="form-help">
+            Enter your WhatsApp phone number with country code
+          </small>
+        </div>
+
+        <button 
+          type="submit" 
+          className="btn btn-primary"
+          disabled={isLoading || !phoneNumber.trim()}
+        >
+          {isLoading ? (
+            <>
+              <div className="spinner"></div>
+              Processing...
+            </>
+          ) : (
+            <>
+              <i className="fas fa-link"></i>
+              Pair Device
+            </>
+          )}
+        </button>
+      </form>
+    </div>
+  );
+}

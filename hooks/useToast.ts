@@ -55,3 +55,39 @@ export function useToast() {
     removeAllToasts
   };
 }
+'use client';
+
+import { useState, useCallback } from 'react';
+
+export interface Toast {
+  id: string;
+  title: string;
+  message: string;
+  type: 'success' | 'error' | 'warning' | 'info';
+}
+
+export function useToast() {
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+  const showToast = useCallback((title: string, message: string, type: Toast['type'] = 'info') => {
+    const id = Math.random().toString(36).substr(2, 9);
+    const newToast: Toast = { id, title, message, type };
+    
+    setToasts(prev => [...prev, newToast]);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+      removeToast(id);
+    }, 5000);
+  }, []);
+
+  const removeToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  }, []);
+
+  return {
+    toasts,
+    showToast,
+    removeToast
+  };
+}

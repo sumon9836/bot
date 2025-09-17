@@ -132,3 +132,43 @@ export function useBanlist(options: UseBanlistOptions = {}) {
     bannedCount: bannedUsers.length
   };
 }
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+
+export function useBanlist() {
+  const [bannedUsers, setBannedUsers] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchBanlist = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await fetch('/api/blocklist');
+      const data = await response.json();
+      
+      if (response.ok) {
+        setBannedUsers(data);
+      } else {
+        setError(data.error || 'Failed to fetch banned users');
+      }
+    } catch (err) {
+      setError('Network error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchBanlist();
+  }, [fetchBanlist]);
+
+  return {
+    bannedUsers,
+    isLoading,
+    error,
+    refetch: fetchBanlist
+  };
+}

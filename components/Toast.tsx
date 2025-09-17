@@ -70,3 +70,67 @@ export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
     </div>
   );
 }
+'use client';
+
+export interface Toast {
+  id: string;
+  title: string;
+  message: string;
+  type: 'success' | 'error' | 'warning' | 'info';
+}
+
+interface ToastProps {
+  toast: Toast;
+  onRemove: (id: string) => void;
+}
+
+export function ToastItem({ toast, onRemove }: ToastProps) {
+  const getIcon = () => {
+    switch (toast.type) {
+      case 'success': return '✅';
+      case 'error': return '❌';
+      case 'warning': return '⚠️';
+      case 'info': return 'ℹ️';
+      default: return 'ℹ️';
+    }
+  };
+
+  return (
+    <div className={`toast show ${toast.type}`}>
+      <div className="toast-content">
+        <div className={`toast-icon ${toast.type}`}>
+          {getIcon()}
+        </div>
+        <div className="toast-text">
+          <div className="toast-title">{toast.title}</div>
+          <div className="toast-message">{toast.message}</div>
+        </div>
+        <button 
+          className="toast-close"
+          onClick={() => onRemove(toast.id)}
+        >
+          ×
+        </button>
+      </div>
+    </div>
+  );
+}
+
+interface ToastContainerProps {
+  toasts: Toast[];
+  onRemove: (id: string) => void;
+}
+
+export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
+  return (
+    <div className="toast-container">
+      {toasts.map((toast) => (
+        <ToastItem 
+          key={toast.id} 
+          toast={toast} 
+          onRemove={onRemove} 
+        />
+      ))}
+    </div>
+  );
+}

@@ -61,3 +61,37 @@ export interface PairingResponse {
 }
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
+export interface Session {
+  id: string;
+  phoneNumber: string;
+  status: 'active' | 'inactive' | 'pairing';
+  createdAt: string;
+  lastActivity?: string;
+}
+
+export interface BannedUser {
+  phoneNumber: string;
+  bannedAt: string;
+  reason?: string;
+}
+
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+
+export interface PairResponse {
+  success: boolean;
+  code?: string;
+  error?: string;
+  qr?: string;
+}
+
+export interface Country {
+  name: string;
+  code: string;
+  flag: string;
+  dialCode: string;
+}

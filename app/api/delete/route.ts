@@ -40,3 +40,13 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+import { NextRequest } from 'next/server';
+import { createProxy } from '../../../lib/proxy';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
+export async function POST(request: NextRequest) {
+  const endpoint = '/delete';
+  return createProxy(request, endpoint, 'POST');
+}
