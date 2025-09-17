@@ -1,77 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
-import { ToastMessage } from '../lib/types';
-
-interface ToastProps {
-  toast: ToastMessage;
-  onRemove: (id: string) => void;
-}
-
-export function Toast({ toast, onRemove }: ToastProps) {
-  useEffect(() => {
-    if (toast.duration && toast.duration > 0) {
-      const timer = setTimeout(() => {
-        onRemove(toast.id);
-      }, toast.duration);
-
-      return () => clearTimeout(timer);
-    }
-  }, [toast.id, toast.duration, onRemove]);
-
-  const getIcon = () => {
-    switch (toast.type) {
-      case 'success':
-        return 'fas fa-check-circle';
-      case 'error':
-        return 'fas fa-exclamation-circle';
-      case 'warning':
-        return 'fas fa-exclamation-triangle';
-      case 'info':
-      default:
-        return 'fas fa-info-circle';
-    }
-  };
-
-  return (
-    <div className={`toast ${toast.type} show`}>
-      <div className="toast-content">
-        <div className={`toast-icon ${toast.type}`}>
-          <i className={getIcon()}></i>
-        </div>
-        <div className="toast-text">
-          <div className="toast-title">{toast.title}</div>
-          <div className="toast-message">{toast.message}</div>
-        </div>
-      </div>
-      <button 
-        className="toast-close"
-        onClick={() => onRemove(toast.id)}
-      >
-        <i className="fas fa-times"></i>
-      </button>
-    </div>
-  );
-}
-
-interface ToastContainerProps {
-  toasts: ToastMessage[];
-  onRemove: (id: string) => void;
-}
-
-export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
-  if (toasts.length === 0) return null;
-
-  return (
-    <div style={{ position: 'fixed', top: '20px', right: '20px', zIndex: 1000 }}>
-      {toasts.map(toast => (
-        <Toast key={toast.id} toast={toast} onRemove={onRemove} />
-      ))}
-    </div>
-  );
-}
-'use client';
-
 export interface Toast {
   id: string;
   title: string;
@@ -84,30 +12,81 @@ interface ToastProps {
   onRemove: (id: string) => void;
 }
 
-export function ToastItem({ toast, onRemove }: ToastProps) {
-  const getIcon = () => {
+export function Toast({ toast, onRemove }: ToastProps) {
+  const getToastIcon = () => {
     switch (toast.type) {
-      case 'success': return '✅';
-      case 'error': return '❌';
-      case 'warning': return '⚠️';
-      case 'info': return 'ℹ️';
-      default: return 'ℹ️';
+      case 'success':
+        return '✓';
+      case 'error':
+        return '✕';
+      case 'warning':
+        return '⚠';
+      case 'info':
+        return 'ℹ';
+      default:
+        return 'ℹ';
+    }
+  };
+
+  const getToastColor = () => {
+    switch (toast.type) {
+      case 'success':
+        return '#10b981';
+      case 'error':
+        return '#ef4444';
+      case 'warning':
+        return '#f59e0b';
+      case 'info':
+        return '#3b82f6';
+      default:
+        return '#3b82f6';
     }
   };
 
   return (
-    <div className={`toast show ${toast.type}`}>
-      <div className="toast-content">
-        <div className={`toast-icon ${toast.type}`}>
-          {getIcon()}
+    <div
+      style={{
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        color: 'white',
+        padding: '16px',
+        borderRadius: '8px',
+        marginBottom: '12px',
+        border: `2px solid ${getToastColor()}`,
+        backdropFilter: 'blur(10px)',
+        minWidth: '300px',
+        maxWidth: '500px',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+        position: 'relative',
+        animation: 'slideIn 0.3s ease-out',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+        <span style={{ color: getToastColor(), fontSize: '18px', marginTop: '2px' }}>
+          {getToastIcon()}
+        </span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '4px', fontSize: '14px' }}>
+            {toast.title}
+          </div>
+          <div style={{ fontSize: '13px', opacity: 0.9, lineHeight: '1.4' }}>
+            {toast.message}
+          </div>
         </div>
-        <div className="toast-text">
-          <div className="toast-title">{toast.title}</div>
-          <div className="toast-message">{toast.message}</div>
-        </div>
-        <button 
-          className="toast-close"
+        <button
           onClick={() => onRemove(toast.id)}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'rgba(255, 255, 255, 0.7)',
+            cursor: 'pointer',
+            fontSize: '16px',
+            padding: '0',
+            width: '20px',
+            height: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
         >
           ×
         </button>
@@ -122,14 +101,12 @@ interface ToastContainerProps {
 }
 
 export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
+  if (toasts.length === 0) return null;
+
   return (
-    <div className="toast-container">
-      {toasts.map((toast) => (
-        <ToastItem 
-          key={toast.id} 
-          toast={toast} 
-          onRemove={onRemove} 
-        />
+    <div style={{ position: 'fixed', top: '20px', right: '20px', zIndex: 1000 }}>
+      {toasts.map(toast => (
+        <Toast key={toast.id} toast={toast} onRemove={onRemove} />
       ))}
     </div>
   );

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useCallback } from 'react';
@@ -7,40 +8,39 @@ interface UseApiOptions {
   onSuccess?: (data: any) => void;
   onError?: (error: string) => void;
   showToast?: (title: string, message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
+  method?: string;
+  headers?: Record<string, string>;
+  body?: string;
 }
 
 export function useApi() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const apiCall = useCallback(async <T = any>(
-    endpoint: string,
-    options: RequestInit & UseApiOptions = {}
-  ): Promise<ApiResponse<T>> => {
-    const { onSuccess, onError, showToast, ...fetchOptions } = options;
+  const apiCall = useCallback(async (endpoint: string, options: UseApiOptions = {}): Promise<ApiResponse> => {
+    const { onSuccess, onError, showToast, method = 'GET', headers = {}, body } = options;
     
     setLoading(true);
     setError(null);
 
     try {
       const response = await fetch(endpoint, {
+        method,
         headers: {
           'Content-Type': 'application/json',
-          ...fetchOptions.headers,
+          ...headers,
         },
-        ...fetchOptions,
+        body,
+        credentials: 'include',
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMessage = data.error || data.message || `HTTP ${response.status}`;
-        setError(errorMessage);
-        onError?.(errorMessage);
-        showToast?.('Request Failed', errorMessage, 'error');
-        return { success: false, error: errorMessage };
+        throw new Error(data.error || `HTTP ${response.status}`);
       }
 
+      setError(null);
       onSuccess?.(data);
       return { success: true, data };
     } catch (err) {
@@ -82,49 +82,5 @@ export function useApi() {
     post,
     put,
     del
-  };
-}
-'use client';
-
-import { useState, useCallback } from 'react';
-
-export function useApi() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const makeRequest = useCallback(async (url: string, options: RequestInit = {}) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const response = await fetch(url, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers,
-        },
-        ...options,
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || `HTTP error! status: ${response.status}`);
-      }
-      
-      return data;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  return {
-    makeRequest,
-    isLoading,
-    error,
-    clearError: () => setError(null)
   };
 }

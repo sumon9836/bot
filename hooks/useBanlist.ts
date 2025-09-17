@@ -24,7 +24,7 @@ export function useBanlist(options: UseBanlistOptions = {}) {
     }
 
     abortControllerRef.current = new AbortController();
-    
+
     if (showLoadingState) {
       setLoading(true);
     }
@@ -47,7 +47,7 @@ export function useBanlist(options: UseBanlistOptions = {}) {
       }
 
       const responseText = await response.text();
-      
+
       // Check if response starts with HTML
       if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<html')) {
         setBannedUsers([]);
@@ -62,7 +62,7 @@ export function useBanlist(options: UseBanlistOptions = {}) {
 
       // Handle different response formats
       let userList: BannedUser[] = [];
-      
+
       if (Array.isArray(data)) {
         userList = data.map(user => ({
           number: typeof user === 'string' ? user : user.number,
@@ -130,45 +130,5 @@ export function useBanlist(options: UseBanlistOptions = {}) {
     error,
     refreshBanlist,
     bannedCount: bannedUsers.length
-  };
-}
-'use client';
-
-import { useState, useEffect, useCallback } from 'react';
-
-export function useBanlist() {
-  const [bannedUsers, setBannedUsers] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchBanlist = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const response = await fetch('/api/blocklist');
-      const data = await response.json();
-      
-      if (response.ok) {
-        setBannedUsers(data);
-      } else {
-        setError(data.error || 'Failed to fetch banned users');
-      }
-    } catch (err) {
-      setError('Network error occurred');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchBanlist();
-  }, [fetchBanlist]);
-
-  return {
-    bannedUsers,
-    isLoading,
-    error,
-    refetch: fetchBanlist
   };
 }
