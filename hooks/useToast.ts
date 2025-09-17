@@ -9,6 +9,16 @@ export function useToast() {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const timeoutRefs = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
+  const removeToast = useCallback((id: string) => {
+    const timeout = timeoutRefs.current.get(id);
+    if (timeout) {
+      clearTimeout(timeout);
+      timeoutRefs.current.delete(id);
+    }
+    
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  }, []);
+
   const showToast = useCallback((title: string, message: string, type: ToastType = 'success', duration: number = 4000) => {
     const id = `toast-${++toastIdCounter}`;
     
@@ -30,17 +40,7 @@ export function useToast() {
     timeoutRefs.current.set(id, timeout);
 
     return id;
-  }, []);
-
-  const removeToast = useCallback((id: string) => {
-    const timeout = timeoutRefs.current.get(id);
-    if (timeout) {
-      clearTimeout(timeout);
-      timeoutRefs.current.delete(id);
-    }
-    
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-  }, []);
+  }, [removeToast]);
 
   const removeAllToasts = useCallback(() => {
     timeoutRefs.current.forEach(timeout => clearTimeout(timeout));

@@ -13,7 +13,7 @@ if (process.env.NODE_ENV === 'production') {
   }
 }
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://tramway.proxy.rlwy.net:12332';
+const BACKEND_URL = process.env.BACKEND_URL || 'http://interchange.proxy.rlwy.net:24084';
 
 export async function createProxy(
   request: NextRequest,
@@ -39,7 +39,9 @@ export async function createProxy(
       body = await request.text();
     }
 
-    console.log(`Proxying ${method} request to: ${url}`);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`Proxying ${method} request to: ${url}`);
+    }
 
     const response = await fetch(url, {
       method,
@@ -51,7 +53,9 @@ export async function createProxy(
     });
 
     const responseText = await response.text();
-    console.log(`Backend response status: ${response.status}`);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`Backend response status: ${response.status}`);
+    }
 
     // Try to parse as JSON, fallback to text
     let responseData: any;
@@ -82,9 +86,13 @@ export async function createProxy(
     );
 
   } catch (error) {
-    console.error('Proxy error:', error);
-    console.error('Backend URL:', BACKEND_URL);
-    console.error('Full URL:', `${BACKEND_URL}${endpoint}`);
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('Proxy error:', error);
+      console.error('Backend URL:', BACKEND_URL);
+      console.error('Full URL:', `${BACKEND_URL}${endpoint}`);
+    } else {
+      console.error('Proxy error:', error instanceof Error ? error.message : 'Unknown error');
+    }
     return NextResponse.json(
       { 
         success: false, 

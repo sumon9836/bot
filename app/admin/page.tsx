@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '../../hooks/useToast';
 import { ToastContainer } from '../../components/Toast';
 import { Loader } from '../../components/Loader';
@@ -58,12 +58,7 @@ export default function AdminDashboard() {
     }));
   }, [sessionsCount, blockedUsers.length]);
 
-  // Check authentication
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/blocklist', {
         method: 'GET',
@@ -87,7 +82,12 @@ export default function AdminDashboard() {
       window.location.href = '/login';
       return;
     }
-  };
+  }, []);
+
+  // Check authentication
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
   const loadBlockedUsers = async () => {
     try {

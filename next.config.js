@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  env: {
-    BACKEND_URL: process.env.BACKEND_URL || 'http://interchange.proxy.rlwy.net:24084',
-  },
+  // BACKEND_URL moved to server-side only for security (lib/proxy.ts)
   // Replit and Vercel proxy configuration
   async rewrites() {
     return [];
@@ -17,30 +15,20 @@ const nextConfig = {
         source: '/(.*)',
         headers: [
           { key: 'Cache-Control', value: 'no-store, max-age=0' },
-          { key: 'Access-Control-Allow-Origin', value: '*' },
-          { key: 'Access-Control-Allow-Methods', value: 'GET, POST, PUT, DELETE, OPTIONS' },
-          { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization, Cookie' },
-          { key: 'Access-Control-Allow-Credentials', value: 'true' },
         ],
       },
-      {
-        source: '/api/:path*',
-        headers: [
-          { key: 'Cache-Control', value: 'no-store, max-age=0' },
-          { key: 'Access-Control-Allow-Origin', value: '*' },
-          { key: 'Access-Control-Allow-Methods', value: 'GET, POST, PUT, DELETE, OPTIONS' },
-          { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization, Cookie' },
-          { key: 'Access-Control-Allow-Credentials', value: 'true' },
-        ],
-      },
+      // CORS now handled by middleware.ts for proper origin validation
     ];
   },
   // Configure for Replit environment
   devIndicators: {
     buildActivity: false,
   },
-  // Allow cross-origin requests for Replit proxy
-  allowedDevOrigins: ['http://localhost:5000', 'http://127.0.0.1:5000', 'http://0.0.0.0:5000'],
+  // Disable Next.js integrated ESLint to use ESLint 9 flat config
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  // CORS origins now handled by middleware.ts with proper validation
   // Allow connections from any host (required for Replit proxy)
   async generateBuildId() {
     return 'replit-build';
