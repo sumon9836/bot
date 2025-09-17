@@ -24,23 +24,13 @@ function SessionCard({ session }: SessionCardProps) {
       <div className="session-info">
         <div className="session-number">+{session.number}</div>
         <div className="session-details">
-          <span className="session-status">
-            <i className={`fas fa-circle ${session.status === 'online' ? 'status-online' : 'status-offline'}`}></i>
-            {session.status || 'Unknown'}
-          </span>
-          {session.platform && (
-            <span className="session-platform">
-              <i className="fas fa-mobile-alt"></i>
-              {session.platform}
-            </span>
-          )}
+          {session.status && <span className="session-status">{session.status}</span>}
+          {session.platform && <span className="session-platform">{session.platform}</span>}
         </div>
+        {session.lastSeen && (
+          <div className="session-last-seen">Last seen: {new Date(session.lastSeen).toLocaleString()}</div>
+        )}
       </div>
-      {session.lastSeen && (
-        <div className="session-last-seen">
-          Last seen: {new Date(session.lastSeen).toLocaleString()}
-        </div>
-      )}
     </div>
   );
 }
@@ -50,13 +40,13 @@ export function SessionsList({ showToast }: SessionsListProps) {
 
   if (loading) {
     return (
-      <div className="card">
+      <div className="card action-card">
         <div className="card-header">
           <i className="fas fa-mobile-alt card-icon"></i>
           <h2>Active Sessions</h2>
         </div>
         <div className="card-content">
-          <Loader />
+          <Loader message="Loading active sessions..." />
         </div>
       </div>
     );
@@ -64,44 +54,37 @@ export function SessionsList({ showToast }: SessionsListProps) {
 
   if (error) {
     return (
-      <div className="card">
+      <div className="card action-card">
         <div className="card-header">
           <i className="fas fa-mobile-alt card-icon"></i>
           <h2>Active Sessions</h2>
         </div>
         <div className="card-content">
-          <div className="error-message">
+          <div className="error-state">
             <i className="fas fa-exclamation-triangle"></i>
-            {error}
+            <p>{error}</p>
+            <button onClick={refresh} className="btn btn-secondary">
+              Try Again
+            </button>
           </div>
-          <button onClick={refresh} className="btn btn-secondary">
-            <i className="fas fa-sync-alt"></i>
-            Retry
-          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="card">
+    <div className="card action-card">
       <div className="card-header">
         <i className="fas fa-mobile-alt card-icon"></i>
-        <h2>Active Sessions ({sessions.length})</h2>
-        <button 
-          onClick={refresh}
-          className="btn btn-secondary btn-small"
-          title="Refresh sessions"
-        >
-          <i className="fas fa-sync-alt"></i>
-        </button>
+        <h2>Active Sessions</h2>
+        <span className="sessions-count">{sessions.length}</span>
       </div>
       <div className="card-content">
         {sessions.length === 0 ? (
           <div className="empty-state">
             <i className="fas fa-mobile-alt"></i>
-            <p>No active sessions</p>
-            <small>Pair a number to create your first session</small>
+            <p>No active sessions found</p>
+            <small>Paired devices will appear here</small>
           </div>
         ) : (
           <div className="sessions-grid">

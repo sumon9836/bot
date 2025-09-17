@@ -20,22 +20,22 @@ export function Header({ onRefresh, showRefreshButton = false }: HeaderProps) {
         </div>
         <div className="header-right">
           <a 
-            href="https://chat.whatsapp.com/CQyxExEBMGvEnkA32zqbNY" 
+            href="https://chat.whatsapp.com/CQyxExEBMGvEnkAAjRhF6o" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="btn btn-support" 
-            title="Join Support Group"
+            className="support-button"
           >
-            <i className="fab fa-whatsapp"></i>
-            <span className="support-text">Support</span>
+            <i className="fas fa-headset"></i>
+            <span>Support</span>
           </a>
-          {showRefreshButton && onRefresh && (
+          {showRefreshButton && (
             <button 
               onClick={onRefresh}
-              className="btn btn-secondary" 
-              title="Refresh Sessions"
+              className="refresh-button"
+              title="Refresh data"
             >
               <i className="fas fa-sync-alt"></i>
+              <span>Refresh</span>
             </button>
           )}
         </div>

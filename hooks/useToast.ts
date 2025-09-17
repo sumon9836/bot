@@ -22,33 +22,27 @@ export function useToast() {
 
   const showToast = useCallback((title: string, message: string, type: ToastType = 'info') => {
     const id = `toast-${++toastIdCounter}`;
-    const toast: ToastMessage = { id, title, message, type };
     
-    setToasts(prev => [...prev, toast]);
-    
-    // Auto-remove after 5 seconds
+    const newToast: ToastMessage = {
+      id,
+      title,
+      message,
+      type
+    };
+
+    setToasts(prev => [...prev, newToast]);
+
+    // Auto-remove toast after 5 seconds
     const timeout = setTimeout(() => {
       removeToast(id);
     }, 5000);
-    
-    timeoutRefs.current.set(id, timeout);
-    
-    return id;
-  }, [removeToast]);
 
-  const clearAllToasts = useCallback(() => {
-    // Clear all timeouts
-    timeoutRefs.current.forEach(timeout => clearTimeout(timeout));
-    timeoutRefs.current.clear();
-    
-    // Clear all toasts
-    setToasts([]);
-  }, []);
+    timeoutRefs.current.set(id, timeout);
+  }, [removeToast]);
 
   return {
     toasts,
     showToast,
-    removeToast,
-    clearAllToasts
+    removeToast
   };
 }

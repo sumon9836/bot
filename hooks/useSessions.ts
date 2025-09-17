@@ -16,67 +16,69 @@ export function useSessions(options: UseSessionsOptions = {}) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const isPollingRef = useRef(false);
+  const mountedRef = useRef(true);
 
   const fetchSessions = useCallback(async () => {
     try {
       const response = await fetch('/api/sessions');
+      
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
+
       const data = await response.json();
       
-      if (data.success) {
-        setSessions(data.sessions || []);
+      if (!mountedRef.current) return;
+
+      if (data.success && Array.isArray(data.data)) {
+        setSessions(data.data);
         setError(null);
       } else {
-        throw new Error(data.error || 'Failed to fetch sessions');
+        throw new Error(data.error || 'Invalid response format');
       }
     } catch (err: any) {
+      if (!mountedRef.current) return;
+      
       console.error('Sessions fetch error:', err);
-      setError(err.message || 'Network error');
-      showToast?.('Error', 'Failed to fetch sessions', 'error');
-      setSessions([]);
+      const errorMessage = err.message || 'Failed to fetch sessions';
+      setError(errorMessage);
+      
+      if (showToast) {
+        showToast('Sessions Error', errorMessage, 'error');
+      }
     } finally {
-      setLoading(false);
+      if (mountedRef.current) {
+        setLoading(false);
+      }
     }
   }, [showToast]);
 
   const refresh = useCallback(() => {
     setLoading(true);
+    setError(null);
     fetchSessions();
   }, [fetchSessions]);
 
-  const startPolling = useCallback(() => {
-    if (isPollingRef.current || !autoRefresh) return;
-    
-    isPollingRef.current = true;
-    intervalRef.current = setInterval(fetchSessions, pollingInterval);
-  }, [fetchSessions, pollingInterval, autoRefresh]);
-
-  const stopPolling = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    isPollingRef.current = false;
-  }, []);
-
   useEffect(() => {
+    mountedRef.current = true;
     fetchSessions();
+
     if (autoRefresh) {
-      startPolling();
+      intervalRef.current = setInterval(fetchSessions, pollingInterval);
     }
 
-    return () => stopPolling();
-  }, [fetchSessions, autoRefresh, startPolling, stopPolling]);
+    return () => {
+      mountedRef.current = false;
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [fetchSessions, autoRefresh, pollingInterval]);
 
   return {
     sessions,
     loading,
     error,
-    refresh,
-    startPolling,
-    stopPolling
+    refresh
   };
 }

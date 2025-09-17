@@ -20,7 +20,7 @@ function BannedUserCard({ user }: BannedUserCardProps) {
     <div className="banned-user-card-compact">
       <div className="user-number">+{user.number}</div>
       <div className="blocked-date">
-        {user.blockedAt ? new Date(user.blockedAt).toLocaleDateString() : 'Recently blocked'}
+        {user.blockedAt ? new Date(user.blockedAt).toLocaleDateString() : 'Unknown'}
       </div>
     </div>
   );
@@ -31,13 +31,13 @@ export function BannedUsersPanel({ showToast }: BannedUsersPanelProps) {
 
   if (loading) {
     return (
-      <div className="card admin-card">
+      <div className="card action-card">
         <div className="card-header">
-          <i className="fas fa-ban card-icon"></i>
+          <i className="fas fa-user-slash card-icon"></i>
           <h2>Banned Users</h2>
         </div>
         <div className="card-content">
-          <Loader />
+          <Loader message="Loading banned users..." />
         </div>
       </div>
     );
@@ -45,49 +45,47 @@ export function BannedUsersPanel({ showToast }: BannedUsersPanelProps) {
 
   if (error) {
     return (
-      <div className="card admin-card">
+      <div className="card action-card">
         <div className="card-header">
-          <i className="fas fa-ban card-icon"></i>
+          <i className="fas fa-user-slash card-icon"></i>
           <h2>Banned Users</h2>
         </div>
         <div className="card-content">
-          <div className="error-message">
+          <div className="error-state">
             <i className="fas fa-exclamation-triangle"></i>
-            {error}
+            <p>{error}</p>
+            <button onClick={refresh} className="btn btn-secondary">
+              Try Again
+            </button>
           </div>
-          <button onClick={refresh} className="btn btn-secondary">
-            <i className="fas fa-sync-alt"></i>
-            Retry
-          </button>
         </div>
       </div>
     );
   }
 
+  const usersList = Object.keys(bannedUsers || {}).map(number => ({
+    number,
+    blockedAt: bannedUsers[number]?.blockedAt
+  }));
+
   return (
-    <div className="card admin-card">
+    <div className="card action-card">
       <div className="card-header">
-        <i className="fas fa-ban card-icon"></i>
-        <h2>Banned Users ({bannedUsers.length})</h2>
-        <button 
-          onClick={refresh}
-          className="btn btn-secondary btn-small"
-          title="Refresh banned users list"
-        >
-          <i className="fas fa-sync-alt"></i>
-        </button>
+        <i className="fas fa-user-slash card-icon"></i>
+        <h2>Banned Users</h2>
+        <span className="banned-count">{usersList.length}</span>
       </div>
       <div className="card-content">
-        {bannedUsers.length === 0 ? (
+        {usersList.length === 0 ? (
           <div className="empty-state">
-            <i className="fas fa-shield-alt"></i>
+            <i className="fas fa-user-check"></i>
             <p>No banned users</p>
-            <small>All users are currently allowed to use the service</small>
+            <small>All users have access to the service</small>
           </div>
         ) : (
           <div className="banned-users-grid">
-            {bannedUsers.map((user, index) => (
-              <BannedUserCard key={`${user.number}-${index}`} user={user} />
+            {usersList.map((user) => (
+              <BannedUserCard key={user.number} user={user} />
             ))}
           </div>
         )}
