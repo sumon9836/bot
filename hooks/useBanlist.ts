@@ -19,7 +19,12 @@ export function useBanlist(options: UseBanlistOptions = {}) {
 
   const fetchBanlist = useCallback(async () => {
     try {
-      const response = await fetch('/api/blocklist');
+      const response = await fetch('/api/blocklist', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -34,10 +39,10 @@ export function useBanlist(options: UseBanlistOptions = {}) {
       let banlistData: Record<string, any> = {};
 
       if (data && typeof data === 'object') {
-        if (data.success === true) {
-          banlistData = data.data || {};
-        } else if (data.success === false) {
+        if (data.success === false) {
           throw new Error(data.error || 'Failed to fetch banlist');
+        } else if (data.success === true) {
+          banlistData = data.data || {};
         } else if (typeof data === 'object' && !data.hasOwnProperty('success')) {
           // Direct object response
           banlistData = data;

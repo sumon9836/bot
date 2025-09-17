@@ -46,11 +46,16 @@ export async function createProxy(request: NextRequest, endpoint: string, method
       headers['content-type'] = 'application/json';
     }
 
-    const response = await fetch(url, {
+    const fetchOptions: RequestInit = {
       method,
       headers,
-      body,
-    });
+    };
+
+    if (body) {
+      fetchOptions.body = body;
+    }
+
+    const response = await fetch(url, fetchOptions);
 
     console.log(`Backend response status: ${response.status}`);
 
@@ -61,15 +66,16 @@ export async function createProxy(request: NextRequest, endpoint: string, method
     try {
       responseData = JSON.parse(responseText);
     } catch (err) {
-      // If not valid JSON, treat as plain text
-      responseData = responseText;
+      console.warn('Response is not valid JSON, treating as plain text:', responseText);
+      responseData = { success: false, error: 'Invalid response format', data: responseText };
     }
 
     console.log('Backend response data:', responseData);
 
-    // Return the response
+    // Return success response even if backend returns error status
+    // Let the frontend handle the error appropriately
     return NextResponse.json(responseData, {
-      status: response.status,
+      status: response.ok ? response.status : 200, // Always return 200 to prevent fetch errors
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
@@ -88,7 +94,7 @@ export async function createProxy(request: NextRequest, endpoint: string, method
         details: error.toString()
       },
       {
-        status: 500,
+        status: 200, // Return 200 to prevent fetch errors in frontend
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',

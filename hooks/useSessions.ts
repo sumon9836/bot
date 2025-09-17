@@ -20,7 +20,12 @@ export function useSessions(options: UseSessionsOptions = {}) {
 
   const fetchSessions = useCallback(async () => {
     try {
-      const response = await fetch('/api/sessions');
+      const response = await fetch('/api/sessions', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -35,7 +40,9 @@ export function useSessions(options: UseSessionsOptions = {}) {
       let sessionsData: Session[] = [];
 
       if (data && typeof data === 'object') {
-        if (data.success === true && Array.isArray(data.data)) {
+        if (data.success === false) {
+          throw new Error(data.error || 'Failed to fetch sessions');
+        } else if (data.success === true && Array.isArray(data.data)) {
           sessionsData = data.data;
         } else if (data.success === true && data.data && typeof data.data === 'object') {
           // Convert object to array if needed
@@ -49,7 +56,7 @@ export function useSessions(options: UseSessionsOptions = {}) {
           }));
         } else if (Array.isArray(data)) {
           sessionsData = data;
-        } else if (typeof data === 'object' && !data.success) {
+        } else if (typeof data === 'object' && !data.hasOwnProperty('success')) {
           // Direct object response - convert to array
           sessionsData = Object.keys(data).map(key => ({
             id: key,
@@ -106,10 +113,15 @@ export function useSessions(options: UseSessionsOptions = {}) {
     };
   }, [fetchSessions, autoRefresh, pollingInterval]);
 
+  // Computed property for sessions count
+  const sessionsCount = sessions.length;
+
   return {
     sessions,
+    sessionsCount,
     loading,
     error,
-    refresh
+    refresh,
+    refreshSessions: refresh // Alias for compatibility
   };
 }
