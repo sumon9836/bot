@@ -1,3 +1,4 @@
+
 'use client';
 
 export interface Toast {
@@ -16,15 +17,15 @@ export function Toast({ toast, onRemove }: ToastProps) {
   const getToastIcon = () => {
     switch (toast.type) {
       case 'success':
-        return '✓';
+        return 'fas fa-check-circle';
       case 'error':
-        return '✕';
+        return 'fas fa-exclamation-circle';
       case 'warning':
-        return '⚠';
+        return 'fas fa-exclamation-triangle';
       case 'info':
-        return 'ℹ';
+        return 'fas fa-info-circle';
       default:
-        return 'ℹ';
+        return 'fas fa-info-circle';
     }
   };
 
@@ -46,29 +47,41 @@ export function Toast({ toast, onRemove }: ToastProps) {
   return (
     <div
       style={{
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-        color: 'white',
-        padding: '16px',
-        borderRadius: '8px',
-        marginBottom: '12px',
-        border: `2px solid ${getToastColor()}`,
+        background: 'rgba(0, 0, 0, 0.8)',
         backdropFilter: 'blur(10px)',
+        border: `1px solid ${getToastColor()}`,
+        borderRadius: '12px',
+        padding: '16px',
+        marginBottom: '12px',
         minWidth: '300px',
-        maxWidth: '500px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+        maxWidth: '400px',
+        color: 'white',
         position: 'relative',
-        animation: 'slideIn 0.3s ease-out',
+        animation: 'slideInRight 0.3s ease-out'
       }}
     >
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-        <span style={{ color: getToastColor(), fontSize: '18px', marginTop: '2px' }}>
-          {getToastIcon()}
-        </span>
+        <i 
+          className={getToastIcon()} 
+          style={{ 
+            color: getToastColor(), 
+            fontSize: '18px',
+            marginTop: '2px'
+          }}
+        ></i>
         <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '4px', fontSize: '14px' }}>
+          <div style={{ 
+            fontWeight: '600', 
+            fontSize: '14px',
+            marginBottom: '4px'
+          }}>
             {toast.title}
           </div>
-          <div style={{ fontSize: '13px', opacity: 0.9, lineHeight: '1.4' }}>
+          <div style={{ 
+            fontSize: '13px', 
+            opacity: 0.9,
+            lineHeight: '1.4'
+          }}>
             {toast.message}
           </div>
         </div>
@@ -85,10 +98,10 @@ export function Toast({ toast, onRemove }: ToastProps) {
             height: '20px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'center'
           }}
         >
-          ×
+          <i className="fas fa-times"></i>
         </button>
       </div>
     </div>
